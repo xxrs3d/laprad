@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Laporan Radiologi</title>
+    <title>LAPORAN RADIOLOGI RUMKIT</title>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.4);
@@ -168,6 +168,7 @@
             <div>
                 <label>Salam</label>
                 <select id="salam" onchange="generateLaporan()">
+                    <option value="otomatis">-- Otomatis --</option>
                     <option value="Selamat pagi">Selamat pagi</option>
                     <option value="Selamat siang">Selamat siang</option>
                     <option value="Selamat malam">Selamat malam</option>
@@ -197,10 +198,9 @@
         </div>
 
         <div class="petugas-group">
-            <label>Petugas 2 (Opsional)</label>
+            <label>Petugas 2</label>
             <div class="petugas-row">
                 <select id="petugas2" onchange="generateLaporan()">
-                    <option value="">-- Tidak Ada --</option>
                     <option value="PELTU Alfried">PELTU Alfried</option>
                     <option value="SUKWAN Dian">SUKWAN Dian</option>
                     <option value="SUKWAN Jo">SUKWAN Jo</option>
@@ -237,19 +237,17 @@
     var kategori = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
     var subKategori = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
 
-    // Safari-safe: set today without UTC timezone shift
     function setDefaultDate() {
         var now = new Date();
         var y = now.getFullYear();
         var m = String(now.getMonth() + 1).padStart('0', 2);
         var d = String(now.getDate()).padStart('0', 2);
-        // padStart polyfill style
-        m = m.length < 2 ? '0' + m : m;
-        d = d.length < 2 ? '0' + d : d;
         document.getElementById('tanggal_picker').value = y + '-' + m + '-' + d;
+        
+        // Inisialisasi laporan pertama kali
+        generateLaporan();
     }
 
-    // Safari-safe: parse "YYYY-MM-DD" manually to avoid UTC offset bug
     function formatTanggalIndonesia(dateString) {
         if (!dateString) return "";
         var parts = dateString.split('-');
@@ -304,12 +302,25 @@
     });
 
     function getLaporan() {
-        var salam = document.getElementById('salam').value;
+        var salamVal = document.getElementById('salam').value;
         var tgl = formatTanggalIndonesia(document.getElementById('tanggal_picker').value);
         var p1 = document.getElementById('petugas1').value;
         var s1 = document.getElementById('shift1').value;
         var p2 = document.getElementById('petugas2').value;
         var s2 = document.getElementById('shift2').value;
+
+        // Logika Salam Otomatis
+        var salamFinal = salamVal;
+        if (salamVal === "otomatis") {
+            var jam = new Date().getHours();
+            if (jam >= 6 && jam < 12) {
+                salamFinal = "Selamat pagi";
+            } else if (jam >= 12 && jam < 16) {
+                salamFinal = "Selamat siang";
+            } else {
+                salamFinal = "Selamat malam";
+            }
+        }
 
         var textDinas = ' *Dinas ' + s1 + '*\n  ' + p1 + '\n';
         if (p2) textDinas += '\n *Dinas ' + s2 + '*\n  ' + p2 + '\n';
@@ -343,7 +354,7 @@
         });
 
         return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' +
-            salam + '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n' +
+            salamFinal + '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n' +
             textDinas + '\n   \nJumlah pasien : ' + totalKeseluruhan + ' orang\n\nKeterangan : \n' +
             detailText + '\nRumkit TNI-AD dalam keadaan aman, sekian laporan selesai, Terimakasih.';
     }
@@ -411,7 +422,6 @@
 
     // Init
     setDefaultDate();
-    generateLaporan();
 </script>
 </body>
 </html>
