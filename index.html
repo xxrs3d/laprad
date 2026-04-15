@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAPORAN RADIOLOGI RUMKIT</title>
+    <title>Laporan Radiologi</title>
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.4);
@@ -159,7 +159,7 @@
 <body>
 
 <div class="container">
-    <h3>LAPORAN RADIOLOGI RUMKIT</H3>
+    <h3>LAPORAN RADIOLOGI RUMKIT</h3>
     
     <div class="form-section">
         <div class="section-title">Waktu &amp; Petugas</div>
@@ -240,12 +240,11 @@
     function setDefaultDate() {
         var now = new Date();
         var y = now.getFullYear();
-        var m = String(now.getMonth() + 1).padStart('0', 2);
-        var d = String(now.getDate()).padStart('0', 2);
-        document.getElementById('tanggal_picker').value = y + '-' + m + '-' + d;
+        // Perbaikan format tanggal: dari padStart('0', 2) menjadi padStart(2, '0')
+        var m = String(now.getMonth() + 1).padStart(2, '0');
+        var d = String(now.getDate()).padStart(2, '0');
         
-        // Inisialisasi laporan pertama kali
-        generateLaporan();
+        document.getElementById('tanggal_picker').value = y + '-' + m + '-' + d;
     }
 
     function formatTanggalIndonesia(dateString) {
@@ -279,7 +278,7 @@
         } catch(e) {}
     }
 
-    // Build patient input cards
+    // Bangun input pasien
     var containerDiv = document.getElementById('pasien-inputs');
     kategori.forEach(function(kat, i) {
         var div = document.createElement('div');
@@ -303,7 +302,8 @@
 
     function getLaporan() {
         var salamVal = document.getElementById('salam').value;
-        var tgl = formatTanggalIndonesia(document.getElementById('tanggal_picker').value);
+        var tglRaw = document.getElementById('tanggal_picker').value;
+        var tgl = formatTanggalIndonesia(tglRaw);
         var p1 = document.getElementById('petugas1').value;
         var s1 = document.getElementById('shift1').value;
         var p2 = document.getElementById('petugas2').value;
@@ -420,8 +420,9 @@
         }, 1500);
     }
 
-    // Init
+    // Eksekusi langsung tanpa menunggu onload agar lebih cepat
     setDefaultDate();
+    generateLaporan();
 </script>
 </body>
 </html>
