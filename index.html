@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Laporan Radiologi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --glass-card: rgba(255, 255, 255, 0.5);
+            --glass-input: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-main: #1c1c1e;
+            --text-muted: #6e6e73;
+            --primary: #007aff;
+            --danger: #ff3b30;
+            --radius-main: 24px;
+            --radius-card: 18px;
+            --radius-input: 12px;
+        }
+
+        body { 
+            font-family: -apple-system, system-ui, 'Inter', sans-serif; 
+            margin: 0; 
+            padding: 12px; 
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 420px; 
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius-main);
+            border: 1px solid var(--glass-border);
+            padding: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+
+        h3 { text-align: center; margin: 8px 0 16px 0; font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+
+        .form-section, .kategori-card { 
+            background: var(--glass-card); 
+            padding: 14px; 
+            border-radius: var(--radius-card); 
+            margin-bottom: 12px; 
+            border: 1px solid var(--glass-border);
+        }
+
+        .section-title {
+            font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+            margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.8px;
+            border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px;
+        }
+
+        label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--text-main); font-size: 0.75rem; }
+
+        select, input[type="date"] { 
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            background: var(--glass-input);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-input); 
+            font-size: 0.85rem;
+            color: var(--text-main);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        /* Baris tunggal: 2 kolom sama rata */
+        .input-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* Baris petugas: label + 2 select dalam satu blok */
+        .petugas-group {
+            margin-bottom: 10px;
+        }
+        .petugas-group:last-child {
+            margin-bottom: 0;
+        }
+        .petugas-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 8px;
+        }
+
+        .counter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .counter-controls {
+            display: flex; align-items: center; background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px; padding: 4px; justify-content: space-between; border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .btn-step {
+            width: 28px; height: 28px; border-radius: 8px; border: none; background: white;
+            font-weight: 700; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer;
+        }
+
+        /* Area Hasil Teks Laporan */
+        .output-container {
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .tap-hint {
+            font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; font-weight: 600;
+        }
+
+        #hasil-laporan { 
+            background: #1c1c1e; 
+            color: #ffffff;
+            padding: 16px; 
+            border-radius: var(--radius-card); 
+            white-space: pre-wrap; 
+            font-family: 'SF Mono', 'Cascadia Code', 'Courier New', monospace; 
+            font-size: 0.7rem; 
+            line-height: 1.5;
+            border: 1px solid rgba(255,255,255,0.1);
+            user-select: all;
+            -webkit-user-select: all;
+            overflow-x: auto;
+        }
+        
+        .action-btn { 
+            width: 100%; padding: 12px; border: none; border-radius: var(--radius-input); 
+            font-size: 0.9rem; font-weight: 600; margin-top: 8px; cursor: pointer; transition: 0.2s;
+        }
+        
+        .btn-copy { background: var(--primary); color: white; }
+        .btn-clear { background: rgba(255, 255, 255, 0.3); color: var(--danger); font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Laporan Radiologi</h3>
+    
+    <div class="form-section">
+        <div class="section-title">Waktu & Petugas</div>
+
+        <!-- Baris Salam & Tanggal -->
+        <div class="input-row-2">
+            <div>
+                <label>Salam</label>
+                <select id="salam" onchange="generateLaporan()">
+                    <option value="Selamat pagi">Selamat pagi</option>
+                    <option value="Selamat siang">Selamat siang</option>
+                    <option value="Selamat malam">Selamat malam</option>
+                </select>
+            </div>
+            <div>
+                <label>Tanggal</label>
+                <input type="date" id="tanggal_picker" onchange="generateLaporan()">
+            </div>
+        </div>
+
+        <!-- Petugas 1 -->
+        <div class="petugas-group">
+            <label>Petugas 1</label>
+            <div class="petugas-row">
+                <select id="petugas1" onchange="generateLaporan()">
+                    <option value="PELTU Alfried">PELTU Alfried</option>
+                    <option value="SUKWAN Dian">SUKWAN Dian</option>
+                    <option value="SUKWAN Jo">SUKWAN Jo</option>
+                    <option value="SUKWAN Algie">SUKWAN Algie</option>
+                </select>
+                <select id="shift1" onchange="generateLaporan()">
+                    <option value="Pagi">Dinas Pagi</option>
+                    <option value="Siang">Dinas Siang</option>
+                    <option value="Malam">Dinas Malam</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Petugas 2 -->
+        <div class="petugas-group">
+            <label>Petugas 2 (Opsional)</label>
+            <div class="petugas-row">
+                <select id="petugas2" onchange="generateLaporan()">
+                    <option value="">-- Tidak Ada --</option>
+                    <option value="PELTU Alfried">PELTU Alfried</option>
+                    <option value="SUKWAN Dian">SUKWAN Dian</option>
+                    <option value="SUKWAN Jo">SUKWAN Jo</option>
+                    <option value="SUKWAN Algie">SUKWAN Algie</option>
+                </select>
+                <select id="shift2" onchange="generateLaporan()">
+                    <option value="Pagi">Dinas Pagi</option>
+                    <option value="Siang">Dinas Siang</option>
+                    <option value="Malam">Dinas Malam</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="pasien-inputs"></div>
+
+    <div class="output-container">
+        <div class="tap-hint">Tap teks di bawah untuk memilih semua</div>
+        <div id="hasil-laporan" onclick="selectText('hasil-laporan')"></div>
+    </div>
+    
+    <button id="btnCopy" class="action-btn btn-copy" onclick="copyLaporan()">📋 Salin Laporan</button>
+    <button class="action-btn btn-clear" onclick="clearInputs()">Reset Data Pasien</button>
+</div>
+
+<script>
+    const kategori = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
+    const subKategori = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
+    
+    function formatTanggalIndonesia(dateString) {
+        if (!dateString) return "";
+        const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+        const d = new Date(dateString);
+        return `${hari[d.getDay()]}, ${d.getDate()} ${bulan[d.getMonth()]} ${d.getFullYear()}`;
+    }
+
+    function setDefaultDate() {
+        const d = new Date();
+        document.getElementById('tanggal_picker').value = d.toISOString().split('T')[0];
+    }
+
+    function changeVal(id, delta) {
+        const input = document.getElementById(id);
+        let val = (parseInt(input.value) || 0) + delta;
+        if (val < 0) val = 0;
+        input.value = val;
+        document.getElementById('display-'+id).innerText = val;
+        generateLaporan();
+    }
+
+    function selectText(containerId) {
+        const node = document.getElementById(containerId);
+        if (document.body.createTextRange) {
+            const range = document.body.createTextRange();
+            range.moveToElementText(node);
+            range.select();
+        } else if (window.getSelection) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+
+    const containerDiv = document.getElementById('pasien-inputs');
+    kategori.forEach((kat, i) => {
+        const div = document.createElement('div');
+        div.className = 'kategori-card';
+        let countersHtml = '';
+        subKategori.forEach(sub => {
+            const inputId = `${sub.replace(/\s+/g, '-')}-${i}`;
+            countersHtml += `
+                <div class="counter-item" style="display:flex; flex-direction:column; gap:4px">
+                    <div style="font-size:0.6rem; font-weight:700; color:var(--text-muted); text-transform:uppercase">${sub}</div>
+                    <div class="counter-controls">
+                        <button class="btn-step" onclick="changeVal('${inputId}', -1)">−</button>
+                        <span style="font-weight:700; font-size:0.85rem" id="display-${inputId}">0</span>
+                        <button class="btn-step" onclick="changeVal('${inputId}', 1)">+</button>
+                        <input type="hidden" id="${inputId}" class="input-pasien" value="0">
+                    </div>
+                </div>`;
+        });
+        div.innerHTML = `<div class="kategori-title">${i + 1}. ${kat}</div><div class="counter-grid">${countersHtml}</div>`;
+        containerDiv.appendChild(div);
+    });
+
+    function generateLaporan() {
+        const salam = document.getElementById('salam').value;
+        const tgl = formatTanggalIndonesia(document.getElementById('tanggal_picker').value);
+        const p1 = document.getElementById('petugas1').value;
+        const s1 = document.getElementById('shift1').value;
+        const p2 = document.getElementById('petugas2').value;
+        const s2 = document.getElementById('shift2').value;
+        
+        let textDinas = ` *Dinas ${s1}*\n  ${p1}\n`;
+        if (p2) textDinas += `\n *Dinas ${s2}*\n  ${p2}\n`;
+
+        let totalKeseluruhan = 0;
+        let detailText = "";
+
+        const padName = (str, len) => {
+            return str + " ".repeat(Math.max(0, len - str.length));
+        };
+
+        kategori.forEach((kat, i) => {
+            const b = parseInt(document.getElementById(`BPJS-${i}`).value) || 0;
+            const u = parseInt(document.getElementById(`Umum-${i}`).value) || 0;
+            const m = parseInt(document.getElementById(`MCU-${i}`).value) || 0;
+            const jr = parseInt(document.getElementById(`Jasa-Raharja-${i}`).value) || 0;
+            
+            totalKeseluruhan += (b + u + m + jr);
+
+            let subItems = [];
+            if (b > 0) subItems.push(`${b} orang (BPJS)`);
+            if (u > 0) subItems.push(`${u} orang (Umum)`);
+            if (m > 0) subItems.push(`${m} orang (MCU)`);
+            if (jr > 0) subItems.push(`${jr} orang (Jasa Raharja)`);
+
+            let labelKat = `${i + 1}. ${kat}`;
+            let ket = subItems.length > 0 ? subItems.join("\n" + " ".repeat(19)) : "nihil";
+            
+            detailText += `${padName(labelKat, 17)}: ${ket}\n`;
+        });
+
+        const laporanFull = `Kepada
+Yth. Karumkit Tk. IV 12.07.03 Palangkaraya
+
+${salam}
+Ijin melaporkan serah terima Dinas Radiologi Rumkit TNI AD
+*${tgl}*
+
+Sebagai berikut :                       
+${textDinas}
+   
+Jumlah pasien : ${totalKeseluruhan} orang
+
+Keterangan : 
+${detailText}
+Rumkit TNI-AD dalam keadaan aman, sekian laporan selesai, Terimakasih.`;
+
+        document.getElementById('hasil-laporan').innerText = laporanFull;
+    }
+
+    function clearInputs() {
+        if(confirm("Reset semua data pasien?")) {
+            document.querySelectorAll('.input-pasien').forEach(el => {
+                el.value = 0;
+                document.getElementById('display-'+el.id).innerText = 0;
+            });
+            generateLaporan();
+        }
+    }
+
+    async function copyLaporan() {
+        const text = document.getElementById('hasil-laporan').innerText;
+        try {
+            await navigator.clipboard.writeText(text);
+            const btn = document.getElementById('btnCopy');
+            btn.innerText = "✅ Berhasil Disalin";
+            btn.style.background = "#34c759";
+            setTimeout(() => {
+                btn.innerText = "📋 Salin Laporan";
+                btn.style.background = "";
+            }, 2000);
+        } catch (err) {
+            selectText('hasil-laporan');
+            alert("Gagal otomatis. Teks sudah terpilih, silakan klik 'Salin' pada menu Android.");
+        }
+    }
+
+    window.onload = () => { setDefaultDate(); generateLaporan(); };
+</script>
+</body>
+</html>
