@@ -3,243 +3,328 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Laporan Radiologi</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
---bg1:#000428;--bg2:#004e92;
---glass-bg:rgba(255,255,255,0.07);
---glass-card:rgba(255,255,255,0.10);
---glass-input:rgba(255,255,255,0.12);
---glass-border:rgba(255,255,255,0.18);
---text-main:#ffffff;
---text-muted:rgba(255,255,255,0.55);
---primary:#4da6ff;
---danger:#ff6b6b;
---success:#4cd97b;
---radius-main:22px;--radius-card:16px;--radius-input:11px;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg1: #000428; --bg2: #004e92;
+  --glass-bg: rgba(255, 255, 255, 0.07);
+  --glass-card: rgba(255, 255, 255, 0.10);
+  --glass-input: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --primary: #4da6ff;
+  --danger: #ff6b6b;
+  --success: #4cd97b;
+  --radius-main: 22px; --radius-card: 16px; --radius-input: 11px;
 }
-html,body{height:100%;width:100%}
-body{
-font-family:-apple-system,system-ui,sans-serif;
-background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
-min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
-padding:16px;
+
+/* PERBAIKAN GRADIENT TERPOTONG */
+html { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+  background-attachment: fixed; /* <-- Fix agar gradient tidak putus */
+  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 16px;
 }
-.app-wrap{
-width:100%;max-width:520px;
-background:var(--glass-bg);
-border:1px solid var(--glass-border);
-border-radius:var(--radius-main);
-padding:18px;
-backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-box-shadow:0 8px 40px rgba(0,4,40,0.45),inset 0 1px 0 rgba(255,255,255,0.15);
+
+.app-wrap {
+  width: 100%; 
+  max-width: 520px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-main);
+  padding: 18px;
+  backdrop-filter: blur(18px); 
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 40px rgba(0, 4, 40, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
-@media(min-width:768px){
-body{align-items:center;padding:24px}
-.app-wrap{max-width:720px;padding:28px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* =========================================
+   RESPONSIVE DESIGN (TABLET & DESKTOP PC) 
+   ========================================= */
+@media (min-width: 992px) {
+  body { padding: 30px; align-items: center; }
+  .app-wrap { 
+    max-width: 1000px; 
+    padding: 30px; 
+  }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Membagi jadi 2 kolom */
+    gap: 25px;
+    align-items: start;
+  }
+  .panel-right {
+    position: sticky; /* Membuat output menempel saat di-scroll */
+    top: 30px; 
+  }
+  #hasil-laporan {
+    min-height: 480px; /* Lebih panjang di PC */
+  }
 }
-@media(orientation:landscape) and (max-height:600px){
-body{padding:8px}
-.app-wrap{padding:12px;border-radius:16px}
-h3{font-size:0.95rem;margin-bottom:10px}
-.form-section,.kategori-card{padding:10px;margin-bottom:8px}
+
+/* =========================================
+   RESPONSIVE DESIGN (SMARTPHONE LANDSCAPE) 
+   ========================================= */
+@media (orientation: landscape) and (max-height: 600px) {
+  body { padding: 10px; }
+  .app-wrap { padding: 15px; border-radius: 16px; }
+  h3 { font-size: 1rem; margin-bottom: 5px; }
+  .subtitle { margin-bottom: 10px; }
+  .form-section, .kategori-card { padding: 10px; margin-bottom: 8px; }
 }
-h3{
-text-align:center;font-size:1.05rem;font-weight:700;
-color:#fff;margin-bottom:16px;letter-spacing:0.3px;
-text-shadow:0 2px 12px rgba(0,78,146,0.6);
+
+h3 {
+  text-align: center; font-size: 1.15rem; font-weight: 700;
+  color: #fff; margin-bottom: 16px; letter-spacing: 0.3px;
+  text-shadow: 0 2px 12px rgba(0, 78, 146, 0.6);
 }
-.subtitle{
-text-align:center;font-size:0.65rem;color:var(--text-muted);
-margin-top:-12px;margin-bottom:14px;letter-spacing:0.8px;text-transform:uppercase;
+.subtitle {
+  text-align: center; font-size: 0.7rem; color: var(--text-muted);
+  margin-top: -12px; margin-bottom: 20px; letter-spacing: 0.8px; text-transform: uppercase;
 }
-.form-section,.kategori-card{
-background:var(--glass-card);
-border:1px solid var(--glass-border);
-border-radius:var(--radius-card);
-padding:14px;margin-bottom:10px;
-box-shadow:inset 0 1px 0 rgba(255,255,255,0.1);
+.form-section, .kategori-card {
+  background: var(--glass-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-card);
+  padding: 14px; margin-bottom: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
-.section-title{
-font-size:0.6rem;font-weight:700;color:var(--text-muted);
-text-transform:uppercase;letter-spacing:0.9px;
-margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:5px;
+.section-title {
+  font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.9px;
+  margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 5px;
 }
-.kategori-title{
-font-size:0.75rem;font-weight:700;color:#fff;
-margin-bottom:10px;display:flex;align-items:center;gap:6px;
+.kategori-title {
+  font-size: 0.8rem; font-weight: 700; color: #fff;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
 }
-.badge{
-display:inline-block;background:rgba(77,166,255,0.2);
-color:var(--primary);font-size:0.6rem;padding:2px 7px;
-border-radius:20px;border:1px solid rgba(77,166,255,0.3);
+.badge {
+  display: inline-block; background: rgba(77, 166, 255, 0.2);
+  color: var(--primary); font-size: 0.65rem; padding: 2px 8px;
+  border-radius: 20px; border: 1px solid rgba(77, 166, 255, 0.3);
 }
-label{
-display:block;font-size:0.7rem;font-weight:600;
-color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;
+label {
+  display: block; font-size: 0.7rem; font-weight: 600;
+  color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;
 }
-select,input[type="date"]{
-width:100%;padding:9px 10px;
-background:var(--glass-input);
-border:1px solid var(--glass-border);
-border-radius:var(--radius-input);
-font-size:0.82rem;color:#fff;outline:none;
--webkit-appearance:none;appearance:none;
-box-shadow:inset 0 1px 0 rgba(255,255,255,0.08);
+select, input[type="date"] {
+  width: 100%; padding: 10px 12px;
+  background: var(--glass-input);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-input);
+  font-size: 0.85rem; color: #fff; outline: none;
+  -webkit-appearance: none; appearance: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
-select option{background:#0a1a3a;color:#fff}
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);opacity:0.6}
-.input-row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.petugas-group{margin-bottom:10px}
-.petugas-group:last-child{margin-bottom:0}
-.petugas-row{display:grid;grid-template-columns:1.6fr 1fr;gap:8px}
-.counter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.counter-item{display:flex;flex-direction:column;gap:5px}
-.sub-label{font-size:0.58rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
-.counter-controls{
-display:flex;align-items:center;justify-content:space-between;
-background:rgba(255,255,255,0.07);
-border:1px solid rgba(255,255,255,0.14);
-border-radius:10px;padding:4px;
+select option { background: #0a1a3a; color: #fff; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; }
+
+.input-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.petugas-group { margin-bottom: 12px; }
+.petugas-group:last-child { margin-bottom: 0; }
+.petugas-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px; }
+
+.counter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.counter-item { display: flex; flex-direction: column; gap: 5px; }
+.sub-label { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.counter-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px; padding: 4px;
 }
-.btn-step{
-width:30px;height:30px;border-radius:8px;border:none;
-background:rgba(255,255,255,0.12);
-color:#fff;font-weight:700;font-size:16px;
-cursor:pointer;touch-action:manipulation;
-display:flex;align-items:center;justify-content:center;
-transition:background 0.15s;
+.btn-step {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff; font-weight: 700; font-size: 18px;
+  cursor: pointer; touch-action: manipulation;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
 }
-.btn-step:active{background:rgba(77,166,255,0.35)}
-.val-display{font-weight:700;font-size:0.88rem;color:#fff;min-width:20px;text-align:center}
-.divider{height:1px;background:rgba(255,255,255,0.08);margin:12px 0}
-.output-wrap{margin-top:14px}
-.tap-hint{font-size:0.62rem;color:var(--text-muted);text-align:center;margin-bottom:6px;letter-spacing:0.3px}
-#hasil-laporan{
-background:rgba(0,4,40,0.7);
-border:1px solid rgba(255,255,255,0.12);
-border-radius:var(--radius-card);
-color:#c8e6ff;
-padding:14px;
-font-family:'Courier New',monospace;
-font-size:0.68rem;line-height:1.6;
-white-space:pre-wrap;word-break:break-word;
--webkit-user-select:all;user-select:all;
-box-shadow:inset 0 2px 12px rgba(0,0,0,0.4);
+.btn-step:active { background: rgba(77, 166, 255, 0.35); }
+.val-display { font-weight: 700; font-size: 0.95rem; color: #fff; min-width: 20px; text-align: center; }
+
+.output-wrap { margin-bottom: 10px; }
+.tap-hint { font-size: 0.65rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; letter-spacing: 0.3px; }
+#hasil-laporan {
+  background: rgba(0, 4, 40, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-card);
+  color: #c8e6ff;
+  padding: 16px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.72rem; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+  -webkit-user-select: all; user-select: all;
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.4);
+  cursor: text;
 }
-.btn-row{display:flex;gap:8px;margin-top:10px}
-.action-btn{
-flex:1;padding:13px 8px;border:none;border-radius:var(--radius-input);
-font-size:0.82rem;font-weight:600;cursor:pointer;
-touch-action:manipulation;transition:opacity 0.15s,transform 0.1s;
+
+.btn-row { display: flex; gap: 10px; margin-top: 10px; }
+.action-btn {
+  flex: 1; padding: 14px 10px; border: none; border-radius: var(--radius-input);
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  touch-action: manipulation; transition: opacity 0.15s, transform 0.1s;
 }
-.action-btn:active{transform:scale(0.97);opacity:0.85}
-.btn-copy{
-background:linear-gradient(135deg,#2a7de1,#1a5fb4);
-color:#fff;border:1px solid rgba(77,166,255,0.3);
-box-shadow:0 4px 14px rgba(26,95,180,0.4);
+.action-btn:active { transform: scale(0.97); opacity: 0.85; }
+.btn-copy {
+  background: linear-gradient(135deg, #2a7de1, #1a5fb4);
+  color: #fff; border: 1px solid rgba(77, 166, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(26, 95, 180, 0.4);
 }
-.btn-wa{
-background:linear-gradient(135deg,#25d366,#1aaa52);
-color:#fff;border:1px solid rgba(37,211,102,0.3);
-box-shadow:0 4px 14px rgba(26,170,82,0.35);
+.btn-wa {
+  background: linear-gradient(135deg, #25d366, #1aaa52);
+  color: #fff; border: 1px solid rgba(37, 211, 102, 0.3);
+  box-shadow: 0 4px 14px rgba(26, 170, 82, 0.35);
 }
-.btn-clear{
-width:100%;padding:11px;margin-top:8px;border:none;
-border-radius:var(--radius-input);
-background:rgba(255,107,107,0.1);
-color:var(--danger);
-border:1px solid rgba(255,107,107,0.2);
-font-size:0.78rem;font-weight:600;cursor:pointer;
-touch-action:manipulation;transition:background 0.15s;
+.btn-clear {
+  width: 100%; padding: 12px; margin-top: 10px; border: none;
+  border-radius: var(--radius-input);
+  background: rgba(255, 107, 107, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(255, 107, 107, 0.2);
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  touch-action: manipulation; transition: background 0.15s;
 }
-.btn-clear:active{background:rgba(255,107,107,0.2)}
-.info-box{
-background:rgba(255,200,100,0.12);border:1px solid rgba(255,200,100,0.25);
-border-radius:10px;padding:10px 12px;
-font-size:0.7rem;color:rgba(255,220,130,0.9);
-margin-top:8px;display:none;line-height:1.5;
+.btn-clear:active { background: rgba(255, 107, 107, 0.2); }
+
+.info-box {
+  background: rgba(255, 200, 100, 0.12); border: 1px solid rgba(255, 200, 100, 0.25);
+  border-radius: 10px; padding: 10px 12px;
+  font-size: 0.7rem; color: rgba(255, 220, 130, 0.9);
+  margin-top: 10px; display: none; line-height: 1.5;
 }
-.star{color:rgba(255,255,255,0.15);font-size:0.5rem;position:absolute;animation:twinkle 3s ease-in-out infinite}
-@keyframes twinkle{0%,100%{opacity:0.15}50%{opacity:0.6}}
+
+/* =========================================
+   POP-UP NOTIFICATION (ALA IPHONE) 
+   ========================================= */
+.toast-notification {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.toast-notification.show {
+  top: 40px;
+}
+.toast-icon {
+  background: #34c759;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px; height: 20px;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 12px; font-weight: bold;
+}
 </style>
 </head>
 <body>
+
+<div id="toastNotif" class="toast-notification">
+  <div class="toast-icon">&#10003;</div>
+  <span>Teks Berhasil Disalin!</span>
+</div>
+
 <div class="app-wrap">
   <h3>LAPORAN RADIOLOGI</h3>
   <div class="subtitle">Rumkit Tk. IV 12.07.03 Palangkaraya</div>
 
-  <div class="form-section">
-    <div class="section-title">Waktu &amp; Tanggal</div>
-    <div class="input-row-2">
-      <div>
-        <label>Waktu</label>
-        <select id="salam" onchange="gen()">
-          <option value="otomatis">Auto</option>
-          <option value="Selamat pagi">Selamat Pagi</option>
-          <option value="Selamat siang">Selamat Siang</option>
-          <option value="Selamat malam">Selamat Malam</option>
-        </select>
+  <div class="main-grid">
+    
+    <div class="panel-left">
+      <div class="form-section">
+        <div class="section-title">Waktu &amp; Tanggal</div>
+        <div class="input-row-2">
+          <div>
+            <label>Waktu</label>
+            <select id="salam" onchange="gen()">
+              <option value="otomatis">Auto</option>
+              <option value="Selamat pagi">Selamat Pagi</option>
+              <option value="Selamat siang">Selamat Siang</option>
+              <option value="Selamat malam">Selamat Malam</option>
+            </select>
+          </div>
+          <div>
+            <label>Tanggal</label>
+            <input type="date" id="tgl" onchange="gen()">
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Tanggal</label>
-        <input type="date" id="tgl" onchange="gen()">
+
+      <div class="form-section">
+        <div class="section-title">Petugas Dinas</div>
+        <div class="petugas-group">
+          <label>Sekarang</label>
+          <div class="petugas-row">
+            <select id="p1" onchange="gen()">
+              <option value="PELTU Alfried">PELTU Alfried</option>
+              <option value="SUKWAN Dian">SUKWAN Dian</option>
+              <option value="SUKWAN Jo">SUKWAN Jo</option>
+              <option value="SUKWAN Algie">SUKWAN Algie</option>
+            </select>
+            <select id="s1" onchange="gen()">
+              <option value="Pagi">Pagi</option>
+              <option value="Siang">Siang</option>
+              <option value="Malam">Malam</option>
+            </select>
+          </div>
+        </div>
+        <div class="petugas-group">
+          <label>Pengganti</label>
+          <div class="petugas-row">
+            <select id="p2" onchange="gen()">
+              <option value="SUKWAN Dian">SUKWAN Dian</option>
+              <option value="PELTU Alfried">PELTU Alfried</option>
+              <option value="SUKWAN Jo">SUKWAN Jo</option>
+              <option value="SUKWAN Algie">SUKWAN Algie</option>
+            </select>
+            <select id="s2" onchange="gen()">
+              <option value="Siang">Siang</option>
+              <option value="Pagi">Pagi</option>
+              <option value="Malam">Malam</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="form-section">
-    <div class="section-title">Petugas Dinas</div>
-    <div class="petugas-group">
-      <label>Sekarang</label>
-      <div class="petugas-row">
-        <select id="p1" onchange="gen()">
-          <option value="PELTU Alfried">PELTU Alfried</option>
-          <option value="SUKWAN Dian">SUKWAN Dian</option>
-          <option value="SUKWAN Jo">SUKWAN Jo</option>
-          <option value="SUKWAN Algie">SUKWAN Algie</option>
-        </select>
-        <select id="s1" onchange="gen()">
-          <option value="Pagi">Pagi</option>
-          <option value="Siang">Siang</option>
-          <option value="Malam">Malam</option>
-        </select>
+      <div id="pasien-inputs"></div>
+      
+      <button class="btn-clear" onclick="doReset()">&#8635; Reset Data Pasien</button>
+    </div> <div class="panel-right">
+      <div class="output-wrap">
+        <div class="tap-hint">Ketuk teks untuk memilih semua</div>
+        <div id="hasil-laporan" onclick="selAll()"></div>
+        <div id="info-box" class="info-box">Jika pop-up tidak muncul: ketuk teks gelap &#8594; tahan &#8594; Pilih Semua &#8594; Salin</div>
       </div>
-    </div>
-    <div class="petugas-group">
-      <label>Pengganti</label>
-      <div class="petugas-row">
-        <select id="p2" onchange="gen()">
-          <option value="SUKWAN Dian">SUKWAN Dian</option>
-          <option value="PELTU Alfried">PELTU Alfried</option>
-          <option value="SUKWAN Jo">SUKWAN Jo</option>
-          <option value="SUKWAN Algie">SUKWAN Algie</option>
-        </select>
-        <select id="s2" onchange="gen()">
-          <option value="Siang">Siang</option>
-          <option value="Pagi">Pagi</option>
-          <option value="Malam">Malam</option>
-        </select>
+
+      <div class="btn-row">
+        <button id="btnCopy" class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin</button>
+        <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
       </div>
-    </div>
-  </div>
-
-  <div id="pasien-inputs"></div>
-
-  <div class="output-wrap">
-    <div class="tap-hint">Ketuk teks untuk memilih semua</div>
-    <div id="hasil-laporan" onclick="selAll()"></div>
-    <div id="info-box" class="info-box">Jika tombol Salin tidak bekerja: ketuk teks gelap &#8594; tahan &#8594; Pilih Semua &#8594; Salin</div>
-  </div>
-
-  <div class="btn-row">
-    <button id="btnCopy" class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin</button>
-    <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
-  </div>
-  <button class="btn-clear" onclick="doReset()">&#8635; Reset Data Pasien</button>
-</div>
+    </div> </div> </div>
 
 <script>
 var kat=["Militer","PNS","KBT","Masyarakat Umum","RO Gigi"];
@@ -340,19 +425,33 @@ function doReset(){
   }
 }
 
+/* FUNGSI COPY DAN POP-UP IPHONE STYLE */
 function doKopi(){
   var txt=getLaporan();
-  var btn=document.getElementById('btnCopy');
-  function ok(){btn.innerText='&#10003; Tersalin!';btn.style.background='linear-gradient(135deg,#34c759,#28a847)';setTimeout(function(){btn.innerHTML='&#128203; Salin';btn.style.background='';},2000);}
+  
+  function triggerPopUp(){
+    var toast = document.getElementById('toastNotif');
+    toast.classList.add('show');
+    // Hilangkan pop up setelah 3 detik
+    setTimeout(function(){
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
   function fb(){
     var ta=document.createElement('textarea');ta.value=txt;
     ta.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px;';
     document.body.appendChild(ta);ta.focus();ta.setSelectionRange(0,txt.length);
     var ok2=false;try{ok2=document.execCommand('copy');}catch(e){}
     document.body.removeChild(ta);
-    if(ok2)ok();else{document.getElementById('info-box').style.display='block';selAll();}
+    if(ok2) triggerPopUp(); else { document.getElementById('info-box').style.display='block'; selAll(); }
   }
-  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(ok).catch(fb);}else{fb();}
+
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(txt).then(triggerPopUp).catch(fb);
+  } else {
+    fb();
+  }
 }
 
 function doWA(){
