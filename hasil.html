@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pembuat Hasil Radiologi</title>
+<!-- html2canvas untuk rendering, jsPDF untuk output PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -181,7 +183,7 @@ body {
 
 .preview-body { 
   padding: 30px; 
-  min-width: 600px; /* Menjaga tata letak dokumen agar tidak rusak di layar sangat kecil */
+  min-width: 600px;
 }
 
 .header {
@@ -233,9 +235,11 @@ body {
 }
 .qr-preview-img { width: 100px; height: 100px; object-fit: contain; display: none; }
 
+/* Elemen cetak tersembunyi – ukuran A4 persis */
 #surat-area {
   width: 210mm;
-  min-height: 297mm;
+  height: 297mm;                /* tinggi tetap A4 */
+  box-sizing: border-box;       /* padding termasuk dalam ukuran */
   padding: 20mm;
   background: white;
   position: absolute;
@@ -244,6 +248,7 @@ body {
   color: black;
   line-height: 1.5;
   font-family: Arial, sans-serif;
+  overflow: hidden;            /* potong jika konten terlalu panjang */
 }
 #surat-area .header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
 #surat-area .logo-img { width: 100px; height: auto; margin-right: 20px; }
@@ -255,7 +260,7 @@ body {
 #surat-area .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; font-size: 11pt; }
 #surat-area .qr-code { width: 100px; height: 100px; object-fit: contain; margin: 0 auto; }
 
-/* Loading */
+/* Loading overlay */
 .loading-overlay {
   position: fixed; inset: 0;
   background: rgba(255,255,255,0.88);
@@ -276,15 +281,10 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-overlay p { font-size: 13px; color: #475569; font-weight: 500; }
 
-/* ── RESPONSIVE DESIGN ── */
+/* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  .app-wrapper {
-    grid-template-columns: 1fr;
-  }
-  .form-panel {
-    position: relative;
-    top: 0;
-  }
+  .app-wrapper { grid-template-columns: 1fr; }
+  .form-panel { position: relative; top: 0; }
 }
 </style>
 </head>
@@ -292,7 +292,7 @@ body {
 
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
-  <p>memproses gambar...</p>
+  <p>memproses PDF...</p>
 </div>
 
 <div class="app-wrapper">
@@ -344,11 +344,11 @@ body {
         </div>
       </div>
 
-      <button class="print-btn" onclick="generateImage()">
+      <button class="print-btn" onclick="generatePDF()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
-        Unduh Hasil (Gambar)
+        Unduh Hasil (PDF)
       </button>
     </div>
   </div>
@@ -410,6 +410,7 @@ body {
 
 </div>
 
+<!-- Area tersembunyi untuk rendering PDF -->
 <div id="surat-area">
   <div class="header">
     <img id="out_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
@@ -500,8 +501,9 @@ function updatePreview() {
   document.getElementById('prev_pjawab').textContent = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
 }
 
-async function generateImage() {
-  // Mengisi area cetak tersembunyi
+// Fungsi utama: generate PDF A4
+async function generatePDF() {
+  // Isi elemen cetak tersembunyi dengan data terkini
   document.getElementById('out_nama').innerText = document.getElementById('in_nama').value || '-';
   document.getElementById('out_tgl_lahir').innerText = formatTanggal(document.getElementById('in_tgl_lahir').value);
   document.getElementById('out_tgl_periksa').innerText = formatTanggal(document.getElementById('in_tgl_periksa').value);
@@ -509,34 +511,47 @@ async function generateImage() {
   document.getElementById('out_petugas').innerText = document.getElementById('in_petugas').value || '....................';
   document.getElementById('out_pjawab').innerText = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
 
+  const qrImg = document.getElementById('out_qr_img');
   if (qrDataURL) {
-    const el = document.getElementById('out_qr_img');
-    el.src = qrDataURL;
-    el.style.display = 'block';
+    qrImg.src = qrDataURL;
+    qrImg.style.display = 'block';
+  } else {
+    qrImg.style.display = 'none';
   }
 
+  // Tampilkan loading
   document.getElementById('loading').classList.add('show');
 
+  // Beri waktu agar render selesai
   setTimeout(async () => {
     try {
       const element = document.getElementById('surat-area');
-      // Melakukan render HTML menjadi Canvas
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
-      
-      // Mengubah Canvas menjadi data URL berformat PNG
+      // Render elemen A4 menjadi canvas dengan skala tinggi
+      const canvas = await html2canvas(element, {
+        scale: 2,              // hasil tajam
+        useCORS: true,
+        logging: false
+      });
+
+      // Konversi ke data PNG (transparan jadi putih)
       const imgData = canvas.toDataURL('image/png');
-      
-      // Memicu proses unduhan gambar secara otomatis
-      const link = document.createElement('a');
-      link.download = `Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.png`;
-      link.href = imgData;
-      link.click();
-      
-    } catch(e) {
-      alert('Gagal membuat gambar: ' + e.message);
+
+      // Buat PDF ukuran A4 (landscape=false)
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+
+      // Tambahkan gambar tepat memenuhi halaman (210x297 mm)
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+
+      // Simpan PDF
+      const namaFile = `Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.pdf`;
+      pdf.save(namaFile);
+
+    } catch (e) {
+      alert('Gagal membuat PDF: ' + e.message);
     }
     document.getElementById('loading').classList.remove('show');
-  }, 500);
+  }, 300);
 }
 </script>
 </body>
