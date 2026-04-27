@@ -85,48 +85,31 @@
             animation: floating 3s ease-in-out infinite;
         }
 
+        /* Tombol statis dan lonjong */
         .fab-btn {
-            background: rgba(77, 166, 255, 0.15);
-            border: 1px solid var(--glass-border);
+            background: var(--primary);
+            border: 1px solid rgba(255,255,255,0.4);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             height: 55px;
-            width: 55px;
-            border-radius: 30px;
+            width: auto; /* Lebar menyesuaikan konten */
+            border-radius: 30px; /* Bentuk lonjong/pill */
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            overflow: hidden;
-            white-space: nowrap;
-            padding: 0 15px;
+            padding: 0 20px;
         }
 
         .fab-icon { font-size: 22px; min-width: 25px; text-align: center; }
 
+        /* Teks statis, selalu tampil */
         .fab-text {
-            max-width: 0;
-            opacity: 0;
             font-size: 0.9rem;
             font-weight: 600;
-            transition: all 0.4s ease;
-            margin-left: 0;
-        }
-
-        /* Hover effect di Desktop */
-        @media (hover: hover) {
-            .fab-btn:hover {
-                width: 260px;
-                background: var(--primary);
-                border-color: rgba(255,255,255,0.4);
-            }
-            .fab-btn:hover .fab-text {
-                max-width: 220px;
-                opacity: 1;
-                margin-left: 12px;
-            }
+            margin-left: 10px;
+            white-space: nowrap;
         }
 
         /* Style Form UI */
@@ -146,6 +129,15 @@
             margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 5px;
         }
 
+        .kategori-title {
+            font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .badge {
+            background: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; color: #fff;
+        }
+
         label { display: block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
         
         select, input[type="date"] {
@@ -154,6 +146,12 @@
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-input);
             font-size: 0.85rem; color: #fff; outline: none;
+        }
+
+        /* PERBAIKAN WARNA OPTION DROPDOWN */
+        select option {
+            background-color: var(--bg1); /* Memberikan warna gelap pada background dropdown */
+            color: #ffffff; /* Memastikan teks tetap putih */
         }
 
         .input-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
@@ -207,7 +205,7 @@
 <a href="./hasil.html" class="fab-container">
     <div class="fab-btn">
         <span class="fab-icon">📋</span>
-        <span class="fab-text">Pembuat Hasil Bacaan</span>
+        <span class="fab-text">Pembuat Hasil Radiologi</span>
     </div>
 </a>
 
