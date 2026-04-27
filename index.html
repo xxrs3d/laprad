@@ -5,9 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Laporan Radiologi - Rumkit Palangkaraya</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         :root {
-            --bg1: #000428; --bg2: #004e92;
+            --bg1: #000428;
+            --bg2: #004e92;
             --glass-bg: rgba(255, 255, 255, 0.07);
             --glass-card: rgba(255, 255, 255, 0.10);
             --glass-input: rgba(255, 255, 255, 0.12);
@@ -17,10 +23,22 @@
             --primary: #4da6ff;
             --danger: #ff6b6b;
             --success: #4cd97b;
-            --radius-main: 22px; --radius-card: 16px; --radius-input: 11px;
+            --radius-main: 22px;
+            --radius-card: 16px;
+            --radius-input: 11px;
+            /* Variabel untuk posisi FAB */
+            --fab-bottom: 35px;
+            --fab-right: 35px;
+            --fab-height: 55px;
         }
 
-        html { height: 100%; }
+        html {
+            height: 100%;
+            /* Smooth scrolling untuk desktop dan mobile */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
@@ -31,78 +49,169 @@
             justify-content: center;
             align-items: flex-start;
             padding: 16px;
+            /* Optimasi performa scrolling */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            /* Memberi ruang untuk FAB di mobile */
+            padding-bottom: calc(16px + 70px);
         }
 
         .app-wrap {
-            width: 100%; 
+            width: 100%;
             max-width: 520px;
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-main);
             padding: 18px;
-            backdrop-filter: blur(18px); 
+            backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             box-shadow: 0 8px 40px rgba(0, 4, 40, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            /* Optimasi rendering */
+            transform: translateZ(0);
+            will-change: transform;
+            /* Margin bottom tambahan agar tidak tertutup FAB di mobile */
+            margin-bottom: 20px;
         }
 
         /* RESPONSIVE DESIGN (TABLET & PC) */
         @media (min-width: 992px) {
-            body { padding: 25px; align-items: stretch; }
-            .app-wrap { 
-                max-width: 100%; 
-                width: 100%;
-                padding: 30px; 
-                margin: 0 auto;
+            body {
+                padding: 25px;
+                align-items: stretch;
+                /* Desktop tidak perlu padding-bottom besar */
+                padding-bottom: 25px;
             }
+
+            .app-wrap {
+                max-width: 100%;
+                width: 100%;
+                padding: 30px;
+                margin: 0 auto;
+                margin-bottom: 0;
+            }
+
             .main-grid {
                 display: grid;
                 grid-template-columns: 1.3fr 1fr;
                 gap: 30px;
                 align-items: start;
             }
+
             .panel-right {
                 position: sticky;
-                top: 25px; 
+                top: 25px;
             }
+
             #hasil-laporan {
                 min-height: 580px;
             }
         }
 
+        /* Perbaikan untuk mobile portrait: padding ekstra di bawah konten */
+        @media (max-width: 991px) {
+            body {
+                padding-bottom: 110px;
+                /* ruang aman untuk FAB + tombol aksi */
+            }
+
+            .app-wrap {
+                margin-bottom: 10px;
+                /* backdrop-filter lebih ringan di mobile untuk performa */
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+
+            .btn-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .action-btn {
+                padding: 16px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Untuk layar sangat kecil (smartphone kecil) */
+        @media (max-width: 400px) {
+            body {
+                padding-bottom: 120px;
+            }
+
+            .fab-container {
+                bottom: 20px;
+                right: 16px;
+            }
+
+            .fab-btn {
+                height: 48px;
+                padding: 0 16px;
+            }
+
+            .fab-icon {
+                font-size: 20px;
+            }
+
+            .fab-text {
+                font-size: 0.8rem;
+            }
+        }
+
         /* FAB NAVIGATION (Link ke hasil.html) */
         @keyframes floating {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
         }
 
         .fab-container {
             position: fixed;
-            bottom: 35px;
-            right: 35px;
+            bottom: var(--fab-bottom);
+            right: var(--fab-right);
             z-index: 9999;
             text-decoration: none;
             animation: floating 3s ease-in-out infinite;
+            /* Memastikan FAB tidak mengganggu klik elemen di bawahnya */
+            pointer-events: auto;
         }
 
         /* Tombol statis dan lonjong */
         .fab-btn {
             background: var(--primary);
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            height: 55px;
-            width: auto; /* Lebar menyesuaikan konten */
-            border-radius: 30px; /* Bentuk lonjong/pill */
+            height: var(--fab-height);
+            width: auto;
+            /* Lebar menyesuaikan konten */
+            border-radius: 30px;
+            /* Bentuk lonjong/pill */
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             padding: 0 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
         }
 
-        .fab-icon { font-size: 22px; min-width: 25px; text-align: center; }
+        .fab-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .fab-icon {
+            font-size: 22px;
+            min-width: 25px;
+            text-align: center;
+        }
 
         /* Teks statis, selalu tampil */
         .fab-text {
@@ -113,292 +222,467 @@
         }
 
         /* Style Form UI */
-        h3 { text-align: center; font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 16px; letter-spacing: 0.3px; }
-        .subtitle { text-align: center; font-size: 0.7rem; color: var(--text-muted); margin-top: -12px; margin-bottom: 20px; text-transform: uppercase; }
-        
-        .form-section, .kategori-card {
+        h3 {
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: 0.3px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: -12px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .form-section,
+        .kategori-card {
             background: var(--glass-card);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-card);
-            padding: 14px; margin-bottom: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            /* Optimasi rendering untuk kartu */
+            transform: translateZ(0);
+            will-change: transform;
         }
-        
+
         .section-title {
-            font-size: 0.65rem; font-weight: 700; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 0.9px;
-            margin-bottom: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 5px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.9px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 5px;
         }
 
         .kategori-title {
-            font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .badge {
-            background: var(--primary); padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; color: #fff;
+            background: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            color: #fff;
         }
 
-        label { display: block; font-size: 0.7rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; }
-        
-        select, input[type="date"] {
-            width: 100%; padding: 10px 12px;
+        label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        select,
+        input[type="date"] {
+            width: 100%;
+            padding: 10px 12px;
             background: var(--glass-input);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-input);
-            font-size: 0.85rem; color: #fff; outline: none;
+            font-size: 0.85rem;
+            color: #fff;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         /* PERBAIKAN WARNA OPTION DROPDOWN */
         select option {
-            background-color: var(--bg1); /* Memberikan warna gelap pada background dropdown */
-            color: #ffffff; /* Memastikan teks tetap putih */
+            background-color: var(--bg1);
+            color: #ffffff;
         }
 
-        .input-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .petugas-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .input-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
 
-        .counter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .counter-item { display: flex; flex-direction: column; gap: 5px; }
-        .sub-label { font-size: 0.6rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        
+        .petugas-row {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .counter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .counter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .sub-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
         .counter-controls {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 10px; padding: 4px;
+            border-radius: 10px;
+            padding: 4px;
         }
 
         .btn-step {
-            width: 32px; height: 32px; border-radius: 8px; border: none;
-            background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 700; cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s ease;
         }
 
-        .val-display { font-weight: 700; font-size: 0.95rem; color: #fff; min-width: 20px; text-align: center; }
+        .btn-step:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .val-display {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #fff;
+            min-width: 20px;
+            text-align: center;
+        }
 
         #hasil-laporan {
             background: rgba(0, 4, 40, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: var(--radius-card);
-            color: #c8e6ff; padding: 18px;
+            color: #c8e6ff;
+            padding: 18px;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 0.78rem; line-height: 1.6;
-            white-space: pre-wrap; word-break: break-word;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            /* Smooth scroll untuk panel hasil jika konten panjang */
+            overflow-y: auto;
+            max-height: 70vh;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
-        .btn-row { display: flex; gap: 10px; margin-top: 10px; }
-        .action-btn { flex: 1; padding: 14px 10px; border: none; border-radius: var(--radius-input); font-size: 0.85rem; font-weight: 600; cursor: pointer; color: #fff; }
-        .btn-copy { background: linear-gradient(135deg, #2a7de1, #1a5fb4); }
-        .btn-wa { background: linear-gradient(135deg, #25d366, #1aaa52); }
-        .btn-clear { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: var(--radius-input); background: rgba(255, 107, 107, 0.1); color: var(--danger); border: 1px solid rgba(255, 107, 107, 0.2); font-weight: 600; }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border: none;
+            border-radius: var(--radius-input);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            transition: transform 0.1s ease, filter 0.2s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.97);
+            filter: brightness(0.9);
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, #2a7de1, #1a5fb4);
+        }
+
+        .btn-wa {
+            background: linear-gradient(135deg, #25d366, #1aaa52);
+        }
+
+        .btn-clear {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: var(--radius-input);
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-clear:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
 
         .toast-notification {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.85); backdrop-filter: blur(12px);
-            padding: 14px 24px; border-radius: 30px; color: #fff; font-size: 0.85rem;
-            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999;
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 14px 24px;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 0.85rem;
+            transition: top 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 9999;
+            pointer-events: none;
         }
-        .toast-notification.show { top: 40px; }
+
+        .toast-notification.show {
+            top: 40px;
+        }
     </style>
 </head>
 <body>
 
-<a href="./hasil.html" class="fab-container">
-    <div class="fab-btn">
-        <span class="fab-icon">📋</span>
-        <span class="fab-text">Pembuat Hasil Radiologi</span>
-    </div>
-</a>
-
-<div id="toastNotif" class="toast-notification">
-    <span>Laporan Berhasil Disalin!</span>
-</div>
-
-<div class="app-wrap">
-    <h3>LAPORAN RADIOLOGI</h3>
-    <div class="subtitle">Rumkit Tk. IV 12.07.03 Palangkaraya</div>
-
-    <div class="main-grid">
-        <div class="panel-left">
-            <div class="form-section">
-                <div class="section-title">Waktu &amp; Tanggal</div>
-                <div class="input-row-2">
-                    <div>
-                        <label>Waktu</label>
-                        <select id="salam" onchange="gen()">
-                            <option value="otomatis">Auto</option>
-                            <option value="Selamat pagi">Selamat Pagi</option>
-                            <option value="Selamat siang">Selamat Siang</option>
-                            <option value="Selamat malam">Selamat Malam</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Tanggal</label>
-                        <input type="date" id="tgl" onchange="gen()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title">Petugas Dinas</div>
-                <div class="petugas-group">
-                    <label>Sekarang</label>
-                    <div class="petugas-row">
-                        <select id="p1" onchange="gen()">
-                            <option value="PELTU Alfried">PELTU Alfried</option>
-                            <option value="SUKWAN Dian">SUKWAN Dian</option>
-                            <option value="SUKWAN Jo">SUKWAN Jo</option>
-                            <option value="SUKWAN Algie">SUKWAN Algie</option>
-                        </select>
-                        <select id="s1" onchange="gen()">
-                            <option value="Pagi">Pagi</option>
-                            <option value="Siang">Siang</option>
-                            <option value="Malam">Malam</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="petugas-group">
-                    <label>Pengganti</label>
-                    <div class="petugas-row">
-                        <select id="p2" onchange="gen()">
-                            <option value="SUKWAN Dian">SUKWAN Dian</option>
-                            <option value="PELTU Alfried">PELTU Alfried</option>
-                            <option value="SUKWAN Jo">SUKWAN Jo</option>
-                            <option value="SUKWAN Algie">SUKWAN Algie</option>
-                        </select>
-                        <select id="s2" onchange="gen()">
-                            <option value="Siang">Siang</option>
-                            <option value="Pagi">Pagi</option>
-                            <option value="Malam">Malam</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div id="pasien-inputs"></div>
-            <button class="btn-clear" onclick="doReset()">&#8635; Reset Data Pasien</button>
+    <a href="./hasil.html" class="fab-container" title="Pembuat Hasil Radiologi">
+        <div class="fab-btn">
+            <span class="fab-icon">📋</span>
+            <span class="fab-text">Pembuat Hasil Radiologi</span>
         </div>
+    </a>
 
-        <div class="panel-right">
-            <div id="hasil-laporan" onclick="selAll()"></div>
-            <div class="btn-row">
-                <button class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin Laporan</button>
-                <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
+    <div id="toastNotif" class="toast-notification">
+        <span>Laporan Berhasil Disalin!</span>
+    </div>
+
+    <div class="app-wrap">
+        <h3>LAPORAN RADIOLOGI</h3>
+        <div class="subtitle">Rumkit Tk. IV 12.07.03 Palangkaraya</div>
+
+        <div class="main-grid">
+            <div class="panel-left">
+                <div class="form-section">
+                    <div class="section-title">Waktu &amp; Tanggal</div>
+                    <div class="input-row-2">
+                        <div>
+                            <label>Waktu</label>
+                            <select id="salam" onchange="gen()">
+                                <option value="otomatis">Auto</option>
+                                <option value="Selamat pagi">Selamat Pagi</option>
+                                <option value="Selamat siang">Selamat Siang</option>
+                                <option value="Selamat malam">Selamat Malam</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Tanggal</label>
+                            <input type="date" id="tgl" onchange="gen()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">Petugas Dinas</div>
+                    <div class="petugas-group">
+                        <label>Sekarang</label>
+                        <div class="petugas-row">
+                            <select id="p1" onchange="gen()">
+                                <option value="PELTU Alfried">PELTU Alfried</option>
+                                <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                <option value="SUKWAN Algie">SUKWAN Algie</option>
+                            </select>
+                            <select id="s1" onchange="gen()">
+                                <option value="Pagi">Pagi</option>
+                                <option value="Siang">Siang</option>
+                                <option value="Malam">Malam</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="petugas-group">
+                        <label>Pengganti</label>
+                        <div class="petugas-row">
+                            <select id="p2" onchange="gen()">
+                                <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                <option value="PELTU Alfried">PELTU Alfried</option>
+                                <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                <option value="SUKWAN Algie">SUKWAN Algie</option>
+                            </select>
+                            <select id="s2" onchange="gen()">
+                                <option value="Siang">Siang</option>
+                                <option value="Pagi">Pagi</option>
+                                <option value="Malam">Malam</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pasien-inputs"></div>
+                <button class="btn-clear" onclick="doReset()">&#8635; Reset Data Pasien</button>
+            </div>
+
+            <div class="panel-right">
+                <div id="hasil-laporan" onclick="selAll()"></div>
+                <div class="btn-row">
+                    <button class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin Laporan</button>
+                    <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    var kat = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
-    var sub = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
+    <script>
+        var kat = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
+        var sub = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
 
-    function initDate() {
-        var n = new Date();
-        document.getElementById('tgl').value = n.toISOString().split('T')[0];
-    }
+        function initDate() {
+            var n = new Date();
+            document.getElementById('tgl').value = n.toISOString().split('T')[0];
+        }
 
-    function fmtTgl(s) {
-        if(!s) return '';
-        var p = s.split('-');
-        var hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        var bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        var dt = new Date(+p[0], +p[1]-1, +p[2]);
-        return hari[dt.getDay()] + ', ' + parseInt(p[2]) + ' ' + bln[+p[1]-1] + ' ' + p[0];
-    }
+        function fmtTgl(s) {
+            if (!s) return '';
+            var p = s.split('-');
+            var hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            var bln = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober",
+                "November", "Desember"
+            ];
+            var dt = new Date(+p[0], +p[1] - 1, +p[2]);
+            return hari[dt.getDay()] + ', ' + parseInt(p[2]) + ' ' + bln[+p[1] - 1] + ' ' + p[0];
+        }
 
-    function chg(id, d) {
-        var el = document.getElementById(id);
-        var v = (parseInt(el.value) || 0) + d;
-        if(v < 0) v = 0;
-        el.value = v;
-        document.getElementById('dsp-'+id).innerText = v;
+        function chg(id, d) {
+            var el = document.getElementById(id);
+            var v = (parseInt(el.value) || 0) + d;
+            if (v < 0) v = 0;
+            el.value = v;
+            document.getElementById('dsp-' + id).innerText = v;
+            gen();
+        }
+
+        function selAll() {
+            var n = document.getElementById('hasil-laporan');
+            var sel = window.getSelection();
+            var r = document.createRange();
+            r.selectNodeContents(n);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        }
+
+        (function buildInputs() {
+            var c = document.getElementById('pasien-inputs');
+            kat.forEach(function(k, i) {
+                var div = document.createElement('div');
+                div.className = 'kategori-card';
+                var grid = '';
+                sub.forEach(function(s) {
+                    var id = s.replace(/\s+/g, '-') + '-' + i;
+                    grid += '<div class="counter-item">' +
+                        '<div class="sub-label">' + s + '</div>' +
+                        '<div class="counter-controls">' +
+                        '<button class="btn-step" onclick="chg(\'' + id + '\',-1)">−</button>' +
+                        '<span class="val-display" id="dsp-' + id + '">0</span>' +
+                        '<button class="btn-step" onclick="chg(\'' + id + '\',1)">+</button>' +
+                        '<input type="hidden" id="' + id + '" class="ip" value="0">' +
+                        '</div></div>';
+                });
+                div.innerHTML = '<div class="kategori-title"><span class="badge">' + (i + 1) + '</span>' + k +
+                    '</div>' +
+                    '<div class="counter-grid">' + grid + '</div>';
+                c.appendChild(div);
+            });
+        })();
+
+        function getLaporan() {
+            var sv = document.getElementById('salam').value;
+            var tgl = fmtTgl(document.getElementById('tgl').value);
+            var p1 = document.getElementById('p1').value;
+            var s1 = document.getElementById('s1').value;
+            var p2 = document.getElementById('p2').value;
+            var s2 = document.getElementById('s2').value;
+            var sf = sv;
+            if (sv === 'otomatis') {
+                var h = new Date().getHours();
+                sf = h >= 6 && h < 12 ? 'Selamat pagi' : h >= 12 && h < 16 ? 'Selamat siang' : 'Selamat malam';
+            }
+            var total = 0,
+                detail = '';
+            kat.forEach(function(k, i) {
+                var items = [],
+                    counts = 0;
+                sub.forEach(function(s) {
+                    var v = parseInt(document.getElementById(s.replace(/\s+/g, '-') + '-' + i).value) || 0;
+                    if (v > 0) {
+                        items.push(v + ' orang (' + s + ')');
+                        counts += v;
+                    }
+                });
+                total += counts;
+                var ket = items.length > 0 ? items.join('\n                    ') : 'nihil';
+                detail += (i + 1) + '. ' + k.padEnd(14) + ': ' + ket + '\n';
+            });
+
+            return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' + sf +
+                '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n *Dinas ' +
+                s1 + '*\n  ' + p1 + '\n\n *Dinas ' + s2 + '*\n  ' + p2 + '\n\nJumlah pasien : ' + total +
+                ' orang\n\nKeterangan : \n' + detail +
+                '\nRumkit TNI-AD dalam keadaan aman, sekian laporan selesai, Terimakasih.';
+        }
+
+        function gen() {
+            document.getElementById('hasil-laporan').innerText = getLaporan();
+        }
+
+        function doReset() {
+            if (confirm('Reset semua data pasien?')) {
+                document.querySelectorAll('.ip').forEach(function(el) {
+                    el.value = 0;
+                    document.getElementById('dsp-' + el.id).innerText = 0;
+                });
+                gen();
+            }
+        }
+
+        function doKopi() {
+            var txt = getLaporan();
+            navigator.clipboard.writeText(txt).then(function() {
+                var toast = document.getElementById('toastNotif');
+                toast.classList.add('show');
+                setTimeout(function() {
+                    toast.classList.remove('show');
+                }, 3000);
+            });
+        }
+
+        function doWA() {
+            var enc = encodeURIComponent(getLaporan());
+            window.open('https://wa.me/?text=' + enc, '_blank');
+        }
+
+        initDate();
         gen();
-    }
-
-    function selAll() {
-        var n = document.getElementById('hasil-laporan');
-        var sel = window.getSelection();
-        var r = document.createRange();
-        r.selectNodeContents(n);
-        sel.removeAllRanges();
-        sel.addRange(r);
-    }
-
-    (function buildInputs() {
-        var c = document.getElementById('pasien-inputs');
-        kat.forEach(function(k, i) {
-            var div = document.createElement('div');
-            div.className = 'kategori-card';
-            var grid = '';
-            sub.forEach(function(s) {
-                var id = s.replace(/\s+/g, '-') + '-' + i;
-                grid += '<div class="counter-item">' +
-                    '<div class="sub-label">' + s + '</div>' +
-                    '<div class="counter-controls">' +
-                    '<button class="btn-step" onclick="chg(\'' + id + '\',-1)">−</button>' +
-                    '<span class="val-display" id="dsp-' + id + '">0</span>' +
-                    '<button class="btn-step" onclick="chg(\'' + id + '\',1)">+</button>' +
-                    '<input type="hidden" id="' + id + '" class="ip" value="0">' +
-                    '</div></div>';
-            });
-            div.innerHTML = '<div class="kategori-title"><span class="badge">' + (i + 1) + '</span>' + k + '</div>' +
-                '<div class="counter-grid">' + grid + '</div>';
-            c.appendChild(div);
-        });
-    })();
-
-    function getLaporan() {
-        var sv = document.getElementById('salam').value;
-        var tgl = fmtTgl(document.getElementById('tgl').value);
-        var p1 = document.getElementById('p1').value;
-        var s1 = document.getElementById('s1').value;
-        var p2 = document.getElementById('p2').value;
-        var s2 = document.getElementById('s2').value;
-        var sf = sv;
-        if(sv === 'otomatis') {
-            var h = new Date().getHours();
-            sf = h >= 6 && h < 12 ? 'Selamat pagi' : h >= 12 && h < 16 ? 'Selamat siang' : 'Selamat malam';
-        }
-        var total = 0, detail = '';
-        kat.forEach(function(k, i) {
-            var items = [], counts = 0;
-            sub.forEach(function(s) {
-                var v = parseInt(document.getElementById(s.replace(/\s+/g, '-') + '-' + i).value) || 0;
-                if(v > 0) { items.push(v + ' orang (' + s + ')'); counts += v; }
-            });
-            total += counts;
-            var ket = items.length > 0 ? items.join('\n                    ') : 'nihil';
-            detail += (i + 1) + '. ' + k.padEnd(14) + ': ' + ket + '\n';
-        });
-        
-        return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' + sf + '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n *Dinas ' + s1 + '*\n  ' + p1 + '\n\n *Dinas ' + s2 + '*\n  ' + p2 + '\n\nJumlah pasien : ' + total + ' orang\n\nKeterangan : \n' + detail + '\nRumkit TNI-AD dalam keadaan aman, sekian laporan selesai, Terimakasih.';
-    }
-
-    function gen() { document.getElementById('hasil-laporan').innerText = getLaporan(); }
-
-    function doReset() {
-        if(confirm('Reset semua data pasien?')) {
-            document.querySelectorAll('.ip').forEach(function(el) {
-                el.value = 0; document.getElementById('dsp-' + el.id).innerText = 0;
-            }); gen();
-        }
-    }
-
-    function doKopi() {
-        var txt = getLaporan();
-        navigator.clipboard.writeText(txt).then(function() {
-            var toast = document.getElementById('toastNotif');
-            toast.classList.add('show');
-            setTimeout(function() { toast.classList.remove('show'); }, 3000);
-        });
-    }
-
-    function doWA() {
-        var enc = encodeURIComponent(getLaporan());
-        window.open('https://wa.me/?text=' + enc, '_blank');
-    }
-
-    initDate(); gen();
-</script>
+    </script>
 </body>
 </html>
