@@ -49,94 +49,107 @@ body {
    RESPONSIVE DESIGN (TABLET & DESKTOP PC) 
    ========================================= */
 @media (min-width: 992px) {
-  body { padding: 20px; align-items: stretch; }
+  body { padding: 25px; align-items: stretch; }
   .app-wrap { 
-    max-width: 100%; /* MENYESUAIKAN PENUH LAYAR */
+    max-width: 100%; 
     width: 100%;
     padding: 30px; 
     margin: 0 auto;
   }
   .main-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr; /* Kiri sedikit lebih lebar dari kanan */
+    grid-template-columns: 1.3fr 1fr;
     gap: 30px;
     align-items: start;
   }
   .panel-right {
     position: sticky;
-    top: 20px; 
+    top: 25px; 
   }
   #hasil-laporan {
-    min-height: 550px;
+    min-height: 580px;
   }
 }
 
 /* =========================================
-   TOMBOL HOVER (FAB) POJOK KIRI BAWAH
+   ANIMASI & TOMBOL HOVER (FAB) KANAN BAWAH
    ========================================= */
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
 .fab-container {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  bottom: 35px; /* Sedikit naik agar jelas */
+  right: 35px; /* Posisi di kanan */
   z-index: 1000;
   text-decoration: none;
+  animation: floating 3s ease-in-out infinite; /* Efek bergerak otomatis */
 }
 
 .fab-btn {
-  background: var(--glass-card);
+  background: rgba(77, 166, 255, 0.15);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  height: 50px;
-  width: 50px; /* Keadaan awal bulat */
-  border-radius: 25px;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  height: 55px;
+  width: 55px;
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   overflow: hidden;
   white-space: nowrap;
-  padding: 0 12px;
+  padding: 0 15px;
 }
 
 .fab-icon {
-  font-size: 20px;
-  min-width: 26px;
+  font-size: 22px;
+  min-width: 25px;
   text-align: center;
 }
 
 .fab-text {
   max-width: 0;
   opacity: 0;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.4s ease;
   margin-left: 0;
 }
 
-/* Hover Effect */
+/* Hover Effect (Desktop) */
 @media (hover: hover) {
   .fab-btn:hover {
-    width: 240px; /* Berubah jadi lonjong */
+    width: 260px; /* Melebar saat di-hover */
     background: var(--primary);
     border-color: rgba(255,255,255,0.4);
   }
   .fab-btn:hover .fab-text {
-    max-width: 200px;
+    max-width: 220px;
     opacity: 1;
-    margin-left: 10px;
+    margin-left: 12px;
   }
 }
 
-/* Mode Smartphone: Aktif saat di-tap */
-.fab-btn:active {
-  transform: scale(0.95);
-  background: var(--primary);
+/* Responsive FAB for Mobile */
+@media (max-width: 600px) {
+  .fab-container {
+    bottom: 25px;
+    right: 25px;
+  }
+  .fab-btn {
+    height: 50px;
+    width: 50px;
+  }
 }
 
-/* Judul & Konten */
+/* Style Laporan dll tetap sama */
 h3 {
   text-align: center; font-size: 1.15rem; font-weight: 700;
   color: #fff; margin-bottom: 16px; letter-spacing: 0.3px;
@@ -202,9 +215,9 @@ select option { background: #0a1a3a; color: #fff; }
   background: rgba(0, 4, 40, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-card);
-  color: #c8e6ff; padding: 16px;
+  color: #c8e6ff; padding: 18px;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 0.75rem; line-height: 1.6;
+  font-size: 0.78rem; line-height: 1.6;
   white-space: pre-wrap; word-break: break-word;
 }
 
@@ -232,10 +245,10 @@ select option { background: #0a1a3a; color: #fff; }
 </head>
 <body>
 
-<a href="https://example.com" class="fab-container" target="_blank">
+<a href="pembuat hasil bacaan.html" class="fab-container">
   <div class="fab-btn">
-    <span class="fab-icon">👨‍⚕️</span>
-    <span class="fab-text">Pembuat Hasil Radiologi</span>
+    <span class="fab-icon">📋</span>
+    <span class="fab-text">Pembuat Hasil Bacaan</span>
   </div>
 </a>
 
@@ -311,8 +324,8 @@ select option { background: #0a1a3a; color: #fff; }
     <div class="panel-right">
       <div id="hasil-laporan" onclick="selAll()"></div>
       <div class="btn-row">
-        <button class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin</button>
-        <button class="action-btn btn-wa" onclick="doWA()">&#128232; WhatsApp</button>
+        <button class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin Laporan</button>
+        <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
       </div>
     </div>
   </div>
