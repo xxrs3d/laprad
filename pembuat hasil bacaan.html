@@ -1,183 +1,583 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEMBUAT HASIL RADIOLOGI</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
-        .form-container { background: white; padding: 20px; max-width: 800px; margin: auto; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        textarea { resize: vertical; min-height: 100px; }
-        .btn-today { font-size: 12px; margin-top: 5px; cursor: pointer; background: #e0e0e0; border: none; padding: 4px 8px; border-radius: 4px; }
-        
-        /* Area Pratinjau Tersembunyi (Akan diproses ke PDF) */
-        #surat-area {
-            width: 210mm; min-height: 297mm; padding: 20mm;
-            background: white; position: absolute; left: -9999px; top: 0;
-            color: black; line-height: 1.5;
-        }
-        .header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
-        .logo-img { width: 100px; height: auto; margin-right: 20px; }
-        .header-text { text-align: center; flex-grow: 1; }
-        .header-text h2 { margin: 0; font-size: 18pt; }
-        .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
-        .info-table td { padding: 5px 0; vertical-align: top; }
-        .hasil-box { border: 1px solid black; min-height: 250px; padding: 15px; margin-top: 10px; white-space: pre-wrap; font-size: 11pt; }
-        .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
-        .qr-code { width: 100px; height: 100px; object-fit: contain; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pembuat PDF Hasil Radiologi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', Arial, sans-serif;
+  background: #eef0f4;
+  min-height: 100vh;
+  padding: 30px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.app-wrapper {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  max-width: 1180px;
+  width: 100%;
+  align-items: start;
+}
+
+/* ── PANEL FORM ── */
+.form-panel {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+  overflow: hidden;
+  position: sticky;
+  top: 30px;
+}
+
+.form-header {
+  background: linear-gradient(135deg, #1a3a6c 0%, #0d2244 100%);
+  padding: 24px 24px 20px;
+}
+
+.form-header h2 {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.form-header p {
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.form-body { padding: 20px 22px 24px; }
+
+.section-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin: 18px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.section-title:first-child { margin-top: 0; }
+
+.field { margin-bottom: 12px; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 5px;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 13px;
+  color: #1e293b;
+  background: #f8fafc;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-color: #3b82f6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.upload-zone {
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  position: relative;
+}
+.upload-zone:hover { border-color: #3b82f6; background: #eff6ff; }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.upload-zone .uz-icon { font-size: 20px; margin-bottom: 3px; }
+.upload-zone p { font-size: 11px; color: #94a3b8; }
+.upload-zone .uz-preview {
+  width: 50px; height: 50px;
+  object-fit: contain; border-radius: 6px;
+  display: none; margin: 0 auto 4px;
+}
+
+.today-btn {
+  background: none; border: none;
+  color: #3b82f6; font-size: 11px; font-weight: 500;
+  cursor: pointer; padding: 0; margin-top: 4px;
+  display: inline-block; text-decoration: underline;
+}
+
+.print-btn {
+  width: 100%;
+  padding: 13px;
+  background: #1a3a6c;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 18px;
+  letter-spacing: 0.2px;
+  transition: background 0.18s, transform 0.1s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.print-btn:hover { background: #1e4d8c; }
+.print-btn:active { transform: scale(0.98); }
+.print-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── PREVIEW PANEL ── */
+.preview-panel {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+  overflow: hidden;
+}
+
+.preview-bar {
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 6px;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.d-r { background: #fc635d; } .d-y { background: #fdbc40; } .d-g { background: #34c749; }
+.preview-bar span { font-size: 11px; color: #94a3b8; font-weight: 500; margin-left: 6px; }
+
+.preview-body { padding: 30px; }
+
+
+.header {
+  display: flex;
+  align-items: center;
+  border-bottom: 3px double black;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.logo-img {
+  width: 100px;
+  height: auto;
+  margin-right: 20px;
+}
+.header-text { text-align: center; flex-grow: 1; }
+.header-text h2 { margin: 0; font-size: 18pt; font-family: Arial, sans-serif; }
+.header-text p { margin: 0; font-size: 10pt; font-family: Arial, sans-serif; }
+
+.info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+.info-table td { padding: 5px 0; vertical-align: top; font-family: Arial, sans-serif; font-size: 10pt; }
+
+.hasil-box {
+  border: 1px solid black;
+  min-height: 250px;
+  padding: 15px;
+  margin-top: 10px;
+  white-space: pre-wrap;
+  font-size: 11pt;
+  font-family: Arial, sans-serif;
+  color: #555;
+}
+
+.footer-sign {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  font-size: 10pt;
+}
+.qr-placeholder {
+  width: 100px; height: 100px;
+  border: 1.5px dashed #ccc;
+  margin: 0 auto 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #ccc; font-size: 11px;
+  background: #f9f9f9;
+}
+.qr-preview-img { width: 100px; height: 100px; object-fit: contain; display: none; }
+
+/* LOGO PLACEHOLDER DI PREVIEW */
+.logo-preview-wrap {
+  width: 100px; height: 60px;
+  margin-right: 20px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px dashed #ddd; background: #fafafa; color: #bbb; font-size: 11px;
+}
+.logo-preview-wrap img { width: 100px; height: 60px; object-fit: contain; display: none; }
+
+
+#surat-area {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  background: white;
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  color: black;
+  line-height: 1.5;
+  font-family: Arial, sans-serif;
+}
+#surat-area .header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
+#surat-area .logo-img { width: 100px; height: auto; margin-right: 20px; }
+#surat-area .header-text { text-align: center; flex-grow: 1; }
+#surat-area .header-text h2 { margin: 0; font-size: 18pt; }
+#surat-area .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
+#surat-area .info-table td { padding: 5px 0; vertical-align: top; }
+#surat-area .hasil-box { border: 1px solid black; min-height: 250px; padding: 15px; margin-top: 10px; white-space: pre-wrap; font-size: 11pt; }
+#surat-area .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
+#surat-area .qr-code { width: 100px; height: 100px; object-fit: contain; }
+
+/* Loading */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,0.88);
+  backdrop-filter: blur(3px);
+  z-index: 999;
+  display: none;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+.loading-overlay.show { display: flex; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #1a3a6c;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin-bottom: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay p { font-size: 13px; color: #475569; font-weight: 500; }
+</style>
 </head>
 <body>
 
-<div class="form-container">
-    <h2>Input Data Radiologi - RS TNI AD</h2>
-    <hr>
-    
-    <div class="input-group">
-        <label>Upload Logo Rumah Sakit (Pilih dari Komputer)</label>
-        <input type="file" id="in_logo" accept="image/*">
-    </div>
-
-    <div class="input-group">
-        <label>Nama Pasien</label>
-        <input type="text" id="in_nama" placeholder="Contoh: Budi Santoso">
-    </div>
-
-    <div class="input-group">
-        <label>Tanggal Lahir</label>
-        <input type="date" id="in_tgl_lahir">
-    </div>
-
-    <div class="input-group">
-        <label>Tanggal Pemeriksaan</label>
-        <input type="date" id="in_tgl_periksa">
-        <button class="btn-today" onclick="setToday('in_tgl_periksa')">Set Hari Ini</button>
-    </div>
-
-    <div class="input-group">
-        <label>Hasil Pemeriksaan</label>
-        <textarea id="in_hasil" placeholder="Ketik hasil diagnosa secara detail di sini..."></textarea>
-    </div>
-
-    <div class="input-group">
-        <label>Petugas Radiologi</label>
-        <input type="text" id="in_petugas" placeholder="Nama Petugas Pemeriksa">
-    </div>
-
-    <div class="input-group">
-        <label>Upload Tanda Tangan/QR (Opsional)</label>
-        <input type="file" id="in_qr" accept="image/*">
-    </div>
-
-    <button onclick="generatePDF()" style="background: #27ae60; color: white; padding: 15px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px;">CETAK KE PDF</button>
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p>harap tunggu...</p>
 </div>
 
-<div id="surat-area">
-    <div class="header">
-        <img id="out_logo" class="logo-img" src="">
+<div class="app-wrapper">
+
+  <!-- ── FORM INPUT ── -->
+  <div class="form-panel">
+    <div class="form-header">
+      <h2>Pembuat Hasil Radiologi</h2>
+      <p>RS TNI AD Palangka Raya</p>
+    </div>
+    <div class="form-body">
+
+      <div class="section-title">Logo Rumah Sakit</div>
+      <div class="field">
+        <label>URL / Path Logo <span style="color:#94a3b8;font-weight:400;">(ganti src sesuai file logo Anda)</span></label>
+        <input type="text" id="in_logo_src" placeholder="Contoh: logo_rstniad.png atau https://..." oninput="updateLogoSrc(this.value)">
+        <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
+          <img id="logo-src-preview" src="" alt="" style="width:60px;height:60px;object-fit:contain;border:1px solid #e2e8f0;border-radius:6px;display:none;">
+          <p style="font-size:11px;color:#94a3b8;line-height:1.5;">Ubah nilai <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;">src</code> pada tag <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;">&lt;img id="out_logo"&gt;</code> di kode HTML untuk mengganti logo secara permanen.</p>
+        </div>
+      </div>
+
+      <div class="section-title">Data Pasien</div>
+      <div class="field">
+        <label>Nama Pasien</label>
+        <input type="text" id="in_nama" placeholder="Contoh: Budi Santoso" oninput="updatePreview()">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Tanggal Lahir</label>
+          <input type="date" id="in_tgl_lahir" oninput="updatePreview()">
+        </div>
+        <div class="field">
+          <label>Tanggal Periksa</label>
+          <input type="date" id="in_tgl_periksa" oninput="updatePreview()">
+          <button class="today-btn" onclick="setToday()">Gunakan hari ini</button>
+        </div>
+      </div>
+
+      <div class="section-title">Hasil & Penandatangan</div>
+      <div class="field">
+        <label>Hasil Pemeriksaan</label>
+        <textarea id="in_hasil" placeholder="Ketik hasil diagnosa secara detail..." oninput="updatePreview()"></textarea>
+      </div>
+      <div class="field">
+        <label>Nama Penanggung Jawab</label>
+        <input type="text" id="in_pjawab" value="dr. Tharina L, Sp. Rad" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Petugas Radiologi</label>
+        <input type="text" id="in_petugas" placeholder="Nama petugas pemeriksa" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Upload Tanda Tangan / QR </label>
+        <div class="upload-zone" onclick="document.getElementById('in_qr').click()">
+          <input type="file" id="in_qr" accept="image/*" onchange="handleUpload(this,'qr-uz-preview','qr-uz-icon','qr-uz-text', updateQRPreview)">
+          <img class="uz-preview" id="qr-uz-preview" src="">
+          <div class="uz-icon" id="qr-uz-icon">✍️</div>
+          <p id="qr-uz-text">Klik untuk upload TTD / QR</p>
+        </div>
+      </div>
+
+      <button class="print-btn" onclick="generatePDF()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/>
+        </svg>
+        Cetak ke PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PRATINJAU DOKUMEN ── -->
+  <div class="preview-panel">
+    <div class="preview-bar">
+      <div class="dot d-r"></div><div class="dot d-y"></div><div class="dot d-g"></div>
+      <span>Pratinjau Dokumen</span>
+    </div>
+    <div class="preview-body">
+
+      <!-- FORMAT DOKUMEN SAMA PERSIS DENGAN ASLI -->
+      <div class="header">
+        <!-- GANTI src DI BAWAH INI UNTUK MENGUBAH LOGO -->
+        <img id="prev_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS" style="display:none;">
+        <div class="logo-preview-wrap" id="prev-logo-wrap"><span id="prev-logo-ph">Logo RS</span></div>
         <div class="header-text">
-            <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
-            <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
-            0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
+          <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
+          <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
+          0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
         </div>
-    </div>
+      </div>
 
-    <table class="info-table">
+      <table class="info-table">
         <tr>
-            <td width="20%">Nama Pasien</td><td width="30%">: <strong id="out_nama"></strong></td>
-            <td width="25%">Tgl Pemeriksaan</td><td width="25%">: <span id="out_tgl_periksa"></span></td>
+          <td width="20%">Nama Pasien</td>
+          <td width="30%">: <strong id="prev_nama">—</strong></td>
+          <td width="25%">Tgl Pemeriksaan</td>
+          <td width="25%">: <span id="prev_tgl_periksa">—</span></td>
         </tr>
         <tr>
-            <td>Tanggal Lahir</td><td>: <span id="out_tgl_lahir"></span></td>
-            <td></td><td></td>
+          <td>Tanggal Lahir</td>
+          <td>: <span id="prev_tgl_lahir">—</span></td>
+          <td></td><td></td>
         </tr>
-    </table>
+      </table>
 
-    <p><strong>HASIL PEMERIKSAAN :</strong></p>
-    <div class="hasil-box" id="out_hasil"></div>
+      <p style="font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;">HASIL PEMERIKSAAN :</p>
+      <div class="hasil-box" id="prev_hasil">Hasil pemeriksaan akan tampil di sini...</div>
 
-    <div class="footer-sign">
+      <div class="footer-sign">
         <div>
-            <p>Penanggung Jawab,</p>
-            <div style="height: 110px;">
-                <img id="out_qr_img" class="qr-code" style="display:none;">
+          <p>Penanggung Jawab,</p>
+          <div style="height:110px; display:flex; align-items:center; justify-content:center;">
+            <div class="qr-placeholder" id="prev-qr-wrap">
+              <img class="qr-preview-img" id="prev_qr" src="">
+              <span id="prev-qr-ph">TTD / QR</span>
             </div>
-            <strong>dr. Tharina L, Sp. Rad</strong>
+          </div>
+          <strong id="prev_pjawab">dr. Tharina L, Sp. Rad</strong>
         </div>
         <div>
-            <p>Petugas Radiologi,</p>
-            <div style="margin-top: 110px;">
-                <strong id="out_petugas"></strong>
-            </div>
+          <p>Petugas Radiologi,</p>
+          <div style="margin-top:110px;">
+            <strong id="prev_petugas">.......................</strong>
+          </div>
         </div>
+      </div>
+
     </div>
+  </div>
+
+</div>
+
+<!-- ── AREA CETAK TERSEMBUNYI — FORMAT ASLI PERSIS ── -->
+<div id="surat-area">
+  <div class="header">
+    <!-- =============================================
+         GANTI src DI BAWAH INI UNTUK MENGUBAH LOGO
+         Contoh: src="logo_rstniad.png"
+                 src="https://example.com/logo.png"
+         ============================================= -->
+    <img id="out_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
+    <div class="header-text">
+      <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
+      <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
+      0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
+    </div>
+  </div>
+
+  <table class="info-table">
+    <tr>
+      <td width="20%">Nama Pasien</td><td width="30%">: <strong id="out_nama"></strong></td>
+      <td width="25%">Tgl Pemeriksaan</td><td width="25%">: <span id="out_tgl_periksa"></span></td>
+    </tr>
+    <tr>
+      <td>Tanggal Lahir</td><td>: <span id="out_tgl_lahir"></span></td>
+      <td></td><td></td>
+    </tr>
+  </table>
+
+  <p><strong>HASIL PEMERIKSAAN :</strong></p>
+  <div class="hasil-box" id="out_hasil"></div>
+
+  <div class="footer-sign">
+    <div>
+      <p>Penanggung Jawab,</p>
+      <div style="height: 110px;">
+        <img id="out_qr_img" class="qr-code" style="display:none;">
+      </div>
+      <strong id="out_pjawab">dr. Tharina L, Sp. Rad</strong>
+    </div>
+    <div>
+      <p>Petugas Radiologi,</p>
+      <div style="margin-top: 110px;">
+        <strong id="out_petugas"></strong>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    function setToday(id) {
-        document.getElementById(id).value = new Date().toISOString().split('T')[0];
+let qrDataURL = null;
+
+function updateLogoSrc(src) {
+  // Update pratinjau logo
+  const prev = document.getElementById('prev_logo');
+  const wrap = document.getElementById('prev-logo-wrap');
+  const ph   = document.getElementById('prev-logo-ph');
+  if (src.trim()) {
+    prev.src = src.trim();
+    prev.style.display = 'block';
+    wrap.style.display = 'none';
+    // preview kecil di form
+    const fp = document.getElementById('logo-src-preview');
+    fp.src = src.trim();
+    fp.style.display = 'block';
+  } else {
+    prev.style.display = 'none';
+    wrap.style.display = 'flex';
+    document.getElementById('logo-src-preview').style.display = 'none';
+  }
+}
+
+function handleUpload(input, previewId, iconId, textId, callback) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = e.target.result;
+    document.getElementById(previewId).src = data;
+    document.getElementById(previewId).style.display = 'block';
+    document.getElementById(iconId).style.display = 'none';
+    document.getElementById(textId).textContent = file.name;
+    callback(data);
+  };
+  reader.readAsDataURL(file);
+}
+
+function updateQRPreview(data) {
+  qrDataURL = data;
+  const img = document.getElementById('prev_qr');
+  img.src = data;
+  img.style.display = 'block';
+  document.getElementById('prev-qr-ph').style.display = 'none';
+}
+
+function setToday() {
+  document.getElementById('in_tgl_periksa').value = new Date().toISOString().split('T')[0];
+  updatePreview();
+}
+
+function formatTanggal(val) {
+  if (!val) return '—';
+  const d = new Date(val + 'T00:00:00');
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function updatePreview() {
+  document.getElementById('prev_nama').textContent = document.getElementById('in_nama').value || '—';
+  document.getElementById('prev_tgl_lahir').textContent = formatTanggal(document.getElementById('in_tgl_lahir').value);
+  document.getElementById('prev_tgl_periksa').textContent = formatTanggal(document.getElementById('in_tgl_periksa').value);
+  const hasil = document.getElementById('in_hasil').value;
+  document.getElementById('prev_hasil').textContent = hasil || 'Hasil pemeriksaan akan tampil di sini...';
+  document.getElementById('prev_petugas').textContent = document.getElementById('in_petugas').value || '.......................';
+  document.getElementById('prev_pjawab').textContent = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+}
+
+async function generatePDF() {
+  const { jsPDF } = window.jspdf;
+
+  // Isi area cetak
+  document.getElementById('out_nama').innerText = document.getElementById('in_nama').value || '-';
+  document.getElementById('out_tgl_lahir').innerText = formatTanggal(document.getElementById('in_tgl_lahir').value);
+  document.getElementById('out_tgl_periksa').innerText = formatTanggal(document.getElementById('in_tgl_periksa').value);
+  document.getElementById('out_hasil').innerText = document.getElementById('in_hasil').value;
+  document.getElementById('out_petugas').innerText = document.getElementById('in_petugas').value || '....................';
+  document.getElementById('out_pjawab').innerText = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+
+  // Logo dari src input
+  const logoSrc = document.getElementById('in_logo_src').value.trim();
+  if (logoSrc) {
+    document.getElementById('out_logo').src = logoSrc;
+  }
+
+  // QR / TTD
+  if (qrDataURL) {
+    const el = document.getElementById('out_qr_img');
+    el.src = qrDataURL;
+    el.style.display = 'block';
+  }
+
+  document.getElementById('loading').classList.add('show');
+
+  setTimeout(async () => {
+    try {
+      const element = document.getElementById('surat-area');
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.pdf`);
+    } catch(e) {
+      alert('Gagal membuat PDF: ' + e.message);
     }
-
-    function formatTanggal(tanggal) {
-        if (!tanggal) return "-";
-        const d = new Date(tanggal);
-        return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
-    }
-
-    // Fungsi membaca file gambar
-    function readFile(fileElement) {
-        return new Promise((resolve) => {
-            const file = fileElement.files[0];
-            if (!file) resolve(null);
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function generatePDF() {
-        const { jsPDF } = window.jspdf;
-
-        // 1. Ambil Data Gambar
-        const logoData = await readFile(document.getElementById('in_logo'));
-        const qrData = await readFile(document.getElementById('in_qr'));
-
-        // 2. Isi Data ke Template
-        document.getElementById('out_nama').innerText = document.getElementById('in_nama').value || "-";
-        document.getElementById('out_tgl_lahir').innerText = formatTanggal(document.getElementById('in_tgl_lahir').value);
-        document.getElementById('out_tgl_periksa').innerText = formatTanggal(document.getElementById('in_tgl_periksa').value);
-        document.getElementById('out_hasil').innerText = document.getElementById('in_hasil').value;
-        document.getElementById('out_petugas').innerText = document.getElementById('in_petugas').value || "....................";
-
-        if(logoData) document.getElementById('out_logo').src = logoData;
-        if(qrData) {
-            const qImg = document.getElementById('out_qr_img');
-            qImg.src = qrData;
-            qImg.style.display = "block";
-        }
-
-        // 3. Proses Rendering
-        const element = document.getElementById('surat-area');
-        
-        // Menunggu sebentar agar gambar ter-load sempurna di memori
-        setTimeout(async () => {
-            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/png');
-            
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.pdf`);
-        }, 500);
-    }
+    document.getElementById('loading').classList.remove('show');
+  }, 500);
+}
 </script>
-
 </body>
 </html>
