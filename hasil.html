@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pembuat PDF Hasil Radiologi</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<title>Pembuat Hasil Radiologi</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -22,7 +21,7 @@ body {
 
 .app-wrapper {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 350px 1fr;
   gap: 24px;
   max-width: 1180px;
   width: 100%;
@@ -105,7 +104,7 @@ body {
 
 .field textarea {
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
   line-height: 1.6;
 }
 
@@ -167,7 +166,7 @@ body {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.09);
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .preview-bar {
@@ -180,8 +179,10 @@ body {
 .d-r { background: #fc635d; } .d-y { background: #fdbc40; } .d-g { background: #34c749; }
 .preview-bar span { font-size: 11px; color: #94a3b8; font-weight: 500; margin-left: 6px; }
 
-.preview-body { padding: 30px; }
-
+.preview-body { 
+  padding: 30px; 
+  min-width: 600px; /* Menjaga tata letak dokumen agar tidak rusak di layar sangat kecil */
+}
 
 .header {
   display: flex;
@@ -194,6 +195,7 @@ body {
   width: 100px;
   height: auto;
   margin-right: 20px;
+  object-fit: contain;
 }
 .header-text { text-align: center; flex-grow: 1; }
 .header-text h2 { margin: 0; font-size: 18pt; font-family: Arial, sans-serif; }
@@ -210,7 +212,7 @@ body {
   white-space: pre-wrap;
   font-size: 11pt;
   font-family: Arial, sans-serif;
-  color: #555;
+  color: #333;
 }
 
 .footer-sign {
@@ -231,16 +233,6 @@ body {
 }
 .qr-preview-img { width: 100px; height: 100px; object-fit: contain; display: none; }
 
-/* LOGO PLACEHOLDER DI PREVIEW */
-.logo-preview-wrap {
-  width: 100px; height: 60px;
-  margin-right: 20px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  border: 1.5px dashed #ddd; background: #fafafa; color: #bbb; font-size: 11px;
-}
-.logo-preview-wrap img { width: 100px; height: 60px; object-fit: contain; display: none; }
-
-
 #surat-area {
   width: 210mm;
   min-height: 297mm;
@@ -256,12 +248,12 @@ body {
 #surat-area .header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
 #surat-area .logo-img { width: 100px; height: auto; margin-right: 20px; }
 #surat-area .header-text { text-align: center; flex-grow: 1; }
-#surat-area .header-text h2 { margin: 0; font-size: 18pt; }
+#surat-area .header-text h2 { margin: 0; font-size: 18pt; font-weight: bold; }
 #surat-area .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
-#surat-area .info-table td { padding: 5px 0; vertical-align: top; }
+#surat-area .info-table td { padding: 5px 0; vertical-align: top; font-size: 11pt; }
 #surat-area .hasil-box { border: 1px solid black; min-height: 250px; padding: 15px; margin-top: 10px; white-space: pre-wrap; font-size: 11pt; }
-#surat-area .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; }
-#surat-area .qr-code { width: 100px; height: 100px; object-fit: contain; }
+#surat-area .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; font-size: 11pt; }
+#surat-area .qr-code { width: 100px; height: 100px; object-fit: contain; margin: 0 auto; }
 
 /* Loading */
 .loading-overlay {
@@ -283,18 +275,28 @@ body {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-overlay p { font-size: 13px; color: #475569; font-weight: 500; }
+
+/* ── RESPONSIVE DESIGN ── */
+@media (max-width: 900px) {
+  .app-wrapper {
+    grid-template-columns: 1fr;
+  }
+  .form-panel {
+    position: relative;
+    top: 0;
+  }
+}
 </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
-  <p>harap tunggu...</p>
+  <p>memproses gambar...</p>
 </div>
 
 <div class="app-wrapper">
 
-  <!-- ── FORM INPUT ── -->
   <div class="form-panel">
     <div class="form-header">
       <h2>Pembuat Hasil Radiologi</h2>
@@ -302,20 +304,10 @@ body {
     </div>
     <div class="form-body">
 
-      <div class="section-title">Logo Rumah Sakit</div>
-      <div class="field">
-        <label>URL / Path Logo <span style="color:#94a3b8;font-weight:400;">(ganti src sesuai file logo Anda)</span></label>
-        <input type="text" id="LOGOTNI.png" placeholder="Contoh: logo_rstniad.png atau https://..." oninput="updateLogoSrc(this.value)">
-        <div style="margin-top:8px; display:flex; align-items:center; gap:10px;">
-          <img id="LOGOTNI.png" src="LOGOTNI.png" alt="LOGOTNI.png" style="width:60px;height:60px;object-fit:contain;border:1px solid #e2e8f0;border-radius:6px;display:none;">
-          <p style="font-size:11px;color:#94a3b8;line-height:1.5;">Ubah nilai <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;">src</code> pada tag <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px;font-size:11px;">&lt;img id="out_logo"&gt;</code> di kode HTML untuk mengganti logo secara permanen.</p>
-        </div>
-      </div>
-
       <div class="section-title">Data Pasien</div>
       <div class="field">
         <label>Nama Pasien</label>
-        <input type="text" id="in_nama" placeholder="Contoh: Budi Santoso" oninput="updatePreview()">
+        <input type="text" id="in_nama" oninput="updatePreview()">
       </div>
       <div class="field-row">
         <div class="field">
@@ -332,7 +324,7 @@ body {
       <div class="section-title">Hasil & Penandatangan</div>
       <div class="field">
         <label>Hasil Pemeriksaan</label>
-        <textarea id="in_hasil" placeholder="Ketik hasil diagnosa secara detail..." oninput="updatePreview()"></textarea>
+        <textarea id="in_hasil" oninput="updatePreview()"></textarea>
       </div>
       <div class="field">
         <label>Nama Penanggung Jawab</label>
@@ -340,7 +332,7 @@ body {
       </div>
       <div class="field">
         <label>Petugas Radiologi</label>
-        <input type="text" id="in_petugas" placeholder="Nama petugas pemeriksa" oninput="updatePreview()">
+        <input type="text" id="in_petugas" oninput="updatePreview()">
       </div>
       <div class="field">
         <label>Upload Tanda Tangan / QR </label>
@@ -352,16 +344,15 @@ body {
         </div>
       </div>
 
-      <button class="print-btn" onclick="generatePDF()">
+      <button class="print-btn" onclick="generateImage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/>
+          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
         </svg>
-        Cetak ke PDF
+        Unduh Hasil (Gambar)
       </button>
     </div>
   </div>
 
-  <!-- ── PRATINJAU DOKUMEN ── -->
   <div class="preview-panel">
     <div class="preview-bar">
       <div class="dot d-r"></div><div class="dot d-y"></div><div class="dot d-g"></div>
@@ -369,11 +360,8 @@ body {
     </div>
     <div class="preview-body">
 
-      <!-- FORMAT DOKUMEN SAMA PERSIS DENGAN ASLI -->
       <div class="header">
-        <!-- GANTI src DI BAWAH INI UNTUK MENGUBAH LOGO -->
-        <img id="LOGOTNI.png" class="LOGOTNI.png" src="LOGOTNI.png" alt="LOGOTNI.png" style="display:none;">
-        <div class="logo-preview-wrap" id="prev-logo-wrap"><span id="prev-logo-ph">Logo RS</span></div>
+        <img id="prev_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
         <div class="header-text">
           <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
           <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
@@ -396,7 +384,7 @@ body {
       </table>
 
       <p style="font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;">HASIL PEMERIKSAAN :</p>
-      <div class="hasil-box" id="prev_hasil">Hasil pemeriksaan akan tampil di sini...</div>
+      <div class="hasil-box" id="prev_hasil"></div>
 
       <div class="footer-sign">
         <div>
@@ -422,15 +410,9 @@ body {
 
 </div>
 
-<!-- ── AREA CETAK TERSEMBUNYI — FORMAT ASLI PERSIS ── -->
 <div id="surat-area">
   <div class="header">
-    <!-- =============================================
-         GANTI src DI BAWAH INI UNTUK MENGUBAH LOGO
-         Contoh: src="logo_rstniad.png"
-                 src="https://example.com/logo.png"
-         ============================================= -->
-    <img id="LOGOTNI.png" class="LOGOTNI.png" src="LOGOTNI.png" alt="LOGOTNI.png">
+    <img id="out_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
     <div class="header-text">
       <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
       <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
@@ -455,7 +437,7 @@ body {
   <div class="footer-sign">
     <div>
       <p>Penanggung Jawab,</p>
-      <div style="height: 110px;">
+      <div style="height: 110px; display:flex; align-items:center; justify-content:center;">
         <img id="out_qr_img" class="qr-code" style="display:none;">
       </div>
       <strong id="out_pjawab">dr. Tharina L, Sp. Rad</strong>
@@ -471,26 +453,6 @@ body {
 
 <script>
 let qrDataURL = null;
-
-function updateLogoSrc(src) {
-  // Update pratinjau logo
-  const prev = document.getElementById('prev_logo');
-  const wrap = document.getElementById('prev-logo-wrap');
-  const ph   = document.getElementById('prev-logo-ph');
-  if (src.trim()) {
-    prev.src = src.trim();
-    prev.style.display = 'block';
-    wrap.style.display = 'none';
-    // preview kecil di form
-    const fp = document.getElementById('logo-src-preview');
-    fp.src = src.trim();
-    fp.style.display = 'block';
-  } else {
-    prev.style.display = 'none';
-    wrap.style.display = 'flex';
-    document.getElementById('logo-src-preview').style.display = 'none';
-  }
-}
 
 function handleUpload(input, previewId, iconId, textId, callback) {
   const file = input.files[0];
@@ -530,16 +492,16 @@ function updatePreview() {
   document.getElementById('prev_nama').textContent = document.getElementById('in_nama').value || '—';
   document.getElementById('prev_tgl_lahir').textContent = formatTanggal(document.getElementById('in_tgl_lahir').value);
   document.getElementById('prev_tgl_periksa').textContent = formatTanggal(document.getElementById('in_tgl_periksa').value);
+  
   const hasil = document.getElementById('in_hasil').value;
-  document.getElementById('prev_hasil').textContent = hasil || 'Hasil pemeriksaan akan tampil di sini...';
+  document.getElementById('prev_hasil').textContent = hasil;
+  
   document.getElementById('prev_petugas').textContent = document.getElementById('in_petugas').value || '.......................';
   document.getElementById('prev_pjawab').textContent = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
 }
 
-async function generatePDF() {
-  const { jsPDF } = window.jspdf;
-
-  // Isi area cetak
+async function generateImage() {
+  // Mengisi area cetak tersembunyi
   document.getElementById('out_nama').innerText = document.getElementById('in_nama').value || '-';
   document.getElementById('out_tgl_lahir').innerText = formatTanggal(document.getElementById('in_tgl_lahir').value);
   document.getElementById('out_tgl_periksa').innerText = formatTanggal(document.getElementById('in_tgl_periksa').value);
@@ -547,13 +509,6 @@ async function generatePDF() {
   document.getElementById('out_petugas').innerText = document.getElementById('in_petugas').value || '....................';
   document.getElementById('out_pjawab').innerText = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
 
-  // Logo dari src input
-  const logoSrc = document.getElementById('in_logo_src').value.trim();
-  if (logoSrc) {
-    document.getElementById('out_logo').src = logoSrc;
-  }
-
-  // QR / TTD
   if (qrDataURL) {
     const el = document.getElementById('out_qr_img');
     el.src = qrDataURL;
@@ -565,15 +520,20 @@ async function generatePDF() {
   setTimeout(async () => {
     try {
       const element = document.getElementById('surat-area');
+      // Melakukan render HTML menjadi Canvas
       const canvas = await html2canvas(element, { scale: 2, useCORS: true, logging: false });
+      
+      // Mengubah Canvas menjadi data URL berformat PNG
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.pdf`);
+      
+      // Memicu proses unduhan gambar secara otomatis
+      const link = document.createElement('a');
+      link.download = `Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.png`;
+      link.href = imgData;
+      link.click();
+      
     } catch(e) {
-      alert('Gagal membuat PDF: ' + e.message);
+      alert('Gagal membuat gambar: ' + e.message);
     }
     document.getElementById('loading').classList.remove('show');
   }, 500);
