@@ -335,7 +335,6 @@ body {
   text-align: center;
   font-weight: bold;
   font-size: 11pt;
-  border-bottom: 1px solid #000;
   padding: 5px 0;
   margin-bottom: 10px;
 }
@@ -429,7 +428,7 @@ body {
 #surat-area2 .f2-header-text .f2-line1 { font-size: 10pt; font-weight: normal; margin-bottom: 2px; }
 #surat-area2 .f2-header-text .f2-line2 { font-size: 14pt; font-weight: bold; }
 #surat-area2 .f2-header-text .f2-line3 { font-size: 9pt; }
-#surat-area2 .f2-title-bar { text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid #000; padding: 5px 0; margin-bottom: 10px; }
+#surat-area2 .f2-title-bar { text-align: center; font-weight: bold; font-size: 11pt; padding: 5px 0; margin-bottom: 10px; }
 #surat-area2 .f2-info { display: flex; justify-content: space-between; font-size: 10pt; margin-bottom: 10px; }
 #surat-area2 .f2-body { min-height: 200px; white-space: pre-wrap; font-size: 11pt; margin-bottom: 10px; }
 #surat-area2 .f2-footer { display: flex; justify-content: flex-end; margin-top: 30px; text-align: center; font-size: 10pt; }
@@ -615,7 +614,8 @@ body {
             <div>Nama/Umur &nbsp;: <span id="f2_prev_nama">—</span>/<span id="f2_prev_umur">—</span></div>
             <div>Tgl Pemeriksaan : <span id="f2_prev_tgl">—</span></div>
           </div>
-          <div class="f2-body" id="f2_prev_hasil"></div>
+          <p style="font-family:Arial,sans-serif;font-size:10pt;margin-bottom:4px;">Kepada Ts.</p>
+          <div class="f2-body" id="f2_prev_hasil" style="font-weight:bold;"></div>
           <div class="f2-footer">
             <div class="f2-sign-block">
               <p>Salam sejawat,</p>
@@ -693,7 +693,8 @@ body {
     <div>Nama/Umur &nbsp;: <span id="out2_nama"></span>/<span id="out2_umur"></span></div>
     <div>Tgl Pemeriksaan : <span id="out2_tgl"></span></div>
   </div>
-  <div class="f2-body" id="out2_hasil"></div>
+  <p style="font-size:11pt;margin-bottom:4px;">Kepada Ts.</p>
+  <div class="f2-body" id="out2_hasil" style="font-weight:bold;"></div>
   <div class="f2-footer">
     <div class="f2-sign-block">
       <p>Salam sejawat,</p>
