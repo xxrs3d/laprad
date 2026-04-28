@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pembuat Hasil Radiologi</title>
-<!-- html2canvas untuk rendering, jsPDF untuk output PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -143,6 +142,54 @@ body {
   display: inline-block; text-decoration: underline;
 }
 
+/* ── FORMAT SWITCH ── */
+.format-switch-section {
+  margin-bottom: 14px;
+}
+
+.format-switch-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.switch-container {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.switch-btn {
+  flex: 1;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #64748b;
+  background: transparent;
+  transition: all 0.2s;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.switch-btn.active {
+  background: #1a3a6c;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(26,58,108,0.25);
+}
+
+.switch-btn:not(.active):hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
 .print-btn {
   width: 100%;
   padding: 13px;
@@ -186,22 +233,27 @@ body {
   min-width: 600px;
 }
 
-.header {
+/* ── FORMAT 1 PREVIEW ── */
+#preview-format1 { display: block; }
+#preview-format2 { display: none; }
+
+/* FORMAT 1 */
+.f1-header {
   display: flex;
   align-items: center;
   border-bottom: 3px double black;
   padding-bottom: 10px;
   margin-bottom: 20px;
 }
-.logo-img {
+.f1-logo-img {
   width: 100px;
   height: auto;
   margin-right: 20px;
   object-fit: contain;
 }
-.header-text { text-align: center; flex-grow: 1; }
-.header-text h2 { margin: 0; font-size: 18pt; font-family: Arial, sans-serif; }
-.header-text p { margin: 0; font-size: 10pt; font-family: Arial, sans-serif; }
+.f1-header-text { text-align: center; flex-grow: 1; }
+.f1-header-text h2 { margin: 0; font-size: 18pt; font-family: Arial, sans-serif; }
+.f1-header-text p { margin: 0; font-size: 10pt; font-family: Arial, sans-serif; }
 
 .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
 .info-table td { padding: 5px 0; vertical-align: top; font-family: Arial, sans-serif; font-size: 10pt; }
@@ -235,11 +287,98 @@ body {
 }
 .qr-preview-img { width: 100px; height: 100px; object-fit: contain; display: none; }
 
-/* Elemen cetak tersembunyi – ukuran A4 persis */
+/* ── FORMAT 2 PREVIEW ── */
+.f2-wrap {
+  font-family: Arial, sans-serif;
+  font-size: 11pt;
+  color: #000;
+}
+
+.f2-header {
+  text-align: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.f2-logo {
+  width: 80px;
+  height: auto;
+  object-fit: contain;
+  margin-right: 10px;
+}
+
+.f2-header-text {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.f2-header-text .f2-line1 {
+  font-size: 10pt;
+  font-weight: normal;
+  margin-bottom: 2px;
+}
+
+.f2-header-text .f2-line2 {
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.f2-header-text .f2-line3 {
+  font-size: 9pt;
+  font-weight: normal;
+}
+
+.f2-title-bar {
+  text-align: center;
+  font-weight: bold;
+  font-size: 11pt;
+  border-bottom: 1px solid #000;
+  padding: 5px 0;
+  margin-bottom: 10px;
+}
+
+.f2-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 10pt;
+}
+
+.f2-body {
+  min-height: 200px;
+  padding: 5px 0;
+  white-space: pre-wrap;
+  font-size: 11pt;
+  margin-bottom: 10px;
+}
+
+.f2-footer {
+  display: flex;
+  justify-content: flex-end;
+  text-align: center;
+  margin-top: 30px;
+  font-size: 10pt;
+}
+
+.f2-sign-block {
+  text-align: center;
+}
+
+.f2-sign-space {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hidden print areas */
 #surat-area {
   width: 210mm;
-  height: 297mm;                /* tinggi tetap A4 */
-  box-sizing: border-box;       /* padding termasuk dalam ukuran */
+  height: 297mm;
+  box-sizing: border-box;
   padding: 20mm;
   background: white;
   position: absolute;
@@ -248,17 +387,55 @@ body {
   color: black;
   line-height: 1.5;
   font-family: Arial, sans-serif;
-  overflow: hidden;            /* potong jika konten terlalu panjang */
+  overflow: hidden;
 }
-#surat-area .header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
-#surat-area .logo-img { width: 100px; height: auto; margin-right: 20px; }
-#surat-area .header-text { text-align: center; flex-grow: 1; }
-#surat-area .header-text h2 { margin: 0; font-size: 18pt; font-weight: bold; }
+
+/* FORMAT 1 print */
+#surat-area .f1-header { display: flex; align-items: center; border-bottom: 3px double black; padding-bottom: 10px; margin-bottom: 20px; }
+#surat-area .f1-logo-img { width: 100px; height: auto; margin-right: 20px; }
+#surat-area .f1-header-text { text-align: center; flex-grow: 1; }
+#surat-area .f1-header-text h2 { margin: 0; font-size: 18pt; font-weight: bold; }
 #surat-area .info-table { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
 #surat-area .info-table td { padding: 5px 0; vertical-align: top; font-size: 11pt; }
 #surat-area .hasil-box { border: 1px solid black; min-height: 250px; padding: 15px; margin-top: 10px; white-space: pre-wrap; font-size: 11pt; }
 #surat-area .footer-sign { display: flex; justify-content: space-between; margin-top: 50px; text-align: center; font-size: 11pt; }
 #surat-area .qr-code { width: 100px; height: 100px; object-fit: contain; margin: 0 auto; }
+
+/* FORMAT 2 print */
+#surat-area2 {
+  width: 210mm;
+  height: 297mm;
+  box-sizing: border-box;
+  padding: 15mm 20mm;
+  background: white;
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  color: black;
+  line-height: 1.5;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+#surat-area2 .f2-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid #000;
+  padding-bottom: 8px;
+  margin-bottom: 0;
+}
+#surat-area2 .f2-logo { width: 80px; height: auto; margin-right: 10px; }
+#surat-area2 .f2-header-text { flex-grow: 1; text-align: center; }
+#surat-area2 .f2-header-text .f2-line1 { font-size: 10pt; font-weight: normal; margin-bottom: 2px; }
+#surat-area2 .f2-header-text .f2-line2 { font-size: 14pt; font-weight: bold; }
+#surat-area2 .f2-header-text .f2-line3 { font-size: 9pt; }
+#surat-area2 .f2-title-bar { text-align: center; font-weight: bold; font-size: 11pt; border-bottom: 1px solid #000; padding: 5px 0; margin-bottom: 10px; }
+#surat-area2 .f2-info { display: flex; justify-content: space-between; font-size: 10pt; margin-bottom: 10px; }
+#surat-area2 .f2-body { min-height: 200px; white-space: pre-wrap; font-size: 11pt; margin-bottom: 10px; }
+#surat-area2 .f2-footer { display: flex; justify-content: flex-end; margin-top: 30px; text-align: center; font-size: 10pt; }
+#surat-area2 .f2-sign-block { text-align: center; }
+#surat-area2 .f2-sign-space { height: 90px; display: flex; align-items: center; justify-content: center; }
+#surat-area2 .qr-code { width: 90px; height: 90px; object-fit: contain; }
 
 /* Loading overlay */
 .loading-overlay {
@@ -281,7 +458,6 @@ body {
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-overlay p { font-size: 13px; color: #475569; font-weight: 500; }
 
-/* ── RESPONSIVE ── */
 @media (max-width: 900px) {
   .app-wrapper { grid-template-columns: 1fr; }
   .form-panel { position: relative; top: 0; }
@@ -304,6 +480,19 @@ body {
     </div>
     <div class="form-body">
 
+      <!-- FORMAT SWITCH -->
+      <div class="format-switch-section">
+        <span class="format-switch-label">Pilih Format Dokumen</span>
+        <div class="switch-container">
+          <button class="switch-btn active" id="btn-fmt1" onclick="switchFormat(1)">
+            Format 1<br><small style="opacity:.7">RS TNI AD</small>
+          </button>
+          <button class="switch-btn" id="btn-fmt2" onclick="switchFormat(2)">
+            Format 2<br><small style="opacity:.7">Datasemen Kes.</small>
+          </button>
+        </div>
+      </div>
+
       <div class="section-title">Data Pasien</div>
       <div class="field">
         <label>Nama Pasien</label>
@@ -321,6 +510,8 @@ body {
         </div>
       </div>
 
+
+
       <div class="section-title">Hasil & Penandatangan</div>
       <div class="field">
         <label>Hasil Pemeriksaan</label>
@@ -330,7 +521,7 @@ body {
         <label>Nama Penanggung Jawab</label>
         <input type="text" id="in_pjawab" value="dr. Tharina L, Sp. Rad" oninput="updatePreview()">
       </div>
-      <div class="field">
+      <div class="field" id="field-petugas">
         <label>Petugas Radiologi</label>
         <input type="text" id="in_petugas" oninput="updatePreview()">
       </div>
@@ -360,47 +551,82 @@ body {
     </div>
     <div class="preview-body">
 
-      <div class="header">
-        <img id="prev_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
-        <div class="header-text">
-          <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
-          <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
-          0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
+      <!-- ===== PREVIEW FORMAT 1 ===== -->
+      <div id="preview-format1">
+        <div class="f1-header">
+          <img id="prev_logo" class="f1-logo-img" src="LOGOTNI.png" alt="Logo RS">
+          <div class="f1-header-text">
+            <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
+            <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
+            0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
+          </div>
+        </div>
+
+        <table class="info-table">
+          <tr>
+            <td width="20%">Nama Pasien</td>
+            <td width="30%">: <strong id="prev_nama">—</strong></td>
+            <td width="25%">Tgl Pemeriksaan</td>
+            <td width="25%">: <span id="prev_tgl_periksa">—</span></td>
+          </tr>
+          <tr>
+            <td>Tanggal Lahir</td>
+            <td>: <span id="prev_tgl_lahir">—</span></td>
+            <td></td><td></td>
+          </tr>
+        </table>
+
+        <p style="font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;">HASIL PEMERIKSAAN :</p>
+        <div class="hasil-box" id="prev_hasil"></div>
+
+        <div class="footer-sign">
+          <div>
+            <p>Penanggung Jawab,</p>
+            <div style="height:110px; display:flex; align-items:center; justify-content:center;">
+              <div class="qr-placeholder" id="prev-qr-wrap">
+                <img class="qr-preview-img" id="prev_qr" src="">
+                <span id="prev-qr-ph">TTD / QR</span>
+              </div>
+            </div>
+            <strong id="prev_pjawab">dr. Tharina L, Sp. Rad</strong>
+          </div>
+          <div>
+            <p>Petugas Radiologi,</p>
+            <div style="margin-top:110px;">
+              <strong id="prev_petugas">.......................</strong>
+            </div>
+          </div>
         </div>
       </div>
 
-      <table class="info-table">
-        <tr>
-          <td width="20%">Nama Pasien</td>
-          <td width="30%">: <strong id="prev_nama">—</strong></td>
-          <td width="25%">Tgl Pemeriksaan</td>
-          <td width="25%">: <span id="prev_tgl_periksa">—</span></td>
-        </tr>
-        <tr>
-          <td>Tanggal Lahir</td>
-          <td>: <span id="prev_tgl_lahir">—</span></td>
-          <td></td><td></td>
-        </tr>
-      </table>
-
-      <p style="font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;">HASIL PEMERIKSAAN :</p>
-      <div class="hasil-box" id="prev_hasil"></div>
-
-      <div class="footer-sign">
-        <div>
-          <p>Penanggung Jawab,</p>
-          <div style="height:110px; display:flex; align-items:center; justify-content:center;">
-            <div class="qr-placeholder" id="prev-qr-wrap">
-              <img class="qr-preview-img" id="prev_qr" src="">
-              <span id="prev-qr-ph">TTD / QR</span>
+      <!-- ===== PREVIEW FORMAT 2 ===== -->
+      <div id="preview-format2">
+        <div class="f2-wrap">
+          <div class="f2-header">
+            <img class="f2-logo" src="LOGOTNI.png" alt="Logo">
+            <div class="f2-header-text">
+              <div class="f2-line1">DATASEMEN KESEHATAN WILAYAH 12.14.02</div>
+              <div class="f2-line2">RUMAH SAKIT TK.IV 12.07703</div>
+              <div class="f2-line3">Jl. Diponegoro No. 55 Palangka Raya Telp. 0536 3220238</div>
             </div>
           </div>
-          <strong id="prev_pjawab">dr. Tharina L, Sp. Rad</strong>
-        </div>
-        <div>
-          <p>Petugas Radiologi,</p>
-          <div style="margin-top:110px;">
-            <strong id="prev_petugas">.......................</strong>
+          <div class="f2-title-bar">HASIL PEMERIKSAAN RADIOLOGI</div>
+          <div class="f2-info">
+            <div>Nama/Umur &nbsp;: <span id="f2_prev_nama">—</span>/<span id="f2_prev_umur">—</span></div>
+            <div>Tgl Pemeriksaan : <span id="f2_prev_tgl">—</span></div>
+          </div>
+          <div class="f2-body" id="f2_prev_hasil"></div>
+          <div class="f2-footer">
+            <div class="f2-sign-block">
+              <p>Salam sejawat,</p>
+              <div class="f2-sign-space">
+                <div class="qr-placeholder" id="f2-prev-qr-wrap" style="width:90px;height:90px;">
+                  <img class="qr-preview-img" id="f2_prev_qr" src="" style="width:90px;height:90px;">
+                  <span id="f2-prev-qr-ph" style="font-size:10px;">TTD</span>
+                </div>
+              </div>
+              <strong id="f2_prev_pjawab">dr. Tharina Lawei, Sp. Rad</strong>
+            </div>
           </div>
         </div>
       </div>
@@ -410,11 +636,11 @@ body {
 
 </div>
 
-<!-- Area tersembunyi untuk rendering PDF -->
+<!-- Area tersembunyi FORMAT 1 -->
 <div id="surat-area">
-  <div class="header">
-    <img id="out_logo" class="logo-img" src="LOGOTNI.png" alt="Logo RS">
-    <div class="header-text">
+  <div class="f1-header">
+    <img id="out_logo" class="f1-logo-img" src="LOGOTNI.png" alt="Logo RS">
+    <div class="f1-header-text">
       <h2>RUMAH SAKIT TNI AD PALANGKA RAYA</h2>
       <p>JL. DIPONEGORO NO. 55 P. RAYA, PALANGKA RAYA, KALIMANTAN TENGAH<br>
       0813-5185-3966 | E-Mail: rstpalangkaraya@gmail.com</p>
@@ -452,8 +678,47 @@ body {
   </div>
 </div>
 
+<!-- Area tersembunyi FORMAT 2 -->
+<div id="surat-area2">
+  <div class="f2-header">
+    <img class="f2-logo" src="LOGOTNI.png" alt="Logo">
+    <div class="f2-header-text">
+      <div class="f2-line1">DATASEMEN KESEHATAN WILAYAH 12.14.02</div>
+      <div class="f2-line2">RUMAH SAKIT TK.IV 12.07703</div>
+      <div class="f2-line3">Jl. Diponegoro No. 55 Palangka Raya Telp. 0536 3220238</div>
+    </div>
+  </div>
+  <div class="f2-title-bar">HASIL PEMERIKSAAN RADIOLOGI</div>
+  <div class="f2-info">
+    <div>Nama/Umur &nbsp;: <span id="out2_nama"></span>/<span id="out2_umur"></span></div>
+    <div>Tgl Pemeriksaan : <span id="out2_tgl"></span></div>
+  </div>
+  <div class="f2-body" id="out2_hasil"></div>
+  <div class="f2-footer">
+    <div class="f2-sign-block">
+      <p>Salam sejawat,</p>
+      <div class="f2-sign-space">
+        <img id="out2_qr_img" class="qr-code" style="display:none;">
+      </div>
+      <strong id="out2_pjawab">dr. Tharina Lawei, Sp. Rad</strong>
+    </div>
+  </div>
+</div>
+
 <script>
 let qrDataURL = null;
+let currentFormat = 1;
+
+function switchFormat(fmt) {
+  currentFormat = fmt;
+  document.getElementById('btn-fmt1').classList.toggle('active', fmt === 1);
+  document.getElementById('btn-fmt2').classList.toggle('active', fmt === 2);
+  document.getElementById('preview-format1').style.display = fmt === 1 ? 'block' : 'none';
+  document.getElementById('preview-format2').style.display = fmt === 2 ? 'block' : 'none';
+
+  document.getElementById('field-petugas').style.display = fmt === 1 ? 'block' : 'none';
+  updatePreview();
+}
 
 function handleUpload(input, previewId, iconId, textId, callback) {
   const file = input.files[0];
@@ -472,10 +737,16 @@ function handleUpload(input, previewId, iconId, textId, callback) {
 
 function updateQRPreview(data) {
   qrDataURL = data;
-  const img = document.getElementById('prev_qr');
-  img.src = data;
-  img.style.display = 'block';
+  // Format 1
+  const img1 = document.getElementById('prev_qr');
+  img1.src = data;
+  img1.style.display = 'block';
   document.getElementById('prev-qr-ph').style.display = 'none';
+  // Format 2
+  const img2 = document.getElementById('f2_prev_qr');
+  img2.src = data;
+  img2.style.display = 'block';
+  document.getElementById('f2-prev-qr-ph').style.display = 'none';
 }
 
 function setToday() {
@@ -489,64 +760,112 @@ function formatTanggal(val) {
   return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
-function updatePreview() {
-  document.getElementById('prev_nama').textContent = document.getElementById('in_nama').value || '—';
-  document.getElementById('prev_tgl_lahir').textContent = formatTanggal(document.getElementById('in_tgl_lahir').value);
-  document.getElementById('prev_tgl_periksa').textContent = formatTanggal(document.getElementById('in_tgl_periksa').value);
-  
-  const hasil = document.getElementById('in_hasil').value;
-  document.getElementById('prev_hasil').textContent = hasil;
-  
-  document.getElementById('prev_petugas').textContent = document.getElementById('in_petugas').value || '.......................';
-  document.getElementById('prev_pjawab').textContent = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+function hitungUmur(tglLahirVal) {
+  if (!tglLahirVal) return '—';
+  const lahir = new Date(tglLahirVal + 'T00:00:00');
+  const sekarang = new Date();
+  let tahun = sekarang.getFullYear() - lahir.getFullYear();
+  let bulan = sekarang.getMonth() - lahir.getMonth();
+  let hari = sekarang.getDate() - lahir.getDate();
+  if (hari < 0) { bulan--; }
+  if (bulan < 0) { tahun--; bulan += 12; }
+  if (tahun < 0) return '—';
+  if (tahun === 0 && bulan === 0) return `${sekarang.getDate() - lahir.getDate()} Hr`;
+  if (tahun === 0) return `${bulan} Bln`;
+  return `${tahun} Th`;
 }
 
-// Fungsi utama: generate PDF A4
-async function generatePDF() {
-  // Isi elemen cetak tersembunyi dengan data terkini
-  document.getElementById('out_nama').innerText = document.getElementById('in_nama').value || '-';
-  document.getElementById('out_tgl_lahir').innerText = formatTanggal(document.getElementById('in_tgl_lahir').value);
-  document.getElementById('out_tgl_periksa').innerText = formatTanggal(document.getElementById('in_tgl_periksa').value);
-  document.getElementById('out_hasil').innerText = document.getElementById('in_hasil').value;
-  document.getElementById('out_petugas').innerText = document.getElementById('in_petugas').value || '....................';
-  document.getElementById('out_pjawab').innerText = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+function formatTanggalShort(val) {
+  if (!val) return '—';
+  const d = new Date(val + 'T00:00:00');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
 
-  const qrImg = document.getElementById('out_qr_img');
-  if (qrDataURL) {
-    qrImg.src = qrDataURL;
-    qrImg.style.display = 'block';
+function updatePreview() {
+  const nama = document.getElementById('in_nama').value || '—';
+  const tglLahir = formatTanggal(document.getElementById('in_tgl_lahir').value);
+  const tglPeriksa = formatTanggal(document.getElementById('in_tgl_periksa').value);
+  const tglPeriksaShort = formatTanggalShort(document.getElementById('in_tgl_periksa').value);
+  const hasil = document.getElementById('in_hasil').value;
+  const petugas = document.getElementById('in_petugas').value || '.......................';
+  const pjawab1 = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+  const umur = hitungUmur(document.getElementById('in_tgl_lahir').value);
+
+  // Format 1
+  document.getElementById('prev_nama').textContent = nama;
+  document.getElementById('prev_tgl_lahir').textContent = tglLahir;
+  document.getElementById('prev_tgl_periksa').textContent = tglPeriksa;
+  document.getElementById('prev_hasil').textContent = hasil;
+  document.getElementById('prev_petugas').textContent = petugas;
+  document.getElementById('prev_pjawab').textContent = pjawab1;
+
+  // Format 2
+  document.getElementById('f2_prev_nama').textContent = nama === '—' ? '—' : nama;
+  document.getElementById('f2_prev_umur').textContent = umur;
+  document.getElementById('f2_prev_tgl').textContent = tglPeriksaShort;
+  document.getElementById('f2_prev_hasil').textContent = hasil;
+  document.getElementById('f2_prev_pjawab').textContent = pjawab1;
+}
+
+async function generatePDF() {
+  const nama = document.getElementById('in_nama').value || '-';
+  const tglLahir = formatTanggal(document.getElementById('in_tgl_lahir').value);
+  const tglPeriksa = formatTanggal(document.getElementById('in_tgl_periksa').value);
+  const tglPeriksaShort = formatTanggalShort(document.getElementById('in_tgl_periksa').value);
+  const hasil = document.getElementById('in_hasil').value;
+  const petugas = document.getElementById('in_petugas').value || '....................';
+  const pjawab = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+  const umur = hitungUmur(document.getElementById('in_tgl_lahir').value);
+
+  let targetEl;
+
+  if (currentFormat === 1) {
+    document.getElementById('out_nama').innerText = nama;
+    document.getElementById('out_tgl_lahir').innerText = tglLahir;
+    document.getElementById('out_tgl_periksa').innerText = tglPeriksa;
+    document.getElementById('out_hasil').innerText = hasil;
+    document.getElementById('out_petugas').innerText = petugas;
+    document.getElementById('out_pjawab').innerText = pjawab;
+
+    const qrImg = document.getElementById('out_qr_img');
+    if (qrDataURL) { qrImg.src = qrDataURL; qrImg.style.display = 'block'; }
+    else { qrImg.style.display = 'none'; }
+
+    targetEl = document.getElementById('surat-area');
   } else {
-    qrImg.style.display = 'none';
+    document.getElementById('out2_nama').innerText = nama;
+    document.getElementById('out2_umur').innerText = umur;
+    document.getElementById('out2_tgl').innerText = tglPeriksaShort;
+    document.getElementById('out2_hasil').innerText = hasil;
+    document.getElementById('out2_pjawab').innerText = pjawab;
+
+    const qrImg2 = document.getElementById('out2_qr_img');
+    if (qrDataURL) { qrImg2.src = qrDataURL; qrImg2.style.display = 'block'; }
+    else { qrImg2.style.display = 'none'; }
+
+    targetEl = document.getElementById('surat-area2');
   }
 
-  // Tampilkan loading
   document.getElementById('loading').classList.add('show');
 
-  // Beri waktu agar render selesai
   setTimeout(async () => {
     try {
-      const element = document.getElementById('surat-area');
-      // Render elemen A4 menjadi canvas dengan skala tinggi
-      const canvas = await html2canvas(element, {
-        scale: 2,              // hasil tajam
+      const canvas = await html2canvas(targetEl, {
+        scale: 2,
         useCORS: true,
         logging: false
       });
 
-      // Konversi ke data PNG (transparan jadi putih)
       const imgData = canvas.toDataURL('image/png');
-
-      // Buat PDF ukuran A4 (landscape=false)
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF('p', 'mm', 'a4');
-
-      // Tambahkan gambar tepat memenuhi halaman (210x297 mm)
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
 
-      // Simpan PDF
-      const namaFile = `Hasil_Radiologi_${document.getElementById('in_nama').value || 'Pasien'}.pdf`;
+      const namaFile = `Hasil_Radiologi_${nama}_Format${currentFormat}.pdf`;
       pdf.save(namaFile);
-
     } catch (e) {
       alert('Gagal membuat PDF: ' + e.message);
     }
