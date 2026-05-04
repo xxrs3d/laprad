@@ -1,1252 +1,647 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Viewer Generator — RST AD PKY</title>
-    <script src="https://cdn.jsdelivr.net/npm/daikon@1.1.2/dist/daikon-min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Viewer Generator — RST AD PKY</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&display=swap');
+:root {
+  --red:#e63946; --red-glow:rgba(230,57,70,0.18); --red-border:rgba(230,57,70,0.28);
+  --bg:#080808; --card:#111111; --surface:#181818; --line:#252525;
+  --text:#f0f0f0; --muted:#666; --muted2:#3a3a3a;
+  --green:#2ec27e; --yellow:#f5a623;
+  --mono:'Share Tech Mono',monospace; --sans:'Barlow Condensed',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--sans);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;background:var(--bg);background-image:radial-gradient(ellipse 70% 50% at 5% 50%,rgba(230,57,70,0.10) 0%,transparent 65%);padding:20px 16px 40px;}
+.container{background:var(--card);border:1px solid var(--red-border);border-radius:14px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 0 80px rgba(230,57,70,0.05),0 30px 80px rgba(0,0,0,0.8);}
 
-        :root {
-            --red: #e63946;
-            --red-glow: rgba(230,57,70,0.22);
-            --red-border: rgba(230,57,70,0.30);
-            --bg: #080808;
-            --card: #111111;
-            --surface: #181818;
-            --line: #252525;
-            --text: #f0f0f0;
-            --muted: #666;
-            --muted2: #444;
-            --green: #2ec27e;
-            --mono: 'Share Tech Mono', monospace;
-            --sans: 'Barlow Condensed', sans-serif;
-        }
+.header{padding:22px 22px 18px;border-bottom:1px solid var(--line);}
+.badge{font-family:var(--mono);font-size:9px;color:var(--red);background:rgba(230,57,70,0.1);border:1px solid var(--red-border);border-radius:4px;padding:3px 8px;letter-spacing:1.5px;display:inline-block;margin-bottom:8px;}
+.logo-title{font-size:28px;font-weight:900;color:var(--text);letter-spacing:2px;text-transform:uppercase;line-height:1;}
+.logo-title span{color:var(--red);}
+.logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:1px;margin-top:5px;}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+.tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);}
+.tab-btn{padding:12px 8px;background:transparent;color:var(--muted);border:none;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:6px;}
+.tab-btn.active{color:var(--red);border-bottom-color:var(--red);background:rgba(230,57,70,0.04);}
 
-        body {
-            font-family: var(--sans);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background: var(--bg);
-            background-image:
-                radial-gradient(ellipse 70% 50% at 5% 50%, rgba(230,57,70,0.12) 0%, transparent 65%);
-            padding: 24px 16px 40px;
-        }
+.tab-panel{display:none;padding:20px 22px;}
+.tab-panel.active{display:block;}
 
-        .container {
-            background: var(--card);
-            border: 1px solid var(--red-border);
-            border-radius: 14px;
-            width: 100%;
-            max-width: 460px;
-            overflow: hidden;
-            box-shadow: 0 0 80px rgba(230,57,70,0.06), 0 30px 80px rgba(0,0,0,0.8);
-        }
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.field input[type="text"]{width:100%;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:15px;font-weight:600;outline:none;transition:border-color 0.2s;}
+.field input[type="text"]:focus{border-color:var(--red);}
+.field input[type="text"]::placeholder{color:var(--muted2);}
 
-        /* HEADER */
-        .header {
-            padding: 24px 24px 0;
-            border-bottom: 1px solid var(--line);
-            padding-bottom: 20px;
-        }
-        .badge {
-            font-family: var(--mono);
-            font-size: 9px;
-            color: var(--red);
-            background: rgba(230,57,70,0.1);
-            border: 1px solid var(--red-border);
-            border-radius: 4px;
-            padding: 3px 8px;
-            letter-spacing: 1.5px;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-        .logo-title {
-            font-size: 30px;
-            font-weight: 900;
-            color: var(--text);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            line-height: 1;
-        }
-        .logo-title span { color: var(--red); }
-        .logo-sub {
-            font-size: 11px;
-            color: var(--muted);
-            font-family: var(--mono);
-            letter-spacing: 1px;
-            margin-top: 6px;
-        }
+.upload-zone{border:1.5px dashed var(--line);border-radius:10px;padding:20px 14px;text-align:center;cursor:pointer;position:relative;margin-bottom:14px;transition:all 0.25s;background:var(--surface);}
+.upload-zone:hover{border-color:var(--red);background:var(--red-glow);}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:24px;margin-bottom:6px;}
+.upload-text{font-size:13px;font-weight:700;color:var(--text);}
+.upload-hint{font-size:10px;color:var(--muted);margin-top:3px;font-family:var(--mono);}
 
-        /* TABS */
-        .tabs {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-bottom: 1px solid var(--line);
-        }
-        .tab-btn {
-            padding: 13px 10px;
-            background: transparent;
-            color: var(--muted);
-            border: none;
-            font-family: var(--sans);
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            border-bottom: 2px solid transparent;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-        }
-        .tab-btn.active {
-            color: var(--red);
-            border-bottom-color: var(--red);
-            background: rgba(230,57,70,0.04);
-        }
-        .tab-btn svg { width: 15px; height: 15px; }
+/* FILE LIST */
+.file-list-wrap{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px;display:none;}
+.file-list-wrap.visible{display:block;}
+.file-list-header{padding:7px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.file-list-header span{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);}
+.clear-btn{font-size:10px;color:var(--red);background:none;border:none;cursor:pointer;font-family:var(--mono);}
+.file-list{overflow-y:auto;max-height:130px;padding:5px;}
+.file-list::-webkit-scrollbar{width:3px;}
+.file-list::-webkit-scrollbar-thumb{background:var(--muted2);}
+.f-item{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:5px;font-size:12px;color:var(--text);}
+.f-item:nth-child(odd){background:rgba(255,255,255,0.02);}
+.f-num{font-family:var(--mono);font-size:10px;color:var(--red);min-width:28px;flex-shrink:0;}
+.f-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.f-status{flex-shrink:0;font-family:var(--mono);font-size:10px;}
+.f-status.ok{color:var(--green);}
+.f-status.err{color:var(--red);}
+.f-status.wait{color:var(--muted);}
 
-        /* PANELS */
-        .tab-panel { display: none; padding: 22px 24px; }
-        .tab-panel.active { display: block; }
+/* STATUS */
+.status-area{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:none;}
+.status-area.visible{display:block;}
+.status-text{font-family:var(--mono);font-size:11px;color:var(--green);margin-bottom:6px;word-break:break-all;}
+.progress-bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--red),#ff6b7a);width:0%;transition:width 0.15s;border-radius:2px;}
 
-        /* FORM */
-        .field { margin-bottom: 14px; }
-        .field label {
-            display: block;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
-        .field input[type="text"] {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 7px;
-            color: var(--text);
-            font-family: var(--sans);
-            font-size: 15px;
-            font-weight: 600;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .field input[type="text"]:focus { border-color: var(--red); }
-        .field input[type="text"]::placeholder { color: var(--muted2); }
-
-        /* UPLOAD ZONE */
-        .upload-zone {
-            border: 1.5px dashed var(--line);
-            border-radius: 10px;
-            padding: 22px 16px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            margin-bottom: 14px;
-            transition: all 0.25s;
-            background: var(--surface);
-        }
-        .upload-zone:hover {
-            border-color: var(--red);
-            background: var(--red-glow);
-        }
-        .upload-zone input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
-        .upload-icon { font-size: 24px; margin-bottom: 6px; }
-        .upload-text {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: 0.5px;
-        }
-        .upload-hint {
-            font-size: 10px;
-            color: var(--muted);
-            margin-top: 3px;
-            font-family: var(--mono);
-        }
-
-        /* IMAGE LIST */
-        .image-list-wrap {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 14px;
-            max-height: 0;
-            transition: max-height 0.3s ease;
-        }
-        .image-list-wrap.has-files { max-height: 140px; }
-        .image-list-header {
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--line);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .image-list-header span {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .clear-btn {
-            font-size: 10px;
-            color: var(--red);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-family: var(--mono);
-        }
-        .image-list {
-            overflow-y: auto;
-            max-height: 108px;
-            padding: 6px;
-        }
-        .image-list::-webkit-scrollbar { width: 4px; }
-        .image-list::-webkit-scrollbar-track { background: transparent; }
-        .image-list::-webkit-scrollbar-thumb { background: var(--muted2); border-radius: 2px; }
-        .img-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 8px;
-            border-radius: 5px;
-            margin-bottom: 3px;
-            font-size: 12px;
-            color: var(--text);
-        }
-        .img-item:nth-child(odd) { background: rgba(255,255,255,0.02); }
-        .img-num {
-            font-family: var(--mono);
-            font-size: 10px;
-            color: var(--red);
-            min-width: 24px;
-        }
-
-        /* STATUS AREA */
-        .status-area {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 14px;
-            min-height: 42px;
-            display: none;
-        }
-        .status-area.visible { display: block; }
-        .status-text {
-            font-family: var(--mono);
-            font-size: 11px;
-            color: var(--green);
-            margin-bottom: 6px;
-        }
-        .progress-bar {
-            height: 3px;
-            background: var(--line);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--red), #ff6b7a);
-            width: 0%;
-            transition: width 0.2s ease;
-            border-radius: 2px;
-        }
-
-        /* GENERATE BTN */
-        .generate-btn {
-            width: 100%;
-            padding: 13px 16px;
-            background: var(--red);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: var(--mono);
-            font-size: 12px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .generate-btn:hover:not(:disabled) {
-            background: #ff4d5b;
-            box-shadow: 0 4px 20px rgba(230,57,70,0.4);
-            transform: translateY(-1px);
-        }
-        .generate-btn:active:not(:disabled) { transform: translateY(0); }
-        .generate-btn:disabled {
-            background: var(--muted2);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-    </style>
+.generate-btn{width:100%;padding:13px 16px;background:var(--red);color:white;border:none;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
+.generate-btn:hover:not(:disabled){background:#ff4d5b;box-shadow:0 4px 20px rgba(230,57,70,0.35);transform:translateY(-1px);}
+.generate-btn:active:not(:disabled){transform:translateY(0);}
+.generate-btn:disabled{background:var(--muted2);cursor:not-allowed;transform:none;box-shadow:none;}
+</style>
 </head>
 <body>
-
 <div class="container">
-    <div class="header">
-        <div class="badge">RST AD PKY — RADIOLOGI</div>
-        <div class="logo-title"><span>3D</span> VIEWER GEN</div>
-        <div class="logo-sub">DICOM &amp; STL OPTIMIZED OUTPUT</div>
+  <div class="header">
+    <div class="badge">RST AD PKY — RADIOLOGI</div>
+    <div class="logo-title"><span>3D</span> VIEWER GEN</div>
+    <div class="logo-sub">DICOM · STL · IMAGE SEQUENCE</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dcm',this)">🩻 DICOM Viewer</button>
+    <button class="tab-btn" onclick="switchTab('stl',this)">🧊 3D STL</button>
+  </div>
+
+  <!-- ===== TAB DICOM ===== -->
+  <div class="tab-panel active" id="tab-dcm">
+    <div class="field">
+      <label>Nama Pasien</label>
+      <input type="text" id="pNameDcm" placeholder="Masukkan nama pasien">
     </div>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('stl', this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-            Model 3D
-        </button>
-        <button class="tab-btn" onclick="switchTab('img', this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            DICOM Seq
-        </button>
+    <div class="upload-zone">
+      <input type="file" id="dcmInput" accept=".dcm" multiple onchange="handleDcm(this)">
+      <div class="upload-icon">🩻</div>
+      <div class="upload-text">Pilih file .dcm</div>
+      <div class="upload-hint">Pilih semua slice sekaligus — otomatis diurutkan</div>
     </div>
 
-    <!-- TAB STL -->
-    <div class="tab-panel active" id="tab-stl">
-        <div class="field">
-            <label>Nama Pasien</label>
-            <input type="text" id="pName" placeholder="Masukkan nama pasien">
-        </div>
-        <div class="upload-zone" id="stlZone">
-            <input type="file" id="stlInput" accept=".stl" onchange="handleSTLFile(this)">
-            <div class="upload-icon">🧊</div>
-            <div class="upload-text" id="stlLabel">Pilih atau seret file STL</div>
-            <div class="upload-hint">Format: .stl — Binary atau ASCII</div>
-        </div>
-        <div class="status-area" id="stlStatus">
-            <div class="status-text" id="stlStatusText">Memproses...</div>
-            <div class="progress-bar"><div class="progress-fill" id="stlProgressFill"></div></div>
-        </div>
-        <button class="generate-btn" onclick="generateSTL()" id="generateStlBtn">
-            <span>⚡</span> Buat 3D Viewer
-        </button>
+    <div class="file-list-wrap" id="dcmListWrap">
+      <div class="file-list-header">
+        <span id="dcmCount">0 file</span>
+        <button class="clear-btn" onclick="clearDcm()">✕ Hapus</button>
+      </div>
+      <div class="file-list" id="dcmList"></div>
     </div>
 
-    <!-- TAB IMAGE SEQUENCE -->
-    <div class="tab-panel" id="tab-img">
-        <div class="field">
-            <label>Nama Pasien</label>
-            <input type="text" id="pNameImg" placeholder="Masukkan nama pasien">
-        </div>
-        <div class="upload-zone">
-            <input type="file" id="imgInput" accept=".dcm" multiple onchange="handleImages(this)">
-            <div class="upload-icon">🩻</div>
-            <div class="upload-text">Pilih file DICOM (.dcm)</div>
-            <div class="upload-hint">Pilih beberapa file sekaligus — otomatis diurutkan</div>
-        </div>
-
-        <div class="image-list-wrap" id="imageListWrap">
-            <div class="image-list-header">
-                <span id="fileCount">0 file</span>
-                <button class="clear-btn" onclick="clearFiles()">✕ Hapus semua</button>
-            </div>
-            <div class="image-list" id="imageList"></div>
-        </div>
-
-        <div class="status-area" id="imgStatus">
-            <div class="status-text" id="imgStatusText">Memproses...</div>
-            <div class="progress-bar"><div class="progress-fill" id="imgProgressFill"></div></div>
-        </div>
-        <button class="generate-btn" onclick="generateImgSeq()" id="generateImgBtn">
-            <span>⚡</span> Buat DICOM Viewer
-        </button>
+    <div class="status-area" id="dcmStatus">
+      <div class="status-text" id="dcmStatusText">Memproses...</div>
+      <div class="progress-bar"><div class="progress-fill" id="dcmProgress"></div></div>
     </div>
+
+    <button class="generate-btn" id="dcmBtn" onclick="generateDcmViewer()">⚡ Buat DICOM Viewer</button>
+  </div>
+
+  <!-- ===== TAB STL ===== -->
+  <div class="tab-panel" id="tab-stl">
+    <div class="field">
+      <label>Nama Pasien</label>
+      <input type="text" id="pNameStl" placeholder="Masukkan nama pasien">
+    </div>
+
+    <div class="upload-zone">
+      <input type="file" id="stlInput" accept=".stl" onchange="handleStl(this)">
+      <div class="upload-icon">🧊</div>
+      <div class="upload-text" id="stlLabel">Pilih file STL</div>
+      <div class="upload-hint">Binary atau ASCII STL</div>
+    </div>
+
+    <div class="status-area" id="stlStatus">
+      <div class="status-text" id="stlStatusText">Memproses...</div>
+      <div class="progress-bar"><div class="progress-fill" id="stlProgress"></div></div>
+    </div>
+
+    <button class="generate-btn" id="stlBtn" onclick="generateStlViewer()">⚡ Buat 3D Viewer</button>
+  </div>
 </div>
 
 <script>
-let imageFiles = [];
-let stlFile = null;
-
-function switchTab(tab, btn) {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('tab-' + tab).classList.add('active');
+// ============================================================
+// TAB
+// ============================================================
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
 }
 
-// ===== STL HANDLER =====
-function handleSTLFile(input) {
-    if (input.files[0]) {
-        stlFile = input.files[0];
-        document.getElementById('stlLabel').textContent = '✔ ' + stlFile.name;
+// ============================================================
+// DICOM PARSER (raw binary, no library)
+// ============================================================
+function parseDicomPixels(buffer) {
+  const view = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+
+  // Check DICM magic at offset 128
+  const isDICM = buffer.byteLength > 132 &&
+    bytes[128]===68 && bytes[129]===73 && bytes[130]===67 && bytes[131]===77;
+
+  let offset = isDICM ? 132 : 0;
+  let rows=0, cols=0, bitsAlloc=8, isSigned=false;
+  let pixelOffset=-1, pixelLength=0;
+
+  while (offset < buffer.byteLength - 8) {
+    let group, element;
+    try {
+      group   = view.getUint16(offset, true);
+      element = view.getUint16(offset+2, true);
+    } catch(e) { break; }
+
+    const vrStr = String.fromCharCode(bytes[offset+4], bytes[offset+5]);
+    const isExplicit = /^[A-Z]{2}$/.test(vrStr);
+
+    let valueLen=0, dataOffset=0;
+    if (isExplicit) {
+      const longVRs = ['OB','OW','SQ','UN','UC','UR','UT','OF','OD','OL'];
+      if (longVRs.includes(vrStr)) {
+        valueLen = view.getUint32(offset+8, true);
+        dataOffset = offset+12;
+      } else {
+        valueLen = view.getUint16(offset+6, true);
+        dataOffset = offset+8;
+      }
+    } else {
+      valueLen = view.getUint32(offset+4, true);
+      dataOffset = offset+8;
     }
+    if (valueLen === 0xFFFFFFFF) valueLen = 0;
+
+    const tag = (group << 16) | element;
+    if      (tag === 0x00280010) rows      = view.getUint16(dataOffset, true);
+    else if (tag === 0x00280011) cols      = view.getUint16(dataOffset, true);
+    else if (tag === 0x00280100) bitsAlloc = view.getUint16(dataOffset, true);
+    else if (tag === 0x00280103) isSigned  = view.getUint16(dataOffset, true) === 1;
+    else if (tag === 0x7FE00010) { pixelOffset = dataOffset; break; }
+
+    const step = dataOffset + (valueLen % 2 !== 0 ? valueLen+1 : valueLen);
+    if (step <= offset) break;
+    offset = step;
+  }
+
+  if (pixelOffset < 0 || rows === 0 || cols === 0) return null;
+
+  const total = rows * cols;
+  const pixels = new Array(total);
+
+  if (bitsAlloc === 16) {
+    for (let i=0; i<total; i++) {
+      const p = pixelOffset + i*2;
+      if (p+1 >= buffer.byteLength) break;
+      pixels[i] = isSigned ? view.getInt16(p, true) : view.getUint16(p, true);
+    }
+  } else {
+    for (let i=0; i<total; i++) pixels[i] = bytes[pixelOffset + i];
+  }
+
+  return { pixels, rows, cols };
 }
 
-// ===== DCM SORT & LIST =====
-function handleImages(input) {
-    const newFiles = Array.from(input.files);
-    imageFiles = [...imageFiles, ...newFiles];
-    imageFiles.sort((a, b) => {
-        const numA = parseInt(a.name.match(/(\d+)/)?.[1] || 0);
-        const numB = parseInt(b.name.match(/(\d+)/)?.[1] || 0);
-        return numA - numB;
-    });
-    renderImageList();
+function dicomToDataURL(buffer) {
+  const parsed = parseDicomPixels(buffer);
+  if (!parsed) return null;
+
+  const { pixels, rows, cols } = parsed;
+
+  // Percentile window/level — ignore extreme outliers
+  const s = [...pixels].sort((a,b) => a-b);
+  const lo = s[Math.floor(s.length * 0.005)];
+  const hi = s[Math.floor(s.length * 0.995)];
+  const range = (hi - lo) || 1;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = cols; canvas.height = rows;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(cols, rows);
+
+  for (let i=0; i<pixels.length; i++) {
+    const v = Math.max(0, Math.min(255, Math.round(((pixels[i]-lo)/range)*255)));
+    img.data[i*4]   = v;
+    img.data[i*4+1] = v;
+    img.data[i*4+2] = v;
+    img.data[i*4+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return canvas.toDataURL('image/png'); // lossless PNG
 }
 
-function renderImageList() {
-    const list = document.getElementById('imageList');
-    const wrap = document.getElementById('imageListWrap');
-    const count = document.getElementById('fileCount');
-    list.innerHTML = '';
-    imageFiles.forEach((f, i) => {
-        list.innerHTML += `<div class="img-item"><span class="img-num">${String(i+1).padStart(3,'0')}</span><span>${f.name}</span></div>`;
-    });
-    count.textContent = imageFiles.length + ' file';
-    wrap.classList.toggle('has-files', imageFiles.length > 0);
+// ============================================================
+// DCM FILE HANDLING
+// ============================================================
+let dcmFiles = [];
+
+function handleDcm(input) {
+  dcmFiles = [...dcmFiles, ...Array.from(input.files)];
+  dcmFiles.sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
+  renderDcmList();
+}
+function clearDcm() {
+  dcmFiles = [];
+  document.getElementById('dcmInput').value = '';
+  renderDcmList();
+}
+function renderDcmList() {
+  const list  = document.getElementById('dcmList');
+  const wrap  = document.getElementById('dcmListWrap');
+  const count = document.getElementById('dcmCount');
+  list.innerHTML = dcmFiles.map((f,i) =>
+    `<div class="f-item" id="fi-${i}">
+       <span class="f-num">${String(i+1).padStart(3,'0')}</span>
+       <span class="f-name">${f.name}</span>
+       <span class="f-status wait" id="fs-${i}">—</span>
+     </div>`
+  ).join('');
+  count.textContent = dcmFiles.length + ' file';
+  wrap.classList.toggle('visible', dcmFiles.length > 0);
 }
 
-function clearFiles() {
-    imageFiles = [];
-    renderImageList();
-    document.getElementById('imgInput').value = '';
-}
+// ============================================================
+// GENERATE DICOM VIEWER
+// ============================================================
+async function generateDcmViewer() {
+  const name = document.getElementById('pNameDcm').value.trim();
+  if (!name)              { alert('Masukkan nama pasien.'); return; }
+  if (!dcmFiles.length)   { alert('Pilih file .dcm terlebih dahulu.'); return; }
 
-// ===== DCM → PNG LOSSLESS (16-bit via full precision mapping) =====
-async function processDcmFile(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new DataView(e.target.result);
-                const series = new daikon.Series();
-                series.addSlice(data);
-                series.buildSeries();
-                const slice = series.images[0];
-                const width = slice.cols;
-                const height = slice.rows;
+  const btn    = document.getElementById('dcmBtn');
+  const sa     = document.getElementById('dcmStatus');
+  const st     = document.getElementById('dcmStatusText');
+  const pf     = document.getElementById('dcmProgress');
 
-                const canvas = document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                const imgData = ctx.createImageData(width, height);
+  btn.disabled = true;
+  sa.classList.add('visible');
 
-                // High-quality window/level normalization
-                const pixelData = slice.getInterpretedData();
-                let minVal = Infinity, maxVal = -Infinity;
-                for (let i = 0; i < pixelData.length; i++) {
-                    if (pixelData[i] < minVal) minVal = pixelData[i];
-                    if (pixelData[i] > maxVal) maxVal = pixelData[i];
-                }
-                const range = maxVal - minVal || 1;
+  const dataURLs = [];
 
-                for (let i = 0; i < pixelData.length; i++) {
-                    // Precise linear mapping, no rounding loss until final 8-bit
-                    const normalized = (pixelData[i] - minVal) / range;
-                    // Apply subtle gamma correction (gamma=1.0 = linear, medical standard)
-                    const val = Math.round(normalized * 255);
-                    const idx = i * 4;
-                    imgData.data[idx]     = val;
-                    imgData.data[idx + 1] = val;
-                    imgData.data[idx + 2] = val;
-                    imgData.data[idx + 3] = 255;
-                }
+  for (let i=0; i<dcmFiles.length; i++) {
+    pf.style.width = Math.round((i/dcmFiles.length)*100) + '%';
+    st.textContent = `Mengonversi ${i+1}/${dcmFiles.length} — ${dcmFiles[i].name}`;
 
-                ctx.putImageData(imgData, 0, 0);
-                // Use PNG (lossless) — no quality loss
-                resolve(canvas.toDataURL('image/png'));
-            } catch(err) { reject(err); }
-        };
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-    });
-}
+    const statusEl = document.getElementById('fs-' + i);
 
-// ===== GENERATE IMAGE SEQUENCE =====
-async function generateImgSeq() {
-    const name = document.getElementById('pNameImg').value.trim();
-    if (!name) { alert('Masukkan nama pasien terlebih dahulu.'); return; }
-    if (imageFiles.length === 0) { alert('Pilih file .dcm terlebih dahulu.'); return; }
+    try {
+      const buf = await new Promise((res,rej) => {
+        const r = new FileReader();
+        r.onload = e => res(e.target.result);
+        r.onerror = rej;
+        r.readAsArrayBuffer(dcmFiles[i]);
+      });
 
-    const btn = document.getElementById('generateImgBtn');
-    const statusArea = document.getElementById('imgStatus');
-    const statusText = document.getElementById('imgStatusText');
-    const progressFill = document.getElementById('imgProgressFill');
+      const dataURL = dicomToDataURL(buf);
+      if (!dataURL) throw new Error('parse gagal');
 
-    btn.disabled = true;
-    statusArea.classList.add('visible');
+      dataURLs.push(dataURL);
+      if (statusEl) statusEl.textContent = '✓';
+      if (statusEl) statusEl.className = 'f-status ok';
 
-    const base64Images = [];
-    for (let i = 0; i < imageFiles.length; i++) {
-        statusText.textContent = `Mengonversi: ${i + 1} / ${imageFiles.length} — ${imageFiles[i].name}`;
-        progressFill.style.width = ((i / imageFiles.length) * 100) + '%';
-        try {
-            const dataURL = await processDcmFile(imageFiles[i]);
-            base64Images.push(dataURL);
-        } catch(e) {
-            console.error('Error pada file:', imageFiles[i].name, e);
-            base64Images.push(''); // placeholder
-        }
+    } catch(e) {
+      console.warn('Skip:', dcmFiles[i].name, e);
+      if (statusEl) statusEl.textContent = '✗';
+      if (statusEl) statusEl.className = 'f-status err';
     }
 
-    progressFill.style.width = '100%';
-    statusText.textContent = '✅ Selesai — Menyiapkan file HTML...';
+    // Yield to browser so UI stays responsive
+    await new Promise(r => setTimeout(r, 0));
+  }
 
-    const html = buildImgTemplate(name, base64Images);
-    downloadFile(html, name, 'DICOM_Viewer');
+  if (!dataURLs.length) {
+    st.textContent = '❌ Tidak ada file yang berhasil dikonversi.';
+    btn.disabled = false;
+    return;
+  }
 
-    setTimeout(() => {
-        btn.disabled = false;
-        statusArea.classList.remove('visible');
-        progressFill.style.width = '0%';
-    }, 2000);
+  pf.style.width = '100%';
+  st.textContent = `✅ ${dataURLs.length} slice siap — membuat HTML...`;
+
+  await new Promise(r => setTimeout(r, 50));
+
+  const html = buildViewerHTML(name, dataURLs);
+  downloadHTML(html, name, 'DICOM_Viewer');
+
+  st.textContent = `✅ Selesai! ${dataURLs.length} slice tersimpan dalam HTML.`;
+  setTimeout(() => {
+    btn.disabled = false;
+    sa.classList.remove('visible');
+    pf.style.width = '0%';
+  }, 3000);
 }
 
-// ===== IMAGE SEQUENCE HTML TEMPLATE (Optimized Mobile Viewer) =====
-function buildImgTemplate(name, images) {
-    const imagesJSON = JSON.stringify(images);
-    return `<!DOCTYPE html>
+// ============================================================
+// IMAGE VIEWER HTML TEMPLATE
+// ============================================================
+function buildViewerHTML(name, dataURLs) {
+  const imagesJSON = JSON.stringify(dataURLs);
+  return `<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>DICOM — ${name}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
-  :root {
-    --red:#e63946; --bg:#080808; --card:#111; --surface:#181818; --line:#252525;
-    --text:#f0f0f0; --muted:#666; --mono:'Share Tech Mono',monospace; --sans:'Barlow Condensed',sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
-  
-  /* LAYOUT */
-  #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
-  
-  /* TOP BAR */
-  #topbar{
-    flex-shrink:0;
-    background:var(--card);
-    border-bottom:1px solid var(--line);
-    padding:10px 14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    z-index:10;
-  }
-  .tb-left{display:flex;flex-direction:column;gap:1px;}
-  .tb-badge{font-size:9px;font-family:var(--mono);color:var(--red);letter-spacing:1px;text-transform:uppercase;}
-  .tb-name{font-size:16px;font-weight:900;letter-spacing:1px;text-transform:uppercase;line-height:1;}
-  .tb-right{display:flex;align-items:center;gap:8px;}
-  
-  /* FRAME COUNTER */
-  .frame-badge{
-    font-family:var(--mono);
-    font-size:13px;
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:5px 10px;
-    letter-spacing:1px;
-    white-space:nowrap;
-  }
-  .frame-badge span{color:var(--red);}
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap');
+:root{--red:#e63946;--bg:#050505;--card:#0f0f0f;--surface:#161616;--line:#1e1e1e;--text:#f0f0f0;--muted:#555;--mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;width:100vw;}
+#topbar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tb-info{display:flex;flex-direction:column;gap:1px;min-width:0;}
+.tb-badge{font-size:8px;font-family:var(--mono);color:var(--red);letter-spacing:1px;}
+.tb-name{font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tb-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.tb-btn{background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:5px 8px;cursor:pointer;transition:all 0.15s;}
+.tb-btn.on{border-color:var(--red);color:var(--red);background:rgba(230,57,70,0.1);}
+.frame-badge{font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 10px;white-space:nowrap;}
+.frame-badge em{color:var(--red);font-style:normal;}
+#viewer{flex:1;position:relative;overflow:hidden;background:#000;display:flex;align-items:center;justify-content:center;touch-action:none;}
+#display{max-width:100%;max-height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none;}
+#display.inv{filter:invert(1);}
+#hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.75);border:1px solid var(--line);border-radius:20px;padding:5px 14px;font-size:11px;font-family:var(--mono);color:var(--muted);pointer-events:none;white-space:nowrap;transition:opacity 0.5s;}
+#hint.gone{opacity:0;}
+#bottom{flex-shrink:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px 12px;}
+.scrub-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.sc-n{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:28px;text-align:center;}
+#scrub{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;background:var(--line);outline:none;cursor:pointer;}
+#scrub::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--red);border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 0 8px rgba(230,57,70,0.5);}
+#scrub::-moz-range-thumb{width:20px;height:20px;background:var(--red);border-radius:50%;cursor:pointer;border:2px solid #fff;}
+.btn-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.cbtn{background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:9px 12px;font-size:14px;cursor:pointer;transition:all 0.15s;line-height:1;font-family:var(--mono);}
+.cbtn:active,.cbtn.on{background:rgba(230,57,70,0.15);border-color:var(--red);color:var(--red);}
+.cbtn.pp{background:var(--red);border-color:var(--red);padding:9px 20px;font-size:16px;}
+.cbtn.pp:active{background:#ff4d5b;}
+.spd{display:flex;gap:3px;}
+.sbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:6px 9px;cursor:pointer;transition:all 0.15s;}
+.sbtn.on{background:rgba(230,57,70,0.12);border-color:var(--red);color:var(--red);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="topbar">
+    <div class="tb-info">
+      <div class="tb-badge">DICOM VIEWER · RST AD PKY</div>
+      <div class="tb-name">${name}</div>
+    </div>
+    <div class="tb-actions">
+      <button class="tb-btn" id="invBtn" onclick="toggleInv()">INV</button>
+      <div class="frame-badge"><em id="cf">1</em>/<span id="tf"></span></div>
+    </div>
+  </div>
+  <div id="viewer">
+    <img id="display" src="" alt="">
+    <div id="hint">← Swipe untuk navigasi →</div>
+  </div>
+  <div id="bottom">
+    <div class="scrub-row">
+      <span class="sc-n" id="scL">1</span>
+      <input type="range" id="scrub" min="0" value="0">
+      <span class="sc-n" id="scR"></span>
+    </div>
+    <div class="btn-row">
+      <button class="cbtn" onclick="go(cur-10)">⏮</button>
+      <button class="cbtn" onclick="go(cur-1)">◀</button>
+      <button class="cbtn pp" id="ppBtn" onclick="togglePlay()">▶</button>
+      <button class="cbtn" onclick="go(cur+1)">▶</button>
+      <button class="cbtn" onclick="go(cur+10)">⏭</button>
+      <div class="spd">
+        <button class="sbtn" onclick="setFps(5,this)">5fps</button>
+        <button class="sbtn on" onclick="setFps(12,this)">12fps</button>
+        <button class="sbtn" onclick="setFps(24,this)">24fps</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const IMGS=${imagesJSON};
+const N=IMGS.length;
+let cur=0,playing=false,timer=null,fps=12,inv=false,hintHidden=false;
+const disp=document.getElementById('display');
+const scrub=document.getElementById('scrub');
+const cfEl=document.getElementById('cf');
+const ppBtn=document.getElementById('ppBtn');
+const hintEl=document.getElementById('hint');
+scrub.max=N-1;
+document.getElementById('tf').textContent=N;
+document.getElementById('scR').textContent=N;
+function go(i){cur=Math.max(0,Math.min(N-1,i));disp.src=IMGS[cur];scrub.value=cur;cfEl.textContent=cur+1;document.getElementById('scL').textContent=cur+1;}
+function togglePlay(){playing=!playing;ppBtn.textContent=playing?'⏸':'▶';if(playing){timer=setInterval(()=>{cur=(cur+1)%N;go(cur);},1000/fps);}else clearInterval(timer);}
+function setFps(f,btn){fps=f;document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(playing){clearInterval(timer);timer=setInterval(()=>{cur=(cur+1)%N;go(cur);},1000/fps);}}
+function toggleInv(){inv=!inv;disp.classList.toggle('inv',inv);document.getElementById('invBtn').classList.toggle('on',inv);}
+function hideHint(){if(!hintHidden){hintHidden=true;hintEl.classList.add('gone');setTimeout(()=>hintEl.style.display='none',600);}}
+scrub.oninput=e=>go(+e.target.value);
+const viewer=document.getElementById('viewer');
+let tx=0,ty=0;
+viewer.addEventListener('touchstart',e=>{if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY;}},{passive:true});
+viewer.addEventListener('touchmove',e=>{if(e.touches.length!==1)return;e.preventDefault();const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;if(Math.abs(dx)>8||Math.abs(dy)>8){hideHint();const d=Math.abs(dx)>Math.abs(dy)?-Math.round(dx/14):Math.round(dy/14);if(d!==0){go(cur+d);tx=e.touches[0].clientX;ty=e.touches[0].clientY;}}},{passive:false});
+viewer.addEventListener('wheel',e=>{e.preventDefault();go(cur+(e.deltaY>0?1:-1));},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(cur+1);else if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(cur-1);else if(e.key===' '){e.preventDefault();togglePlay();}else if(e.key==='i'||e.key==='I')toggleInv();});
+go(0);
+<\/script>
+</body>
+</html>`;
+}
 
-  /* WINDOW/LEVEL BTN */
-  .wl-btn{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:6px;
-    padding:5px 10px;
-    font-size:11px;
-    font-family:var(--mono);
-    color:var(--muted);
-    cursor:pointer;
-    white-space:nowrap;
-  }
-  .wl-btn.active{border-color:var(--red);color:var(--red);}
+// ============================================================
+// STL
+// ============================================================
+let stlFile = null;
 
-  /* VIEWER */
-  #viewer{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    position:relative;
-    background:#000;
-    touch-action:none;
+function handleStl(input) {
+  if (input.files[0]) {
+    stlFile = input.files[0];
+    document.getElementById('stlLabel').textContent = '✔ ' + stlFile.name;
   }
-  #display{
-    max-width:100%;
-    max-height:100%;
-    object-fit:contain;
-    display:block;
-    user-select:none;
-    -webkit-user-drag:none;
-    pointer-events:none;
-  }
+}
 
-  /* SWIPE HINT */
-  #swipe-hint{
-    position:absolute;
-    bottom:16px;
-    left:50%;
-    transform:translateX(-50%);
-    background:rgba(0,0,0,0.7);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:6px 14px;
-    font-size:11px;
-    font-family:var(--mono);
-    color:var(--muted);
-    white-space:nowrap;
-    pointer-events:none;
-    opacity:1;
-    transition:opacity 0.5s;
-  }
-  #swipe-hint.hidden{opacity:0;}
+async function generateStlViewer() {
+  const name = document.getElementById('pNameStl').value.trim();
+  if (!name)    { alert('Masukkan nama pasien.'); return; }
+  if (!stlFile) { alert('Pilih file STL.'); return; }
 
-  /* BOTTOM CONTROLS */
-  #controls{
-    flex-shrink:0;
-    background:var(--card);
-    border-top:1px solid var(--line);
-    padding:12px 14px 14px;
-  }
-  
-  /* SCRUBBER */
-  .scrubber-wrap{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-  #scrub{
-    flex:1;
-    -webkit-appearance:none;
-    appearance:none;
-    height:4px;
-    border-radius:2px;
-    background:var(--line);
-    outline:none;
-    cursor:pointer;
-  }
-  #scrub::-webkit-slider-thumb{
-    -webkit-appearance:none;
-    width:18px;height:18px;
-    background:var(--red);
-    border-radius:50%;
-    cursor:pointer;
-    border:2px solid #fff;
-    box-shadow:0 0 8px rgba(230,57,70,0.5);
-  }
-  #scrub::-moz-range-thumb{
-    width:18px;height:18px;
-    background:var(--red);
-    border-radius:50%;
-    cursor:pointer;
-    border:2px solid #fff;
-  }
-  .sc-num{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:30px;text-align:center;}
+  const btn = document.getElementById('stlBtn');
+  const sa  = document.getElementById('stlStatus');
+  const st  = document.getElementById('stlStatusText');
+  const pf  = document.getElementById('stlProgress');
 
-  /* PLAYBACK CONTROLS */
-  .play-controls{display:flex;align-items:center;justify-content:center;gap:8px;}
-  .ctrl-btn{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:8px;
-    color:var(--text);
-    padding:9px 14px;
-    font-size:14px;
-    cursor:pointer;
-    transition:all 0.15s;
-    line-height:1;
-  }
-  .ctrl-btn:active{background:var(--red);border-color:var(--red);}
-  .ctrl-btn.play-pause{
-    background:var(--red);
-    border-color:var(--red);
-    padding:9px 22px;
-    font-size:16px;
-  }
-  .ctrl-btn.play-pause:active{background:#ff4d5b;}
-  
-  /* SPEED */
-  .speed-group{display:flex;gap:4px;}
-  .speed-btn{
-    background:var(--surface);
-    border:1px solid var(--line);
-    border-radius:6px;
-    color:var(--muted);
-    font-family:var(--mono);
-    font-size:10px;
-    padding:6px 10px;
-    cursor:pointer;
-    transition:all 0.15s;
-  }
-  .speed-btn.active{background:rgba(230,57,70,0.15);border-color:var(--red);color:var(--red);}
+  btn.disabled = true;
+  sa.classList.add('visible');
+  st.textContent = 'Membaca STL...';
+  pf.style.width = '40%';
 
-  /* INVERT TOGGLE */
-  #display.inverted{filter:invert(1);}
+  const buf = await new Promise((res,rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsArrayBuffer(stlFile);
+  });
+
+  const bytes = new Uint8Array(buf);
+  let b64 = '';
+  const chunk = 8192;
+  for (let i=0; i<bytes.length; i+=chunk) {
+    b64 += String.fromCharCode(...bytes.subarray(i, Math.min(i+chunk, bytes.length)));
+  }
+  b64 = btoa(b64);
+
+  pf.style.width = '80%';
+  st.textContent = 'Menyiapkan HTML...';
+  await new Promise(r => setTimeout(r, 30));
+
+  const html = buildStlHTML(name, b64);
+  downloadHTML(html, name, '3D_Viewer');
+
+  pf.style.width = '100%';
+  st.textContent = '✅ Selesai!';
+  setTimeout(() => { btn.disabled=false; sa.classList.remove('visible'); pf.style.width='0%'; }, 2000);
+}
+
+function buildStlHTML(name, stlB64) {
+  return `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>3D — ${name}</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;700;900&display=swap');
+:root{--red:#e63946;--bg:#080808;--card:#0f0f0f;--surface:#181818;--line:#222;--text:#f0f0f0;--muted:#555;--mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--sans);}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+#topbar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.tb-left{display:flex;flex-direction:column;gap:2px;}
+.tb-badge{font-size:8px;font-family:var(--mono);color:var(--red);letter-spacing:1px;}
+.tb-name{font-size:16px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#f0f0f0;line-height:1;}
+.tb-right{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;line-height:1.6;}
+#canvas{flex:1;display:block;width:100%;cursor:grab;touch-action:none;outline:none;}
+#canvas:active{cursor:grabbing;}
+#bottombar{flex-shrink:0;background:var(--card);border-top:1px solid var(--line);padding:10px 12px 12px;}
+.ctrl-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.cbtn{background:var(--surface);border:1px solid var(--line);border-radius:7px;color:#f0f0f0;padding:8px 13px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.15s;}
+.cbtn:active,.cbtn.on{background:rgba(230,57,70,0.15);border-color:var(--red);color:var(--red);}
+.hint{text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:8px;}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="topbar">
     <div class="tb-left">
-      <div class="tb-badge">DICOM Viewer · RST AD PKY</div>
-      <div class="tb-name">${name}</div>
-    </div>
-    <div class="tb-right">
-      <button class="wl-btn" id="invertBtn" onclick="toggleInvert()">INV</button>
-      <div class="frame-badge"><span id="curFrame">1</span>/<span id="totalFrames">—</span></div>
-    </div>
-  </div>
-
-  <div id="viewer">
-    <img id="display" src="" alt="DICOM">
-    <div id="swipe-hint">← Swipe kiri/kanan untuk navigasi →</div>
-  </div>
-
-  <div id="controls">
-    <div class="scrubber-wrap">
-      <span class="sc-num" id="scLeft">1</span>
-      <input type="range" id="scrub" min="0" value="0">
-      <span class="sc-num" id="scRight">—</span>
-    </div>
-    <div class="play-controls">
-      <button class="ctrl-btn" onclick="stepFrame(-10)" title="−10">⏮</button>
-      <button class="ctrl-btn" onclick="stepFrame(-1)" title="−1">◀</button>
-      <button class="ctrl-btn play-pause" id="playBtn" onclick="togglePlay()">▶</button>
-      <button class="ctrl-btn" onclick="stepFrame(1)" title="+1">▶</button>
-      <button class="ctrl-btn" onclick="stepFrame(10)" title="+10">⏭</button>
-      <div class="speed-group">
-        <button class="speed-btn" onclick="setSpeed(5)">5fps</button>
-        <button class="speed-btn active" onclick="setSpeed(12)">12fps</button>
-        <button class="speed-btn" onclick="setSpeed(24)">24fps</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-const IMGS = ${imagesJSON};
-const total = IMGS.length;
-let current = 0;
-let playing = false;
-let playInterval = null;
-let fps = 12;
-let inverted = false;
-
-const display = document.getElementById('display');
-const scrub = document.getElementById('scrub');
-const curFrame = document.getElementById('curFrame');
-const totalFrames = document.getElementById('totalFrames');
-const scLeft = document.getElementById('scLeft');
-const scRight = document.getElementById('scRight');
-const playBtn = document.getElementById('playBtn');
-const swipeHint = document.getElementById('swipe-hint');
-
-scrub.max = total - 1;
-totalFrames.textContent = total;
-scRight.textContent = total;
-
-function goTo(i) {
-  current = Math.max(0, Math.min(total - 1, i));
-  display.src = IMGS[current];
-  scrub.value = current;
-  curFrame.textContent = current + 1;
-  scLeft.textContent = current + 1;
-}
-
-function stepFrame(n) { goTo(current + n); }
-
-function togglePlay() {
-  playing = !playing;
-  playBtn.textContent = playing ? '⏸' : '▶';
-  if (playing) {
-    playInterval = setInterval(() => {
-      current = (current + 1) % total;
-      goTo(current);
-    }, 1000 / fps);
-  } else {
-    clearInterval(playInterval);
-  }
-}
-
-function setSpeed(f) {
-  fps = f;
-  document.querySelectorAll('.speed-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === f + 'fps');
-  });
-  if (playing) {
-    clearInterval(playInterval);
-    playInterval = setInterval(() => { current = (current + 1) % total; goTo(current); }, 1000 / fps);
-  }
-}
-
-function toggleInvert() {
-  inverted = !inverted;
-  display.classList.toggle('inverted', inverted);
-  document.getElementById('invertBtn').classList.toggle('active', inverted);
-}
-
-scrub.oninput = (e) => goTo(parseInt(e.target.value));
-
-// ===== SWIPE / TOUCH GESTURES =====
-let touchStartX = 0;
-let touchStartY = 0;
-let isDragging = false;
-let swipeHintHidden = false;
-const SWIPE_THRESHOLD = 10;
-
-function hideSwipeHint() {
-  if (!swipeHintHidden) {
-    swipeHintHidden = true;
-    swipeHint.classList.add('hidden');
-    setTimeout(() => { swipeHint.style.display = 'none'; }, 600);
-  }
-}
-
-const viewer = document.getElementById('viewer');
-viewer.addEventListener('touchstart', (e) => {
-  if (e.touches.length === 1) {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    isDragging = true;
-  }
-}, { passive: true });
-
-viewer.addEventListener('touchmove', (e) => {
-  if (!isDragging || e.touches.length !== 1) return;
-  e.preventDefault();
-  const dx = e.touches[0].clientX - touchStartX;
-  const dy = e.touches[0].clientY - touchStartY;
-  if (Math.abs(dx) > SWIPE_THRESHOLD || Math.abs(dy) > SWIPE_THRESHOLD) {
-    hideSwipeHint();
-    const delta = Math.abs(dx) > Math.abs(dy) ? -Math.round(dx / 12) : Math.round(dy / 12);
-    goTo(current + delta);
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  }
-}, { passive: false });
-
-viewer.addEventListener('touchend', () => { isDragging = false; });
-
-// ===== KEYBOARD =====
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') stepFrame(1);
-  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') stepFrame(-1);
-  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
-  else if (e.key === 'i' || e.key === 'I') toggleInvert();
-});
-
-// ===== MOUSE WHEEL =====
-viewer.addEventListener('wheel', (e) => {
-  e.preventDefault();
-  stepFrame(e.deltaY > 0 ? 1 : -1);
-}, { passive: false });
-
-// Init
-goTo(0);
-<\/script>
-</body>
-</html>`;
-}
-
-// ===== STL VIEWER TEMPLATE =====
-async function generateSTL() {
-    const name = document.getElementById('pName').value.trim();
-    if (!name) { alert('Masukkan nama pasien terlebih dahulu.'); return; }
-    if (!stlFile) { alert('Pilih file STL terlebih dahulu.'); return; }
-
-    const btn = document.getElementById('generateStlBtn');
-    const statusArea = document.getElementById('stlStatus');
-    const statusText = document.getElementById('stlStatusText');
-    const progressFill = document.getElementById('stlProgressFill');
-
-    btn.disabled = true;
-    statusArea.classList.add('visible');
-    statusText.textContent = 'Membaca file STL...';
-    progressFill.style.width = '30%';
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        progressFill.style.width = '80%';
-        statusText.textContent = 'Menyiapkan viewer HTML...';
-        const stlBase64 = btoa(
-            new Uint8Array(e.target.result).reduce((data, byte) => data + String.fromCharCode(byte), '')
-        );
-        const html = buildSTLTemplate(name, stlBase64);
-        downloadFile(html, name, 'STL_Viewer');
-        progressFill.style.width = '100%';
-        statusText.textContent = '✅ Selesai!';
-        setTimeout(() => {
-            btn.disabled = false;
-            statusArea.classList.remove('visible');
-            progressFill.style.width = '0%';
-        }, 2000);
-    };
-    reader.readAsArrayBuffer(stlFile);
-}
-
-function buildSTLTemplate(name, stlBase64) {
-    return `<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>3D Viewer — ${name}</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;700;900&display=swap');
-  :root{--red:#e63946;--bg:#080808;--card:#111;--surface:#181818;--line:#252525;--text:#f0f0f0;--muted:#666;--mono:'Share Tech Mono',monospace;--sans:'Barlow Condensed',sans-serif;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);}
-  #app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
-  #topbar{flex-shrink:0;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
-  .tb-badge{font-size:9px;font-family:var(--mono);color:var(--red);letter-spacing:1px;}
-  .tb-name{font-size:16px;font-weight:900;letter-spacing:1px;text-transform:uppercase;line-height:1;margin-top:2px;}
-  #canvas{flex:1;display:block;width:100%;cursor:grab;touch-action:none;}
-  #canvas:active{cursor:grabbing;}
-  #bottombar{flex-shrink:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px;}
-  .ctrl-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;}
-  .ctrl-btn{background:var(--surface);border:1px solid var(--line);border-radius:7px;color:var(--text);padding:8px 14px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
-  .ctrl-btn:active,.ctrl-btn.active{background:rgba(230,57,70,0.15);border-color:var(--red);color:var(--red);}
-  .hint-text{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:0.5px;}
-</style>
-</head>
-<body>
-<div id="app">
-  <div id="topbar">
-    <div>
       <div class="tb-badge">3D STL VIEWER · RST AD PKY</div>
       <div class="tb-name">${name}</div>
     </div>
-    <div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;">
-      <div id="triCount">—</div>
-      <div>TRIANGLES</div>
-    </div>
+    <div class="tb-right"><span id="triCount">—</span><br>TRIANGLES</div>
   </div>
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" tabindex="0"></canvas>
   <div id="bottombar">
     <div class="ctrl-row">
-      <button class="ctrl-btn" onclick="resetView()">⟳ RESET</button>
-      <button class="ctrl-btn" onclick="toggleWireframe()" id="wireBtn">▦ WIREFRAME</button>
-      <button class="ctrl-btn" onclick="toggleColor()" id="colorBtn">◐ WARNA</button>
-      <button class="ctrl-btn" onclick="autoRotateToggle()" id="autoBtn">⟳ AUTO</button>
+      <button class="cbtn" onclick="resetView()">⟳ RESET</button>
+      <button class="cbtn" id="wireBtn" onclick="toggleWire()">▦ WIRE</button>
+      <button class="cbtn" id="colorBtn" onclick="toggleColor()">◐ WARNA</button>
+      <button class="cbtn" id="autoBtn" onclick="toggleAuto()">↻ AUTO</button>
     </div>
-    <div class="hint-text" id="hintText">🖱 Drag=Rotate · Scroll=Zoom · Kanan/Tengah=Pan | 📱 Swipe=Rotate · Pinch=Zoom</div>
+    <div class="hint">🖥 Drag=Putar · Scroll=Zoom · Klik Kanan=Pan &nbsp;|&nbsp; 📱 1Jari=Putar · 2Jari=Zoom</div>
   </div>
 </div>
-
 <script>
-// ===== BASE64 STL DECODER =====
-function base64ToArrayBuffer(b64){const bin=atob(b64);const buf=new ArrayBuffer(bin.length);const arr=new Uint8Array(buf);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return buf;}
-
-const STL_B64 = "${stlBase64}";
-const canvas = document.getElementById('canvas');
-const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-// ===== SHADERS =====
-const vsSource = \`
-attribute vec3 aPos;
-attribute vec3 aNorm;
-uniform mat4 uMVP;
-uniform mat4 uNormalMatrix;
-varying vec3 vNorm;
-varying vec3 vPos;
-void main(){
-  vec4 worldPos = uMVP * vec4(aPos,1.0);
-  gl_Position = worldPos;
-  vNorm = normalize((uNormalMatrix * vec4(aNorm,0.0)).xyz);
-  vPos = worldPos.xyz;
-}
-\`;
-const fsSource = \`
-precision mediump float;
-varying vec3 vNorm;
-varying vec3 vPos;
-uniform vec3 uColor;
-uniform int uWireframe;
-void main(){
-  vec3 norm = normalize(vNorm);
-  // Multi-light shading
-  vec3 L1 = normalize(vec3(1.0,1.5,2.0));
-  vec3 L2 = normalize(vec3(-1.0,-0.5,-1.0));
-  float d1 = max(dot(norm,L1),0.0);
-  float d2 = max(dot(norm,L2),0.0)*0.3;
-  float ambient = 0.18;
-  float diff = d1 + d2 + ambient;
-  // Specular
-  vec3 viewDir = normalize(-vPos);
-  vec3 halfDir = normalize(L1 + viewDir);
-  float spec = pow(max(dot(norm,halfDir),0.0),32.0)*0.4;
-  vec3 col = uWireframe==1 ? vec3(0.9,0.9,0.9) : uColor;
-  gl_FragColor = vec4(col * diff + vec3(spec), 1.0);
-}
-\`;
-
-function compileShader(type, src) {
-  const sh = gl.createShader(type);
-  gl.shaderSource(sh, src);
-  gl.compileShader(sh);
-  return sh;
-}
-const prog = gl.createProgram();
-gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, vsSource));
-gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fsSource));
-gl.linkProgram(prog);
-gl.useProgram(prog);
-
-// ===== PARSE STL =====
-function parseSTL(buffer) {
-  const view = new DataView(buffer);
-  // Detect ASCII vs Binary
-  const header = new Uint8Array(buffer, 0, 5);
-  const isBinary = !(header[0]===115 && header[1]===111 && header[2]===108 && header[3]===105 && header[4]===100);
-  const verts = [], norms = [];
-  if (isBinary) {
-    const triCount = view.getUint32(80, true);
-    document.getElementById('triCount').textContent = triCount.toLocaleString();
-    let off = 84;
-    for (let i = 0; i < triCount; i++) {
-      const nx=view.getFloat32(off,true),ny=view.getFloat32(off+4,true),nz=view.getFloat32(off+8,true); off+=12;
-      for (let v=0;v<3;v++) {
-        verts.push(view.getFloat32(off,true),view.getFloat32(off+4,true),view.getFloat32(off+8,true));
-        norms.push(nx,ny,nz);
-        off+=12;
-      }
-      off+=2;
-    }
-  } else {
-    // ASCII
-    const text = new TextDecoder().decode(buffer);
-    const lines = text.split('\\n');
-    let cn = [0,0,0];
-    let tc = 0;
-    for (const line of lines) {
-      const t = line.trim();
-      if (t.startsWith('facet normal')) {
-        const p = t.split(/\\s+/);
-        cn = [parseFloat(p[2]),parseFloat(p[3]),parseFloat(p[4])];
-        tc++;
-      } else if (t.startsWith('vertex')) {
-        const p = t.split(/\\s+/);
-        verts.push(parseFloat(p[1]),parseFloat(p[2]),parseFloat(p[3]));
-        norms.push(cn[0],cn[1],cn[2]);
-      }
-    }
-    document.getElementById('triCount').textContent = tc.toLocaleString();
-  }
-  return {verts:new Float32Array(verts), norms:new Float32Array(norms)};
-}
-
-const buf = base64ToArrayBuffer(STL_B64);
-const mesh = parseSTL(buf);
-const vertCount = mesh.verts.length / 3;
-
-// Upload to GPU
-const vBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, vBuf);
-gl.bufferData(gl.ARRAY_BUFFER, mesh.verts, gl.STATIC_DRAW);
-const nBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, nBuf);
-gl.bufferData(gl.ARRAY_BUFFER, mesh.norms, gl.STATIC_DRAW);
-
-// Compute center & scale
-let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,minZ=Infinity,maxZ=-Infinity;
-for(let i=0;i<mesh.verts.length;i+=3){
-  minX=Math.min(minX,mesh.verts[i]);maxX=Math.max(maxX,mesh.verts[i]);
-  minY=Math.min(minY,mesh.verts[i+1]);maxY=Math.max(maxY,mesh.verts[i+1]);
-  minZ=Math.min(minZ,mesh.verts[i+2]);maxZ=Math.max(maxZ,mesh.verts[i+2]);
-}
-const cx=(minX+maxX)/2,cy=(minY+maxY)/2,cz=(minZ+maxZ)/2;
-const modelScale = 2.0/Math.max(maxX-minX,maxY-minY,maxZ-minZ);
-
-// ===== MATRIX MATH =====
-function mat4(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);}
-function mat4Mul(a,b){const r=mat4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){r[j*4+i]=0;for(let k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k];}return r;}
-function perspective(fov,asp,near,far){const f=1/Math.tan(fov/2),r=mat4();r[0]=f/asp;r[5]=f;r[10]=(far+near)/(near-far);r[11]=-1;r[14]=(2*far*near)/(near-far);r[15]=0;return r;}
-function rotX(a){const r=mat4(),c=Math.cos(a),s=Math.sin(a);r[5]=c;r[6]=s;r[9]=-s;r[10]=c;return r;}
-function rotY(a){const r=mat4(),c=Math.cos(a),s=Math.sin(a);r[0]=c;r[2]=-s;r[8]=s;r[10]=c;return r;}
-function scale(s){const r=mat4();r[0]=r[5]=r[10]=s;return r;}
-function translate(x,y,z){const r=mat4();r[12]=x;r[13]=y;r[14]=z;return r;}
-function mat4Transpose(m){const r=mat4();for(let i=0;i<4;i++)for(let j=0;j<4;j++)r[i*4+j]=m[j*4+i];return r;}
-
-// ===== STATE =====
-let rotX_=0.3, rotY_=0.0, zoom=1.0, panX=0, panY=0;
-let wireframe=false, colorMode=0, autoRotate=false;
-const COLORS=[[0.75,0.82,0.88],[0.9,0.5,0.4],[0.4,0.85,0.55],[0.95,0.85,0.4]];
-
-function resetView(){rotX_=0.3;rotY_=0;zoom=1;panX=0;panY=0;}
-
-function toggleWireframe(){
-  wireframe=!wireframe;
-  document.getElementById('wireBtn').classList.toggle('active',wireframe);
-}
-function toggleColor(){
-  colorMode=(colorMode+1)%COLORS.length;
-  document.getElementById('colorBtn').classList.toggle('active',colorMode!==0);
-}
-function autoRotateToggle(){
-  autoRotate=!autoRotate;
-  document.getElementById('autoBtn').classList.toggle('active',autoRotate);
-}
-
-// ===== RENDER =====
-function resize(){
-  canvas.width=canvas.clientWidth*devicePixelRatio;
-  canvas.height=canvas.clientHeight*devicePixelRatio;
-  gl.viewport(0,0,canvas.width,canvas.height);
-}
-
-function render(){
-  resize();
-  gl.clearColor(0.03,0.03,0.03,1);
-  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.DEPTH_TEST);
-  if(wireframe){gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);}
-  else gl.disable(gl.POLYGON_OFFSET_FILL);
-
+function b64Buf(b){const bin=atob(b),buf=new ArrayBuffer(bin.length),arr=new Uint8Array(buf);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return buf;}
+const canvas=document.getElementById('canvas');
+const gl=canvas.getContext('webgl',{antialias:true})||canvas.getContext('experimental-webgl',{antialias:true});
+if(!gl){document.body.innerHTML='<p style="color:#e63946;padding:20px;font-family:monospace;">WebGL tidak didukung.</p>';}
+const VS=\`attribute vec3 aP,aN;uniform mat4 uM,uN;varying vec3 vN,vP;void main(){vec4 w=uM*vec4(aP,1.);gl_Position=w;vN=normalize((uN*vec4(aN,0.)).xyz);vP=w.xyz;}\`;
+const FS=\`precision mediump float;varying vec3 vN,vP;uniform vec3 uC;uniform int uW;void main(){vec3 n=normalize(vN);float d=max(dot(n,normalize(vec3(1.,1.5,2.))),0.)+max(dot(n,normalize(vec3(-1.,-.5,-1.))),0.)*.3+.18;vec3 h=normalize(normalize(vec3(1.,1.5,2.))+normalize(-vP));float s=pow(max(dot(n,h),0.),32.)*.4;vec3 c=uW==1?vec3(.9):uC;gl_FragColor=vec4(c*d+vec3(s),1.);}\`;
+function mkSh(t,s){const h=gl.createShader(t);gl.shaderSource(h,s);gl.compileShader(h);return h;}
+const prog=gl.createProgram();gl.attachShader(prog,mkSh(gl.VERTEX_SHADER,VS));gl.attachShader(prog,mkSh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(prog);gl.useProgram(prog);
+function parseSTL(buf){const v=new DataView(buf),b=new Uint8Array(buf),ascii=b[0]===115&&b[1]===111&&b[2]===108&&b[3]===105&&b[4]===100,vs=[],ns=[];if(!ascii){const n=v.getUint32(80,true);document.getElementById('triCount').textContent=n.toLocaleString();let o=84;for(let i=0;i<n;i++){const nx=v.getFloat32(o,true),ny=v.getFloat32(o+4,true),nz=v.getFloat32(o+8,true);o+=12;for(let j=0;j<3;j++){vs.push(v.getFloat32(o,true),v.getFloat32(o+4,true),v.getFloat32(o+8,true));ns.push(nx,ny,nz);o+=12;}o+=2;}}else{const txt=new TextDecoder().decode(buf);let cn=[0,0,0],tc=0;for(const l of txt.split('\\n')){const t=l.trim();if(t.startsWith('facet normal')){const p=t.split(/\\s+/);cn=[+p[2],+p[3],+p[4]];tc++;}else if(t.startsWith('vertex')){const p=t.split(/\\s+/);vs.push(+p[1],+p[2],+p[3]);ns.push(...cn);}}document.getElementById('triCount').textContent=tc.toLocaleString();}return{v:new Float32Array(vs),n:new Float32Array(ns)};}
+const mesh=parseSTL(b64Buf("${stlB64}"));
+const vc=mesh.v.length/3;
+const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,mesh.v,gl.STATIC_DRAW);
+const nb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.bufferData(gl.ARRAY_BUFFER,mesh.n,gl.STATIC_DRAW);
+let mnX=Infinity,mxX=-Infinity,mnY=Infinity,mxY=-Infinity,mnZ=Infinity,mxZ=-Infinity;
+for(let i=0;i<mesh.v.length;i+=3){mnX=Math.min(mnX,mesh.v[i]);mxX=Math.max(mxX,mesh.v[i]);mnY=Math.min(mnY,mesh.v[i+1]);mxY=Math.max(mxY,mesh.v[i+1]);mnZ=Math.min(mnZ,mesh.v[i+2]);mxZ=Math.max(mxZ,mesh.v[i+2]);}
+const cx=(mnX+mxX)/2,cy=(mnY+mxY)/2,cz=(mnZ+mxZ)/2,ms=2/Math.max(mxX-mnX,mxY-mnY,mxZ-mnZ);
+function m4(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);}
+function mul(a,b){const r=m4();for(let i=0;i<4;i++)for(let j=0;j<4;j++){r[j*4+i]=0;for(let k=0;k<4;k++)r[j*4+i]+=a[k*4+i]*b[j*4+k];}return r;}
+function persp(f,a,n,fr){const t=1/Math.tan(f/2),r=m4();r[0]=t/a;r[5]=t;r[10]=(fr+n)/(n-fr);r[11]=-1;r[14]=(2*fr*n)/(n-fr);r[15]=0;return r;}
+function rX(a){const r=m4(),c=Math.cos(a),s=Math.sin(a);r[5]=c;r[6]=s;r[9]=-s;r[10]=c;return r;}
+function rY(a){const r=m4(),c=Math.cos(a),s=Math.sin(a);r[0]=c;r[2]=-s;r[8]=s;r[10]=c;return r;}
+function sc(s){const r=m4();r[0]=r[5]=r[10]=s;return r;}
+function tr(x,y,z){const r=m4();r[12]=x;r[13]=y;r[14]=z;return r;}
+function tp(m){const r=m4();for(let i=0;i<4;i++)for(let j=0;j<4;j++)r[i*4+j]=m[j*4+i];return r;}
+let rx=0.3,ry=0,zoom=1,px=0,py=0,wire=false,col=0,auto=false;
+const COLS=[[0.72,0.80,0.88],[0.9,0.48,0.38],[0.38,0.82,0.55],[0.95,0.82,0.38]];
+function resetView(){rx=0.3;ry=0;zoom=1;px=0;py=0;}
+function toggleWire(){wire=!wire;document.getElementById('wireBtn').classList.toggle('on',wire);}
+function toggleColor(){col=(col+1)%COLS.length;document.getElementById('colorBtn').classList.toggle('on',col!==0);}
+function toggleAuto(){auto=!auto;document.getElementById('autoBtn').classList.toggle('on',auto);}
+function draw(){
+  canvas.width=canvas.clientWidth*devicePixelRatio;canvas.height=canvas.clientHeight*devicePixelRatio;
+  gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.03,.03,.03,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
   const asp=canvas.width/canvas.height;
-  const proj=perspective(0.8,asp,0.01,100);
-  const view=translate(panX,panY,-3.5/zoom);
-  const model=mat4Mul(rotX(rotX_),rotY(rotY_));
-  const centerT=translate(-cx,-cy,-cz);
-  const sc=scale(modelScale);
-  const mv=mat4Mul(mat4Mul(view,model),mat4Mul(sc,centerT));
-  const mvp=mat4Mul(proj,mv);
-  const normalMat=mat4Transpose(mv);
-
-  const uMVP=gl.getUniformLocation(prog,'uMVP');
-  const uNorm=gl.getUniformLocation(prog,'uNormalMatrix');
-  const uCol=gl.getUniformLocation(prog,'uColor');
-  const uWire=gl.getUniformLocation(prog,'uWireframe');
-  gl.uniformMatrix4fv(uMVP,false,mvp);
-  gl.uniformMatrix4fv(uNorm,false,normalMat);
-  gl.uniform3fv(uCol,COLORS[colorMode]);
-  gl.uniform1i(uWire,wireframe?1:0);
-
-  const aPos=gl.getAttribLocation(prog,'aPos');
-  gl.bindBuffer(gl.ARRAY_BUFFER,vBuf);
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,0,0);
-  const aNorm=gl.getAttribLocation(prog,'aNorm');
-  gl.bindBuffer(gl.ARRAY_BUFFER,nBuf);
-  gl.enableVertexAttribArray(aNorm);
-  gl.vertexAttribPointer(aNorm,3,gl.FLOAT,false,0,0);
-
-  gl.drawArrays(wireframe?gl.LINES:gl.TRIANGLES,0,vertCount);
-  if(autoRotate) rotY_+=0.008;
-  requestAnimationFrame(render);
+  const mv=mul(mul(tr(px,py,-3.5/zoom),mul(rX(rx),rY(ry))),mul(sc(ms),tr(-cx,-cy,-cz)));
+  const mvp=mul(persp(0.8,asp,.01,100),mv);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'uM'),false,mvp);
+  gl.uniformMatrix4fv(gl.getUniformLocation(prog,'uN'),false,tp(mv));
+  gl.uniform3fv(gl.getUniformLocation(prog,'uC'),COLS[col]);
+  gl.uniform1i(gl.getUniformLocation(prog,'uW'),wire?1:0);
+  const aP=gl.getAttribLocation(prog,'aP');gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.enableVertexAttribArray(aP);gl.vertexAttribPointer(aP,3,gl.FLOAT,false,0,0);
+  const aN=gl.getAttribLocation(prog,'aN');gl.bindBuffer(gl.ARRAY_BUFFER,nb);gl.enableVertexAttribArray(aN);gl.vertexAttribPointer(aN,3,gl.FLOAT,false,0,0);
+  gl.drawArrays(gl.TRIANGLES,0,vc);
+  if(auto)ry+=0.008;
+  requestAnimationFrame(draw);
 }
-render();
-
-// ===== PC MOUSE CONTROLS =====
-let mouseDown=false, rightDown=false, midDown=false;
-let lastX=0,lastY=0;
-canvas.addEventListener('mousedown',(e)=>{
-  if(e.button===0){mouseDown=true;}
-  else if(e.button===2){rightDown=true;}
-  else if(e.button===1){midDown=true;e.preventDefault();}
-  lastX=e.clientX;lastY=e.clientY;
-});
-window.addEventListener('mouseup',()=>{mouseDown=false;rightDown=false;midDown=false;});
-canvas.addEventListener('mousemove',(e)=>{
-  const dx=e.clientX-lastX, dy=e.clientY-lastY;
-  if(mouseDown){rotY_+=dx*0.008;rotX_+=dy*0.008;}
-  else if(rightDown||midDown){panX+=dx*0.003/zoom;panY-=dy*0.003/zoom;}
-  lastX=e.clientX;lastY=e.clientY;
-});
-canvas.addEventListener('wheel',(e)=>{
-  e.preventDefault();
-  zoom*=e.deltaY<0?1.1:0.9;
-  zoom=Math.max(0.1,Math.min(zoom,20));
-},{passive:false});
-canvas.addEventListener('contextmenu',(e)=>e.preventDefault());
-
-// ===== MOBILE TOUCH CONTROLS =====
-let touches={};
-let lastPinchDist=null;
-let lastTouchX=0,lastTouchY=0;
-
-canvas.addEventListener('touchstart',(e)=>{
-  e.preventDefault();
-  if(e.touches.length===1){
-    lastTouchX=e.touches[0].clientX;
-    lastTouchY=e.touches[0].clientY;
-  } else if(e.touches.length===2){
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    lastPinchDist=Math.sqrt(dx*dx+dy*dy);
-  }
-},{passive:false});
-
-canvas.addEventListener('touchmove',(e)=>{
-  e.preventDefault();
-  if(e.touches.length===1){
-    const dx=e.touches[0].clientX-lastTouchX;
-    const dy=e.touches[0].clientY-lastTouchY;
-    // Swipe left/right = rotate Y, swipe up/down = rotate X
-    rotY_+=dx*0.01;
-    rotX_+=dy*0.01;
-    lastTouchX=e.touches[0].clientX;
-    lastTouchY=e.touches[0].clientY;
-  } else if(e.touches.length===2){
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-    if(lastPinchDist){
-      const delta=dist/lastPinchDist;
-      zoom*=delta;
-      zoom=Math.max(0.1,Math.min(zoom,20));
-    }
-    lastPinchDist=dist;
-  }
-},{passive:false});
-
-canvas.addEventListener('touchend',(e)=>{
-  if(e.touches.length<2) lastPinchDist=null;
-},{passive:true});
-
-// ===== KEYBOARD =====
-document.addEventListener('keydown',(e)=>{
-  if(e.key==='r'||e.key==='R') resetView();
-  if(e.key==='w'||e.key==='W') toggleWireframe();
-  if(e.key==='a'||e.key==='A') autoRotateToggle();
-  if(e.key==='+'||e.key==='=') {zoom*=1.1;}
-  if(e.key==='-') {zoom*=0.9;}
-});
+draw();
+let md=false,rd=false,lx=0,ly=0;
+canvas.addEventListener('mousedown',e=>{if(e.button===0)md=true;if(e.button===2)rd=true;lx=e.clientX;ly=e.clientY;});
+window.addEventListener('mouseup',()=>{md=false;rd=false;});
+canvas.addEventListener('mousemove',e=>{const dx=e.clientX-lx,dy=e.clientY-ly;if(md){ry+=dx*.008;rx+=dy*.008;}if(rd){px+=dx*.003/zoom;py-=dy*.003/zoom;}lx=e.clientX;ly=e.clientY;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoom*=e.deltaY<0?1.1:0.9;zoom=Math.max(.1,Math.min(zoom,20));},{passive:false});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+let lpd=null,ltx=0,lty=0;
+canvas.addEventListener('touchstart',e=>{e.preventDefault();if(e.touches.length===1){ltx=e.touches[0].clientX;lty=e.touches[0].clientY;}else if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY;lpd=Math.sqrt(dx*dx+dy*dy);}},{passive:false});
+canvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1){const dx=e.touches[0].clientX-ltx,dy=e.touches[0].clientY-lty;ry+=dx*.01;rx+=dy*.01;ltx=e.touches[0].clientX;lty=e.touches[0].clientY;}else if(e.touches.length===2){const dx=e.touches[0].clientX-e.touches[1].clientX,dy=e.touches[0].clientY-e.touches[1].clientY,d=Math.sqrt(dx*dx+dy*dy);if(lpd){zoom*=d/lpd;zoom=Math.max(.1,Math.min(zoom,20));}lpd=d;}},{passive:false});
+canvas.addEventListener('touchend',e=>{if(e.touches.length<2)lpd=null;},{passive:true});
+document.addEventListener('keydown',e=>{if(e.key==='r')resetView();if(e.key==='w')toggleWire();if(e.key==='a')toggleAuto();});
 <\/script>
 </body>
 </html>`;
 }
 
-// ===== DOWNLOAD =====
-function downloadFile(html, name, prefix) {
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${prefix}_${name.replace(/\s+/g, '_')}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+// ============================================================
+// UTILS
+// ============================================================
+function downloadHTML(html, name, prefix) {
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${prefix}_${name.replace(/\s+/g,'_')}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 </script>
 </body>
