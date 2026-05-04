@@ -2,10 +2,10 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D STL Viewer Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D & Image Sequence Viewer Gen</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
 
         :root {
             --red: #e74c3c;
@@ -16,1310 +16,308 @@
             --text: #ffffff;
             --muted: #888;
             --green: #27ae60;
-            --yellow: #f39c12;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
             font-family: 'Rajdhani', sans-serif;
-            min-height: 100vh;
+            background: var(--bg);
+            background-image: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(231,76,60,0.1) 0%, transparent 60%);
+            color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
-            background: var(--bg);
-            background-image:
-                radial-gradient(ellipse 80% 60% at 0% 50%, rgba(231,76,60,0.18) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 40% at 100% 0%, rgba(231,76,60,0.08) 0%, transparent 60%);
-            padding: 20px;
+            min-height: 100vh;
+            padding: 15px;
         }
 
         .container {
             background: var(--card);
-            padding: 36px 32px;
+            padding: 25px;
             border-radius: 16px;
             border: 1px solid var(--red-border);
-            box-shadow: 0 0 60px rgba(231,76,60,0.08), 0 20px 60px rgba(0,0,0,0.7);
             width: 100%;
-            max-width: 480px;
-            position: relative;
-            overflow: hidden;
+            max-width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--red), transparent);
-        }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo h2 { font-family: 'Space Mono', monospace; font-size: 18px; letter-spacing: 2px; }
+        .logo span { color: var(--red); }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-
-        .logo h2 {
-            font-family: 'Space Mono', monospace;
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-        }
-
-        .logo span {
-            color: var(--red);
-        }
-
-        .logo p {
-            color: var(--muted);
-            font-size: 12px;
-            letter-spacing: 2px;
-            margin-top: 4px;
-            text-transform: uppercase;
-        }
-
-        /* TABS */
-        .tabs {
-            display: flex;
-            gap: 0;
-            margin-bottom: 24px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: transparent;
-            color: var(--muted);
-            border: none;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            background: var(--red);
-            color: white;
-        }
-
-        .tab-btn:not(.active):hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
-        }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #161616; padding: 4px; border-radius: 10px; }
+        .tab-btn { flex: 1; padding: 10px; background: transparent; color: var(--muted); border: none; border-radius: 7px; cursor: pointer; font-weight: 600; font-family: inherit; transition: 0.3s; }
+        .tab-btn.active { background: var(--red); color: white; }
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* INPUTS */
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            color: var(--muted);
-            margin-bottom: 6px;
-            font-size: 12px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
+        .input-group { margin-bottom: 15px; }
+        label { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
         input[type="text"], input[type="date"] {
-            width: 100%;
-            padding: 11px 14px;
-            background: #161616;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 8px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 15px;
-            transition: all 0.2s;
+            width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 8px; font-family: inherit;
         }
 
-        input[type="text"]:focus, input[type="date"]:focus {
-            outline: none;
-            border-color: var(--red);
-            box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
-        }
-
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
-
-        /* UPLOAD ZONE */
         .upload-zone {
-            position: relative;
-            border: 2px dashed #333;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s;
-            margin-bottom: 16px;
-            background: #0f0f0f;
+            border: 2px dashed #333; padding: 25px; text-align: center; border-radius: 10px; cursor: pointer; position: relative; transition: 0.3s;
         }
+        .upload-zone:hover { border-color: var(--red); background: var(--red-dim); }
+        .upload-zone input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
 
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--red);
-            background: var(--red-dim);
-        }
+        .image-list { max-height: 150px; overflow-y: auto; margin-top: 10px; border-radius: 8px; }
+        .img-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #161616; margin-bottom: 4px; border-radius: 5px; font-size: 12px; }
+        .remove-btn { color: var(--red); border: none; background: none; cursor: pointer; font-weight: bold; padding: 0 5px; }
 
-        .upload-zone input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
-        }
-
-        .upload-icon {
-            font-size: 28px;
-            margin-bottom: 6px;
-        }
-
-        .upload-zone p {
-            color: var(--muted);
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .upload-zone .file-ready p {
-            color: var(--green);
-            font-weight: 600;
-        }
-
-        .upload-zone.ready {
-            border-color: var(--green);
-            border-style: solid;
-            background: rgba(39,174,96,0.07);
-        }
-
-        /* IMAGE SEQUENCE */
-        .image-list {
-            max-height: 120px;
-            overflow-y: auto;
-            margin-bottom: 12px;
-        }
-
-        .image-list::-webkit-scrollbar { width: 4px; }
-        .image-list::-webkit-scrollbar-track { background: #111; }
-        .image-list::-webkit-scrollbar-thumb { background: var(--red); border-radius: 2px; }
-
-        .img-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 6px 8px;
-            background: #161616;
-            border-radius: 6px;
-            margin-bottom: 4px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .img-item .thumb {
-            width: 32px; height: 32px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .img-item .img-name {
-            flex: 1;
-            color: #ccc;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .img-item .remove-btn {
-            background: none;
-            border: none;
-            color: var(--red);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 0 4px;
-            width: auto;
-        }
-
-        .img-count-badge {
-            display: inline-block;
-            background: var(--red);
-            color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            margin-left: 6px;
-            font-family: 'Space Mono', monospace;
-        }
-
-        /* BUTTON */
         .generate-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--red);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Space Mono', monospace;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 8px;
+            width: 100%; padding: 15px; background: var(--red); color: white; border: none; border-radius: 8px; font-family: 'Space Mono', monospace;
+            font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s;
         }
+        .generate-btn:disabled { background: #444; opacity: 0.6; }
 
-        .generate-btn:hover:not(:disabled) {
-            background: #c0392b;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(231,76,60,0.35);
-        }
-
-        .generate-btn:disabled {
-            background: #444;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* PROGRESS */
-        .progress-wrap {
-            margin-top: 14px;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 3px;
-            background: #222;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--red);
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 2px;
-        }
-
-        #status {
-            text-align: center;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-            margin-top: 8px;
-            min-height: 18px;
-            color: var(--green);
-        }
-
-        /* TIPS */
-        .tips {
-            margin-top: 20px;
-            padding: 12px 16px;
-            background: #111;
-            border-radius: 8px;
-            border-left: 3px solid var(--red);
-        }
-
-        .tips p {
-            font-size: 12px;
-            color: var(--muted);
-            letter-spacing: 0.3px;
-            line-height: 1.6;
-        }
-
-        .tips span {
-            color: #ddd;
-        }
+        #status { margin-top: 10px; font-size: 13px; text-align: center; min-height: 20px; }
+        .progress-bar { height: 3px; background: #222; margin-top: 10px; border-radius: 5px; overflow: hidden; display: none; }
+        .progress-fill { height: 100%; background: var(--red); width: 0%; transition: 0.2s; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="logo">
-        <h2><span>3D</span> VIEWER GEN</h2>
-        <p>Mobile-Optimized · Touch Ready</p>
+        <h2><span>3D</span> MEDICAL GEN</h2>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('stl', this)">🧊 Model 3D</button>
-        <button class="tab-btn" onclick="switchTab('img', this)">🖼️ Image Sequence</button>
+        <button class="tab-btn active" onclick="switchTab('stl', this)">🧊 3D STL</button>
+        <button class="tab-btn" onclick="switchTab('img', this)">🖼️ DCM Seq</button>
     </div>
 
     <!-- TAB STL -->
     <div class="tab-panel active" id="tab-stl">
         <div class="input-group">
-            <label>Nama Penerima / Pasien</label>
-            <input type="text" id="pName" placeholder="Contoh: Budi Santoso" autocomplete="off">
+            <label>Nama Pasien</label>
+            <input type="text" id="pName" placeholder="Nama Lengkap">
         </div>
-        <div class="input-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" id="pDob">
-        </div>
-        <label>File Model 3D (.STL)</label>
         <div class="upload-zone" id="stlZone">
-            <input type="file" id="stlInput" accept=".stl" onchange="handleSTLFile(this)">
-            <div class="upload-icon">📦</div>
-            <p>Ketuk untuk pilih file STL</p>
-            <p style="font-size:11px; margin-top:4px;">Drag & drop juga bisa</p>
+            <input type="file" id="stlInput" accept=".stl" onchange="handleFileReady('stl', this)">
+            <p id="stlStatus">Ketuk untuk upload file STL</p>
         </div>
-
-        <button class="generate-btn" onclick="generateSTL()" id="generateStlBtn">⚡ Buat 3D Viewer</button>
+        <button class="generate-btn" id="btnStl" onclick="generate('stl')">GENERATE 3D VIEWER</button>
     </div>
 
-    <!-- TAB IMAGE SEQUENCE -->
+    <!-- TAB IMG -->
     <div class="tab-panel" id="tab-img">
         <div class="input-group">
-            <label>Nama Penerima / Pasien</label>
-            <input type="text" id="pNameImg" placeholder="Contoh: Budi Santoso" autocomplete="off">
+            <label>Nama Pasien</label>
+            <input type="text" id="pNameImg" placeholder="Nama Lengkap">
         </div>
-        <div class="input-group">
-            <label>Tanggal Lahir</label>
-            <input type="date" id="pDobImg">
+        <div class="upload-zone">
+            <input type="file" id="imgInput" accept=".dcm,image/*" multiple onchange="handleDCMFiles(this)">
+            <p id="imgStatus">Pilih urutan file .dcm</p>
         </div>
-        <label>
-            Gambar Sequence
-            <span class="img-count-badge" id="imgCount">0</span>
-        </label>
-        <div class="upload-zone" id="imgZone" style="margin-top:8px;">
-            <input type="file" id="imgInput" accept="image/*" multiple onchange="handleImages(this)">
-            <div class="upload-icon">🖼️</div>
-            <p>Pilih gambar (bisa multi-pilih)</p>
-            <p style="font-size:11px; margin-top:4px;">JPG, PNG, WEBP · Urutan otomatis</p>
-        </div>
-
         <div class="image-list" id="imageList"></div>
-
-        <button class="generate-btn" onclick="generateImgSeq()" id="generateImgBtn">⚡ Buat Image Viewer</button>
+        <button class="generate-btn" id="btnImg" onclick="generate('img')">GENERATE IMAGE VIEWER</button>
     </div>
 
-    <!-- Progress & Status -->
-    <div class="progress-wrap" id="progressWrap">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
+    <div class="progress-bar" id="pBar"><div class="progress-fill" id="pFill"></div></div>
     <div id="status"></div>
-
-    <div class="tips">
-        <p>
-            📱 <span>Kontrol Smartphone:</span><br>
-            <span>3D:</span> Swipe putar · Pinch zoom · 2 jari geser<br>
-            <span>Foto:</span> Swipe kiri/kanan untuk slide gambar
-        </p>
-    </div>
 </div>
 
 <script>
-    // ========== TAB SWITCHING ==========
-    function switchTab(tab, btn) {
+    let dcmFiles = [];
+
+    function switchTab(type, btn) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('tab-' + tab).classList.add('active');
-        clearStatus();
+        document.getElementById('tab-' + type).classList.add('active');
     }
 
-    function clearStatus() {
-        document.getElementById('status').innerText = '';
-        document.getElementById('progressWrap').style.display = 'none';
-        setProgress(0);
-    }
-
-    function setStatus(msg, color) {
-        const s = document.getElementById('status');
-        s.innerText = msg;
-        s.style.color = color || '#27ae60';
-    }
-
-    function setProgress(pct) {
-        document.getElementById('progressFill').style.width = pct + '%';
-    }
-
-    // ========== STL HANDLING ==========
-    function handleSTLFile(input) {
-        const zone = document.getElementById('stlZone');
-        if (input.files[0]) {
-            zone.classList.add('ready');
-            zone.querySelector('p').innerText = '✅ ' + input.files[0].name;
-            zone.querySelector('p').style.color = '#27ae60';
+    function handleFileReady(type, input) {
+        if(input.files[0]) {
+            document.getElementById(type + 'Status').innerText = "✅ " + input.files[0].name;
+            document.getElementById(type + 'Status').style.color = "#27ae60";
         }
     }
 
-    function arrayBufferToBase64(buffer) {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        const CHUNK = 8192;
-        for (let i = 0; i < bytes.byteLength; i += CHUNK) {
-            const chunk = bytes.subarray(i, i + CHUNK);
-            binary += String.fromCharCode.apply(null, chunk);
-        }
-        return window.btoa(binary);
-    }
-
-    async function generateSTL() {
-        const name = document.getElementById('pName').value.trim();
-        const dob = document.getElementById('pDob').value;
-        const fileInput = document.getElementById('stlInput');
-        const btn = document.getElementById('generateStlBtn');
-
-        if (!name) return alert('Silakan isi Nama Penerima/Pasien!');
-        if (!fileInput.files[0]) return alert('Silakan pilih file STL terlebih dahulu!');
-
-        btn.disabled = true;
-        btn.innerText = 'Memproses...';
-        document.getElementById('progressWrap').style.display = 'block';
-        setStatus('Membaca file STL...', '#f39c12');
-        setProgress(20);
-
-        const file = fileInput.files[0];
-
-        try {
-            const arrayBuffer = await file.arrayBuffer();
-            setProgress(50);
-            setStatus('Mengkonversi data...', '#f39c12');
-
-            await new Promise(r => setTimeout(r, 50)); // yield to UI
-
-            const base64Data = arrayBufferToBase64(arrayBuffer);
-            setProgress(80);
-            setStatus('Membangun file viewer...', '#f39c12');
-
-            await new Promise(r => setTimeout(r, 50));
-
-            const html = buildSTLTemplate(name, dob, base64Data);
-            downloadHTML(html, name, '3D_Viewer');
-
-            setProgress(100);
-            setStatus('✅ Berhasil! File viewer telah didownload.', '#27ae60');
-        } catch (e) {
-            setStatus('❌ Gagal: ' + e.message, '#e74c3c');
-        }
-
-        btn.disabled = false;
-        btn.innerText = '⚡ Buat 3D Viewer';
-    }
-
-    // ========== IMAGE SEQUENCE ==========
-    let imageFiles = [];
-
-    function handleImages(input) {
+    function handleDCMFiles(input) {
         const newFiles = Array.from(input.files);
-        imageFiles = imageFiles.concat(newFiles);
-        imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-        renderImageList();
-        document.getElementById('imgZone').classList.add('ready');
-    }
-
-    function renderImageList() {
-        const list = document.getElementById('imageList');
-        const count = document.getElementById('imgCount');
-        count.innerText = imageFiles.length;
-        list.innerHTML = '';
-
-        imageFiles.forEach((f, i) => {
-            const item = document.createElement('div');
-            item.className = 'img-item';
-            const thumb = document.createElement('img');
-            thumb.className = 'thumb';
-            thumb.src = URL.createObjectURL(f);
-            const name = document.createElement('span');
-            name.className = 'img-name';
-            name.innerText = (i + 1) + '. ' + f.name;
-            const rmBtn = document.createElement('button');
-            rmBtn.className = 'remove-btn';
-            rmBtn.innerText = '×';
-            rmBtn.onclick = () => { imageFiles.splice(i, 1); renderImageList(); };
-            item.appendChild(thumb);
-            item.appendChild(name);
-            item.appendChild(rmBtn);
-            list.appendChild(item);
+        dcmFiles = [...dcmFiles, ...newFiles];
+        
+        // SORTING LOGIC: Mengambil angka di belakang nama file sebelum .dcm
+        dcmFiles.sort((a, b) => {
+            const numA = parseInt(a.name.match(/(\d+)(?=\.[^.]+$)/)?.[0] || 0);
+            const numB = parseInt(b.name.match(/(\d+)(?=\.[^.]+$)/)?.[0] || 0);
+            return numA - numB;
         });
+
+        renderDCMList();
     }
 
-    async function generateImgSeq() {
-        const name = document.getElementById('pNameImg').value.trim();
-        const dob = document.getElementById('pDobImg').value;
-        const btn = document.getElementById('generateImgBtn');
-
-        if (!name) return alert('Silakan isi Nama Penerima/Pasien!');
-        if (imageFiles.length === 0) return alert('Silakan pilih gambar terlebih dahulu!');
-
-        btn.disabled = true;
-        btn.innerText = 'Memproses...';
-        document.getElementById('progressWrap').style.display = 'block';
-        setStatus('Membaca gambar...', '#f39c12');
-
-        const base64Images = [];
-        const mimeTypes = [];
-
-        for (let i = 0; i < imageFiles.length; i++) {
-            setProgress(Math.round((i / imageFiles.length) * 80));
-            setStatus(`Memproses gambar ${i + 1}/${imageFiles.length}...`, '#f39c12');
-            const { b64, mime } = await readFileAsBase64(imageFiles[i]);
-            base64Images.push(b64);
-            mimeTypes.push(mime);
-            await new Promise(r => setTimeout(r, 10));
-        }
-
-        setProgress(90);
-        setStatus('Membangun file viewer...', '#f39c12');
-        await new Promise(r => setTimeout(r, 50));
-
-        const html = buildImgTemplate(name, dob, base64Images, mimeTypes);
-        downloadHTML(html, name, 'Image_Viewer');
-
-        setProgress(100);
-        setStatus('✅ Berhasil! File viewer telah didownload.', '#27ae60');
-
-        btn.disabled = false;
-        btn.innerText = '⚡ Buat Image Viewer';
+    function renderDCMList() {
+        const list = document.getElementById('imageList');
+        list.innerHTML = '';
+        dcmFiles.forEach((f, i) => {
+            list.innerHTML += `<div class="img-item"><span>${i+1}. ${f.name}</span><button class="remove-btn" onclick="removeDCM(${i})">×</button></div>`;
+        });
+        document.getElementById('imgStatus').innerText = `Total: ${dcmFiles.length} file dipilih`;
     }
 
-    function readFileAsBase64(file) {
-        return new Promise((resolve, reject) => {
+    function removeDCM(i) { dcmFiles.splice(i, 1); renderDCMList(); }
+
+    async function fileToBase64(file) {
+        return new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = e => {
-                const result = e.target.result;
-                const b64 = result.split(',')[1];
-                resolve({ b64, mime: file.type });
-            };
-            reader.onerror = reject;
+            reader.onload = () => resolve(reader.result.split(',')[1]);
             reader.readAsDataURL(file);
         });
     }
 
-    function downloadHTML(html, name, prefix) {
-        const blob = new Blob([html], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        const safeName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-        link.download = `${prefix}_${safeName}.html`;
-        link.click();
-    }
+    async function generate(type) {
+        const name = document.getElementById(type === 'stl' ? 'pName' : 'pNameImg').value;
+        if(!name) return alert("Isi nama pasien!");
 
-    // ========== STL TEMPLATE ==========
-    function buildSTLTemplate(name, dob, stlBase64) {
-        const displayDob = dob || 'Tidak disebutkan';
-        const todayDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        const btn = document.getElementById(type === 'stl' ? 'btnStl' : 'btnImg');
+        const status = document.getElementById('status');
+        const pBar = document.getElementById('pBar');
+        const pFill = document.getElementById('pFill');
 
-        return `<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>3D Viewer - ${name}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{background:#111;font-family:'Segoe UI',sans-serif;overflow:hidden;touch-action:none;}
-#c{display:block;width:100vw;height:100vh;}
-#panel{
-    position:fixed;top:16px;left:16px;
-    color:#fff;background:rgba(15,15,15,0.88);
-    padding:14px 18px;border-radius:10px;
-    border-left:3px solid #e74c3c;
-    backdrop-filter:blur(8px);
-    pointer-events:none;
-    max-width:200px;
-}
-#panel h3{font-size:15px;margin-bottom:10px;border-bottom:1px solid #333;padding-bottom:8px;}
-.row{font-size:13px;color:#aaa;margin:5px 0;}
-.val{color:#fff;font-weight:600;}
-#hint{
-    position:fixed;bottom:16px;
-    width:100%;text-align:center;
-    color:rgba(255,255,255,0.45);font-size:11px;
-    pointer-events:none;letter-spacing:0.5px;
-}
-#loading{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    color:#e74c3c;font-size:20px;font-weight:bold;text-align:center;
-}
-.spinner{
-    width:40px;height:40px;border:3px solid #333;border-top-color:#e74c3c;
-    border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-</style>
-</head>
-<body>
-<canvas id="c"></canvas>
-<div id="loading"><div class="spinner"></div>Memuat Model 3D...</div>
-<div id="panel" style="display:none">
-    <h3>Data Rekam</h3>
-    <div class="row">Nama: <span class="val">${name}</span></div>
-    <div class="row">Tgl Lahir: <span class="val">${displayDob}</span></div>
-    <div class="row" style="margin-top:10px;font-size:10px;opacity:0.5;">${todayDate}</div>
-</div>
-<div id="hint">Swipe: Putar &nbsp;|&nbsp; Pinch: Zoom &nbsp;|&nbsp; 2 Jari: Geser</div>
+        btn.disabled = true;
+        pBar.style.display = 'block';
+        status.innerText = "Memproses data...";
 
-<script>
-(function(){
-// ---- Minimal WebGL STL Viewer ----
-const canvas = document.getElementById('c');
-const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-if(!gl){ document.getElementById('loading').innerText='WebGL tidak didukung'; return; }
-
-function resize(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    gl.viewport(0,0,canvas.width,canvas.height);
-}
-resize();
-window.addEventListener('resize', resize);
-
-// Shader
-const vsrc = \`
-attribute vec3 pos;
-attribute vec3 norm;
-uniform mat4 mvp;
-uniform mat4 mv;
-varying vec3 vNormal;
-void main(){
-    vNormal = normalize(mat3(mv) * norm);
-    gl_Position = mvp * vec4(pos, 1.0);
-}
-\`;
-
-const fsrc = \`
-precision mediump float;
-varying vec3 vNormal;
-void main(){
-    vec3 light = normalize(vec3(0.5, 1.0, 0.8));
-    vec3 light2 = normalize(vec3(-0.5, -0.5, -0.5));
-    float d = max(dot(vNormal, light), 0.0);
-    float d2 = max(dot(vNormal, light2), 0.0) * 0.3;
-    float ambient = 0.25;
-    float bright = ambient + d * 0.7 + d2;
-    vec3 col = vec3(0.82, 0.82, 0.82) * bright;
-    gl_FragColor = vec4(col, 1.0);
-}
-\`;
-
-function compileShader(type, src){
-    const s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    return s;
-}
-const prog = gl.createProgram();
-gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, vsrc));
-gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, fsrc));
-gl.linkProgram(prog);
-gl.useProgram(prog);
-
-const posLoc = gl.getAttribLocation(prog, 'pos');
-const normLoc = gl.getAttribLocation(prog, 'norm');
-const mvpLoc = gl.getUniformLocation(prog, 'mvp');
-const mvLoc = gl.getUniformLocation(prog, 'mv');
-
-// Parse STL
-const b64 = "${stlBase64}";
-let raw;
-try{
-    const bin = atob(b64);
-    raw = new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++) raw[i]=bin.charCodeAt(i);
-}catch(e){
-    document.getElementById('loading').innerText='Gagal decode data';return;
-}
-
-let positions=[], normals=[];
-
-// Try binary STL
-function parseBinarySTL(buf){
-    const dv = new DataView(buf);
-    const count = dv.getUint32(80, true);
-    let ok = true;
-    const expectedSize = 84 + count * 50;
-    if(buf.byteLength < expectedSize) ok = false;
-    if(ok && count > 0){
-        for(let i=0;i<count;i++){
-            const off = 84 + i*50;
-            const nx=dv.getFloat32(off,true), ny=dv.getFloat32(off+4,true), nz=dv.getFloat32(off+8,true);
-            for(let v=0;v<3;v++){
-                const voff = off+12+v*12;
-                positions.push(dv.getFloat32(voff,true), dv.getFloat32(voff+4,true), dv.getFloat32(voff+8,true));
-                normals.push(nx,ny,nz);
+        try {
+            let htmlContent = "";
+            if(type === 'stl') {
+                const file = document.getElementById('stlInput').files[0];
+                if(!file) throw new Error("Pilih file STL!");
+                const b64 = await fileToBase64(file);
+                htmlContent = buildSTLViewer(name, b64);
+            } else {
+                if(dcmFiles.length === 0) throw new Error("Pilih file gambar!");
+                const imgs = [];
+                for(let i=0; i<dcmFiles.length; i++) {
+                    status.innerText = `Mengonversi file ${i+1}/${dcmFiles.length}...`;
+                    pFill.style.width = ((i/dcmFiles.length)*100) + "%";
+                    const b64 = await fileToBase64(dcmFiles[i]);
+                    imgs.push({ b64, type: dcmFiles[i].type || 'image/jpeg' });
+                }
+                htmlContent = buildImgViewer(name, imgs);
             }
+
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${type.toUpperCase()}_${name.replace(/\s+/g, '_')}.html`;
+            link.click();
+
+            status.innerText = "✅ Berhasil didownload!";
+            status.style.color = "#27ae60";
+        } catch(e) {
+            status.innerText = "❌ Error: " + e.message;
+            status.style.color = "#e74c3c";
         }
-        return positions.length > 0;
+        btn.disabled = false;
     }
-    return false;
-}
 
-// Try ASCII STL
-function parseASCIISTL(text){
-    const lines = text.split('\\n');
-    let nx=0,ny=0,nz=0;
-    let inFacet=false;
-    let vCount=0;
-    for(const line of lines){
-        const l = line.trim();
-        if(l.startsWith('facet normal')){
-            const p=l.split(/\\s+/);
-            nx=parseFloat(p[2]);ny=parseFloat(p[3]);nz=parseFloat(p[4]);
-            inFacet=true; vCount=0;
-        } else if(l.startsWith('vertex') && inFacet){
-            const p=l.split(/\\s+/);
-            positions.push(parseFloat(p[1]),parseFloat(p[2]),parseFloat(p[3]));
-            normals.push(nx,ny,nz);
-            vCount++;
-        } else if(l.startsWith('endfacet')){
-            inFacet=false;
+    // --- TEMPLATE GENERATORS ---
+
+    function buildSTLViewer(name, b64) {
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>3D - ${name}</title>
+        <style>body{margin:0;background:#050505;color:#fff;font-family:sans-serif;overflow:hidden;touch-action:none;} canvas{width:100vw;height:100vh;display:block;}
+        #ui{position:fixed;top:20px;left:20px;background:rgba(0,0,0,0.7);padding:15px;border-left:3px solid #e74c3c;border-radius:5px;pointer-events:none;}
+        #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#050505;z-index:100;}</style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
+        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/STLLoader.js"><\/script>
+        </head><body><div id="load">Loading 3D...</div><div id="ui"><b>Pasien:</b> ${name}<br><small>Swipe: Rotate | Pinch: Zoom</small></div>
+        <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        document.body.appendChild(renderer.domElement);
+
+        const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(1,1,1); scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+        const loader = new THREE.STLLoader();
+        const b64 = "${b64}";
+        const bin = atob(b64);
+        const ab = new Uint8Array(bin.length);
+        for(let i=0; i<bin.length; i++) ab[i] = bin.charCodeAt(i);
+
+        const geometry = loader.parse(ab.buffer);
+        const material = new THREE.MeshPhongMaterial({color:0xdddddd, specular:0x111111, shininess:200});
+        const mesh = new THREE.Mesh(geometry, material);
+        geometry.center();
+        
+        // Auto scale for mobile
+        const box = new THREE.Box3().setFromObject(mesh);
+        const size = box.getSize(new THREE.Vector3()).length();
+        camera.position.z = size * 1.5;
+        scene.add(mesh);
+        document.getElementById('load').style.display='none';
+
+        // Mobile Controls
+        let isDragging = false; let px, py;
+        window.addEventListener('touchstart', e => { isDragging=true; px=e.touches[0].pageX; py=e.touches[0].pageY; });
+        window.addEventListener('touchmove', e => {
+            if(!isDragging) return;
+            const dx = e.touches[0].pageX - px; const dy = e.touches[0].pageY - py;
+            mesh.rotation.y += dx * 0.01; mesh.rotation.x += dy * 0.01;
+            px = e.touches[0].pageX; py = e.touches[0].pageY;
+        });
+        window.addEventListener('touchend', () => isDragging=false);
+
+        function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
+        animate();
+        <\/script></body></html>`;
+    }
+
+    function buildImgViewer(name, imgs) {
+        const jsonImgs = JSON.stringify(imgs);
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Images - ${name}</title>
+        <style>body{margin:0;background:#000;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        #header{padding:15px;background:rgba(20,20,20,0.9);border-bottom:1px solid #333;}
+        #view{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+        img{max-width:100%;max-height:100%;object-fit:contain;}
+        #ctrl{padding:20px;display:flex;align-items:center;gap:15px;background:#111;}
+        input[type=range]{flex:1;accent-color:#e74c3c;}</style>
+        </head><body><div id="header"><b>${name}</b></div>
+        <div id="view"><img id="mainImg" src=""></div>
+        <div id="ctrl"><span id="idx">1</span> <input type="range" id="slider" min="0" value="0"> <span id="total"></span></div>
+        <script>
+        const imgs = ${jsonImgs};
+        const main = document.getElementById('mainImg');
+        const slider = document.getElementById('slider');
+        const idxTxt = document.getElementById('idx');
+        
+        slider.max = imgs.length - 1;
+        document.getElementById('total').innerText = imgs.length;
+
+        function update(i){
+            main.src = 'data:' + imgs[i].type + ';base64,' + imgs[i].b64;
+            idxTxt.innerText = parseInt(i) + 1;
         }
+
+        slider.oninput = (e) => update(e.target.value);
+        update(0);
+
+        // Touch to scrub
+        let startX;
+        document.getElementById('view').ontouchstart = e => startX = e.touches[0].pageX;
+        document.getElementById('view').ontouchmove = e => {
+            const dx = e.touches[0].pageX - startX;
+            if(Math.abs(dx) > 10){
+                const step = dx > 0 ? 1 : -1;
+                slider.value = parseInt(slider.value) + step;
+                update(slider.value);
+                startX = e.touches[0].pageX;
+            }
+        };
+        <\/script></body></html>`;
     }
-    return positions.length > 0;
-}
-
-const isBinary = !(new TextDecoder().decode(raw.slice(0,5)).toLowerCase().startsWith('solid') &&
-                   new TextDecoder().decode(raw.slice(0,256)).toLowerCase().includes('facet'));
-
-let parsed = false;
-if(!isBinary) parsed = parseASCIISTL(new TextDecoder().decode(raw));
-if(!parsed) parsed = parseBinarySTL(raw.buffer.slice(raw.byteOffset, raw.byteOffset+raw.byteLength));
-if(!parsed) parsed = parseASCIISTL(new TextDecoder().decode(raw));
-
-if(!parsed || positions.length === 0){
-    document.getElementById('loading').innerText='Gagal parse STL'; return;
-}
-
-// Upload to GPU
-const posBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-const normBuf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-
-const triCount = positions.length / 3;
-
-// Compute bounds & center
-let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,minZ=Infinity,maxZ=-Infinity;
-for(let i=0;i<positions.length;i+=3){
-    const x=positions[i],y=positions[i+1],z=positions[i+2];
-    if(x<minX)minX=x; if(x>maxX)maxX=x;
-    if(y<minY)minY=y; if(y>maxY)maxY=y;
-    if(z<minZ)minZ=z; if(z>maxZ)maxZ=z;
-}
-const cx=(minX+maxX)/2, cy=(minY+maxY)/2, cz=(minZ+maxZ)/2;
-const maxDim = Math.max(maxX-minX, maxY-minY, maxZ-minZ) || 1;
-
-// Camera state
-let rotX = -0.3, rotY = 0.3;
-let zoom = maxDim * 2.2;
-let panX = 0, panY = 0;
-
-// ---- Math helpers ----
-function mat4mul(a, b){
-    const r=new Float32Array(16);
-    for(let i=0;i<4;i++) for(let j=0;j<4;j++){
-        let s=0; for(let k=0;k<4;k++) s+=a[i*4+k]*b[k*4+j];
-        r[i*4+j]=s;
-    }
-    return r;
-}
-function perspective(fov, asp, near, far){
-    const f=1/Math.tan(fov/2);
-    return new Float32Array([
-        f/asp,0,0,0,
-        0,f,0,0,
-        0,0,(far+near)/(near-far),-1,
-        0,0,(2*far*near)/(near-far),0
-    ]);
-}
-function translation(x,y,z){
-    const m=new Float32Array(16); m[0]=m[5]=m[10]=m[15]=1;
-    m[12]=x; m[13]=y; m[14]=z; return m;
-}
-function rotXmat(a){
-    const c=Math.cos(a),s=Math.sin(a);
-    return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);
-}
-function rotYmat(a){
-    const c=Math.cos(a),s=Math.sin(a);
-    return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);
-}
-
-function render(){
-    gl.clearColor(0.07,0.07,0.07,1);
-    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-
-    const asp = canvas.width/canvas.height;
-    const proj = perspective(Math.PI/4, asp, 0.01, zoom*10);
-
-    const model = mat4mul(
-        mat4mul(rotXmat(rotX), rotYmat(rotY)),
-        translation(-cx,-cy,-cz)
-    );
-    const view = translation(panX, panY, -zoom);
-    const mv = mat4mul(view, model);
-    const mvp = mat4mul(proj, mv);
-
-    gl.uniformMatrix4fv(mvpLoc, false, mvp);
-    gl.uniformMatrix4fv(mvLoc, false, mv);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
-    gl.enableVertexAttribArray(posLoc);
-    gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
-    gl.enableVertexAttribArray(normLoc);
-    gl.vertexAttribPointer(normLoc, 3, gl.FLOAT, false, 0, 0);
-
-    gl.drawArrays(gl.TRIANGLES, 0, triCount);
-}
-
-let rafId;
-function loop(){ rafId=requestAnimationFrame(loop); render(); }
-loop();
-
-document.getElementById('loading').style.display='none';
-document.getElementById('panel').style.display='block';
-
-// ========== TOUCH CONTROLS (Mobile-First) ==========
-let touches = {};
-let lastTouches = {};
-let touchMode = null; // 'rotate','zoom','pan'
-
-function getTouchDist(t1, t2){
-    const dx=t1.clientX-t2.clientX, dy=t1.clientY-t2.clientY;
-    return Math.sqrt(dx*dx+dy*dy);
-}
-
-function getTouchMid(t1, t2){
-    return { x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2 };
-}
-
-let lastDist = 0;
-let lastMid = { x:0, y:0 };
-
-canvas.addEventListener('touchstart', e=>{
-    e.preventDefault();
-    lastTouches = {};
-    for(const t of e.touches) lastTouches[t.identifier] = { clientX:t.clientX, clientY:t.clientY };
-    if(e.touches.length === 2){
-        lastDist = getTouchDist(e.touches[0], e.touches[1]);
-        lastMid = getTouchMid(e.touches[0], e.touches[1]);
-        touchMode = 'zoom-pan';
-    } else if(e.touches.length === 1){
-        touchMode = 'rotate';
-    }
-}, { passive:false });
-
-canvas.addEventListener('touchmove', e=>{
-    e.preventDefault();
-    const tArr = Array.from(e.touches);
-
-    if(e.touches.length === 1 && touchMode === 'rotate'){
-        const t = e.touches[0];
-        const prev = lastTouches[t.identifier];
-        if(prev){
-            const dx = t.clientX - prev.clientX;
-            const dy = t.clientY - prev.clientY;
-            rotY += dx * 0.008;
-            rotX += dy * 0.008;
-            rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, rotX));
-        }
-    } else if(e.touches.length === 2 && touchMode === 'zoom-pan'){
-        const t1=e.touches[0], t2=e.touches[1];
-        const dist = getTouchDist(t1, t2);
-        const mid = getTouchMid(t1, t2);
-
-        // Zoom
-        const scale = lastDist > 0 ? dist / lastDist : 1;
-        zoom = Math.max(maxDim*0.3, Math.min(maxDim*10, zoom / scale));
-
-        // Pan
-        const dpx = (mid.x - lastMid.x) * zoom / canvas.width * 2;
-        const dpy = -(mid.y - lastMid.y) * zoom / canvas.height * 2;
-        panX += dpx;
-        panY += dpy;
-
-        lastDist = dist;
-        lastMid = mid;
-    }
-
-    // Update lastTouches
-    for(const t of e.touches) lastTouches[t.identifier] = { clientX:t.clientX, clientY:t.clientY };
-}, { passive:false });
-
-canvas.addEventListener('touchend', e=>{
-    e.preventDefault();
-    if(e.touches.length < 2) touchMode = e.touches.length === 1 ? 'rotate' : null;
-    lastTouches = {};
-    for(const t of e.touches) lastTouches[t.identifier] = { clientX:t.clientX, clientY:t.clientY };
-}, { passive:false });
-
-// ---- Mouse fallback (desktop) ----
-let mouse = { down:false, right:false, x:0, y:0 };
-canvas.addEventListener('mousedown', e=>{ mouse.down=true; mouse.right=e.button===2; mouse.x=e.clientX; mouse.y=e.clientY; });
-canvas.addEventListener('mouseup', ()=>{ mouse.down=false; });
-canvas.addEventListener('mousemove', e=>{
-    if(!mouse.down) return;
-    const dx=e.clientX-mouse.x, dy=e.clientY-mouse.y;
-    if(mouse.right){ panX+=dx*zoom/canvas.width*2; panY-=dy*zoom/canvas.height*2; }
-    else { rotY+=dx*0.006; rotX+=dy*0.006; rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX)); }
-    mouse.x=e.clientX; mouse.y=e.clientY;
-});
-canvas.addEventListener('wheel', e=>{ e.preventDefault(); zoom*=(1+e.deltaY*0.001); zoom=Math.max(maxDim*0.3,Math.min(maxDim*10,zoom)); }, { passive:false });
-canvas.addEventListener('contextmenu', e=>e.preventDefault());
-
-})();
-<\/script>
-</body>
-</html>`;
-    }
-
-    // ========== IMAGE SEQUENCE TEMPLATE ==========
-    function buildImgTemplate(name, dob, images, mimes) {
-        const displayDob = dob || 'Tidak disebutkan';
-        const todayDate = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-        const count = images.length;
-
-        const imagesJSON = JSON.stringify(images.map((b64, i) => ({ b64, mime: mimes[i] })));
-
-        return `<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Image Viewer - ${name}</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{
-    background:#0d0d0d;
-    font-family:'Segoe UI',sans-serif;
-    overflow:hidden;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    user-select:none;
-}
-#header{
-    position:fixed;top:0;left:0;right:0;z-index:10;
-    background:rgba(10,10,10,0.92);
-    border-bottom:1px solid rgba(231,76,60,0.3);
-    backdrop-filter:blur(10px);
-    padding:12px 16px;
-    display:flex;
-    align-items:center;
-    gap:14px;
-}
-#header .info{flex:1;}
-#header h3{color:#fff;font-size:15px;font-weight:600;margin-bottom:2px;}
-#header p{color:#888;font-size:12px;}
-#counter{
-    color:#e74c3c;
-    font-family:monospace;
-    font-size:18px;
-    font-weight:bold;
-    min-width:60px;
-    text-align:right;
-}
-#viewer{
-    flex:1;
-    position:relative;
-    overflow:hidden;
-    margin-top:60px;
-    margin-bottom:56px;
-}
-#track{
-    display:flex;
-    height:100%;
-    transition:transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
-    will-change:transform;
-}
-.slide{
-    min-width:100vw;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-}
-.slide img{
-    max-width:100%;
-    max-height:100%;
-    object-fit:contain;
-    display:block;
-    pointer-events:none;
-}
-/* Zoom overlay per slide */
-.slide-canvas{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-#footer{
-    position:fixed;bottom:0;left:0;right:0;z-index:10;
-    background:rgba(10,10,10,0.92);
-    backdrop-filter:blur(10px);
-    border-top:1px solid #222;
-    padding:8px 16px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-}
-#progress{flex:1;height:3px;background:#222;border-radius:2px;overflow:hidden;}
-#progress-fill{height:100%;background:#e74c3c;border-radius:2px;transition:width 0.3s;}
-.nav-btn{
-    background:rgba(231,76,60,0.15);
-    border:1px solid rgba(231,76,60,0.4);
-    color:#e74c3c;
-    border-radius:6px;
-    padding:6px 14px;
-    font-size:16px;
-    cursor:pointer;
-    touch-action:manipulation;
-    transition:all 0.15s;
-}
-.nav-btn:active{background:rgba(231,76,60,0.35);}
-#dots{
-    display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:180px;
-}
-.dot{
-    width:5px;height:5px;border-radius:50%;
-    background:#333;transition:background 0.2s, transform 0.2s;
-}
-.dot.active{background:#e74c3c;transform:scale(1.4);}
-#hint-swipe{
-    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-    color:rgba(255,255,255,0.5);font-size:13px;
-    text-align:center;pointer-events:none;
-    animation: fadeHint 3s ease forwards;
-}
-@keyframes fadeHint{0%{opacity:1}70%{opacity:1}100%{opacity:0;visibility:hidden;}}
-</style>
-</head>
-<body>
-
-<div id="header">
-    <div class="info">
-        <h3>${name}</h3>
-        <p>Tgl Lahir: ${displayDob} &nbsp;·&nbsp; ${todayDate}</p>
-    </div>
-    <div id="counter">1/${count}</div>
-</div>
-
-<div id="viewer">
-    <div id="track"></div>
-    <div id="hint-swipe">← Swipe untuk navigasi →</div>
-</div>
-
-<div id="footer">
-    <button class="nav-btn" id="prevBtn" onclick="goTo(current-1)">‹</button>
-    <div id="progress"><div id="progress-fill"></div></div>
-    <div id="dots"></div>
-    <button class="nav-btn" id="nextBtn" onclick="goTo(current+1)">›</button>
-</div>
-
-<script>
-const IMAGES = ${imagesJSON};
-const total = IMAGES.length;
-let current = 0;
-let imgScale = 1;
-let imgPanX = 0, imgPanY = 0;
-
-// Build slides
-const track = document.getElementById('track');
-IMAGES.forEach((img, i) => {
-    const slide = document.createElement('div');
-    slide.className = 'slide';
-    const el = document.createElement('img');
-    el.id = 'img' + i;
-    // Lazy load: only preload first 3
-    if(i < 3){
-        el.src = 'data:' + img.mime + ';base64,' + img.b64;
-    } else {
-        el.dataset.src = 'data:' + img.mime + ';base64,' + img.b64;
-    }
-    el.alt = 'Frame ' + (i+1);
-    slide.appendChild(el);
-    track.appendChild(slide);
-});
-
-// Dots
-const dotsEl = document.getElementById('dots');
-const MAX_DOTS = 10;
-for(let i=0;i<Math.min(total, MAX_DOTS);i++){
-    const d=document.createElement('div');
-    d.className='dot'+(i===0?' active':'');
-    dotsEl.appendChild(d);
-}
-
-function goTo(idx){
-    idx = Math.max(0, Math.min(total-1, idx));
-    current = idx;
-
-    // Lazy load adjacent
-    [-1,0,1,2].forEach(off => {
-        const j = idx + off;
-        if(j>=0 && j<total){
-            const el = document.getElementById('img'+j);
-            if(el && el.dataset.src){ el.src = el.dataset.src; delete el.dataset.src; }
-        }
-    });
-
-    track.style.transform = 'translateX(-' + (idx * 100) + 'vw)';
-    document.getElementById('counter').innerText = (idx+1) + '/' + total;
-    document.getElementById('progress-fill').style.width = ((idx+1)/total*100) + '%';
-
-    // Dots
-    const dots = dotsEl.querySelectorAll('.dot');
-    const dotIdx = Math.min(idx, MAX_DOTS-1);
-    dots.forEach((d,i)=>{ d.classList.toggle('active', i===dotIdx); });
-
-    // Reset zoom on slide change
-    imgScale=1; imgPanX=0; imgPanY=0;
-}
-
-// ========== SWIPE CONTROLS ==========
-const viewer = document.getElementById('viewer');
-let startX=0, startY=0, startTime=0;
-let isDragging=false;
-let swipeHandled = false;
-
-// Per-image pinch zoom
-let pinchStart=0, pinchScaleStart=1;
-let pinchMidStart={x:0,y:0};
-let pinchPanXStart=0, pinchPanYStart=0;
-let isPinching=false;
-
-function applyImageTransform(){
-    const img = document.getElementById('img'+current);
-    if(!img) return;
-    img.style.transform = 'translate('+imgPanX+'px,'+imgPanY+'px) scale('+imgScale+')';
-    img.style.transition = 'transform 0s';
-}
-
-viewer.addEventListener('touchstart', e=>{
-    if(e.touches.length===1){
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        startTime = Date.now();
-        isDragging = true;
-        swipeHandled = false;
-        isPinching = false;
-    } else if(e.touches.length===2){
-        isPinching = true;
-        isDragging = false;
-        const t1=e.touches[0], t2=e.touches[1];
-        pinchStart = Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
-        pinchScaleStart = imgScale;
-        pinchMidStart = { x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2 };
-        pinchPanXStart = imgPanX;
-        pinchPanYStart = imgPanY;
-    }
-}, { passive:true });
-
-viewer.addEventListener('touchmove', e=>{
-    if(isPinching && e.touches.length===2){
-        e.preventDefault();
-        const t1=e.touches[0], t2=e.touches[1];
-        const dist = Math.hypot(t2.clientX-t1.clientX, t2.clientY-t1.clientY);
-        imgScale = Math.max(0.5, Math.min(5, pinchScaleStart * (dist/pinchStart)));
-        const mid = {x:(t1.clientX+t2.clientX)/2, y:(t1.clientY+t2.clientY)/2};
-        imgPanX = pinchPanXStart + (mid.x - pinchMidStart.x);
-        imgPanY = pinchPanYStart + (mid.y - pinchMidStart.y);
-        applyImageTransform();
-        return;
-    }
-
-    if(!isDragging || e.touches.length!==1 || swipeHandled) return;
-
-    const dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
-
-    // If zoomed in, let pan happen instead of slide
-    if(imgScale > 1.05){
-        e.preventDefault();
-        imgPanX += e.touches[0].clientX - startX;
-        imgPanY += e.touches[0].clientY - startY;
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        applyImageTransform();
-        return;
-    }
-
-    // Horizontal swipe detection
-    if(Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 8){
-        e.preventDefault(); // Prevent scroll
-        // Live drag feedback
-        const offset = current * 100;
-        const drag = (dx / window.innerWidth) * 100;
-        track.style.transition = 'none';
-        track.style.transform = 'translateX(' + (-offset + drag) + 'vw)';
-    }
-}, { passive:false });
-
-viewer.addEventListener('touchend', e=>{
-    if(isPinching){ isPinching=false; return; }
-    if(!isDragging) return;
-    isDragging=false;
-
-    const dx = (e.changedTouches[0]?.clientX || startX) - startX;
-    const dt = Date.now() - startTime;
-    const velocity = Math.abs(dx) / dt;
-
-    if((Math.abs(dx) > 50 || velocity > 0.4) && imgScale<=1.05){
-        swipeHandled=true;
-        if(dx < 0) goTo(current+1);
-        else goTo(current-1);
-    } else {
-        // Snap back
-        track.style.transition = '';
-        track.style.transform = 'translateX(-'+(current*100)+'vw)';
-    }
-    if(imgScale<=1.05){ imgScale=1; imgPanX=0; imgPanY=0; applyImageTransform(); }
-}, { passive:true });
-
-// Double tap to reset zoom
-let lastTap=0;
-viewer.addEventListener('touchend', e=>{
-    const now=Date.now();
-    if(now-lastTap<300){ imgScale=1; imgPanX=0; imgPanY=0; applyImageTransform(); }
-    lastTap=now;
-}, { passive:true });
-
-// Keyboard (desktop)
-document.addEventListener('keydown', e=>{
-    if(e.key==='ArrowRight'||e.key==='ArrowDown') goTo(current+1);
-    if(e.key==='ArrowLeft'||e.key==='ArrowUp') goTo(current-1);
-});
-
-// Init
-goTo(0);
-<\/script>
-</body>
-</html>`;
-    }
-
-    // ========== DRAG & DROP FOR STL ==========
-    const stlZone = document.getElementById('stlZone');
-    stlZone.addEventListener('dragover', e=>{e.preventDefault(); stlZone.classList.add('dragover');});
-    stlZone.addEventListener('dragleave', ()=>stlZone.classList.remove('dragover'));
-    stlZone.addEventListener('drop', e=>{
-        e.preventDefault();
-        stlZone.classList.remove('dragover');
-        const f = e.dataTransfer.files[0];
-        if(f && f.name.toLowerCase().endsWith('.stl')){
-            document.getElementById('stlInput').files = e.dataTransfer.files;
-            handleSTLFile(document.getElementById('stlInput'));
-        }
-    });
 </script>
 </body>
 </html>
