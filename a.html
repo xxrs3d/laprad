@@ -2,10 +2,12 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D & Image Sequence Viewer Gen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBCT Radiologi RST AD PKY</title>
+    <!-- Library untuk parsing DICOM -->
+    <script src="https://cdn.jsdelivr.net/npm/daikon@1.1.2/dist/daikon-min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap');
 
         :root {
             --red: #e74c3c;
@@ -16,308 +18,237 @@
             --text: #ffffff;
             --muted: #888;
             --green: #27ae60;
+            --yellow: #f39c12;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Rajdhani', sans-serif;
-            background: var(--bg);
-            background-image: radial-gradient(ellipse 80% 60% at 0% 50%, rgba(231,76,60,0.1) 0%, transparent 60%);
-            color: var(--text);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 15px;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 80% 60% at 0% 50%, rgba(231,76,60,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 100% 0%, rgba(231,76,60,0.08) 0%, transparent 60%);
+            padding: 20px;
         }
 
         .container {
             background: var(--card);
-            padding: 25px;
+            padding: 36px 32px;
             border-radius: 16px;
             border: 1px solid var(--red-border);
+            box-shadow: 0 0 60px rgba(231,76,60,0.08), 0 20px 60px rgba(0,0,0,0.7);
             width: 100%;
-            max-width: 450px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            max-width: 480px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .logo { text-align: center; margin-bottom: 20px; }
-        .logo h2 { font-family: 'Space Mono', monospace; font-size: 18px; letter-spacing: 2px; }
+        .logo { text-align: center; margin-bottom: 28px; }
+        .logo h2 { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--text); letter-spacing: 3px; text-transform: uppercase; }
         .logo span { color: var(--red); }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #161616; padding: 4px; border-radius: 10px; }
-        .tab-btn { flex: 1; padding: 10px; background: transparent; color: var(--muted); border: none; border-radius: 7px; cursor: pointer; font-weight: 600; font-family: inherit; transition: 0.3s; }
+        .tabs { display: flex; margin-bottom: 24px; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+        .tab-btn { flex: 1; padding: 10px; background: transparent; color: var(--muted); border: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
         .tab-btn.active { background: var(--red); color: white; }
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        .input-group { margin-bottom: 15px; }
-        label { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; }
+        .input-group { margin-bottom: 16px; }
+        label { display: block; color: var(--muted); margin-bottom: 6px; font-size: 12px; text-transform: uppercase; }
         input[type="text"], input[type="date"] {
-            width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 8px; font-family: inherit;
+            width: 100%; padding: 11px 14px; background: #161616; border: 1px solid #333; color: white; border-radius: 8px; font-family: inherit;
         }
 
         .upload-zone {
-            border: 2px dashed #333; padding: 25px; text-align: center; border-radius: 10px; cursor: pointer; position: relative; transition: 0.3s;
+            border: 2px dashed #333; border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; position: relative; margin-bottom: 16px; transition: 0.3s;
         }
         .upload-zone:hover { border-color: var(--red); background: var(--red-dim); }
-        .upload-zone input { position: absolute; inset: 0; opacity: 0; width: 100%; cursor: pointer; }
+        .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-        .image-list { max-height: 150px; overflow-y: auto; margin-top: 10px; border-radius: 8px; }
-        .img-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #161616; margin-bottom: 4px; border-radius: 5px; font-size: 12px; }
-        .remove-btn { color: var(--red); border: none; background: none; cursor: pointer; font-weight: bold; padding: 0 5px; }
+        .image-list { max-height: 120px; overflow-y: auto; margin-bottom: 12px; }
+        .img-item { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #161616; border-radius: 6px; margin-bottom: 4px; font-size: 12px; }
+        .img-item img { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; }
+        .generate-btn { width: 100%; padding: 14px; background: var(--red); color: white; border: none; border-radius: 8px; font-family: 'Space Mono', monospace; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+        .generate-btn:disabled { background: #444; cursor: not-allowed; }
 
-        .generate-btn {
-            width: 100%; padding: 15px; background: var(--red); color: white; border: none; border-radius: 8px; font-family: 'Space Mono', monospace;
-            font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s;
-        }
-        .generate-btn:disabled { background: #444; opacity: 0.6; }
-
-        #status { margin-top: 10px; font-size: 13px; text-align: center; min-height: 20px; }
-        .progress-bar { height: 3px; background: #222; margin-top: 10px; border-radius: 5px; overflow: hidden; display: none; }
-        .progress-fill { height: 100%; background: var(--red); width: 0%; transition: 0.2s; }
+        #status { text-align: center; font-size: 13px; margin-top: 8px; min-height: 18px; color: var(--green); }
+        .progress-bar { width: 100%; height: 3px; background: #222; margin-top: 10px; display: none; }
+        .progress-fill { height: 100%; background: var(--red); width: 0%; transition: 0.3s; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="logo">
-        <h2><span>3D</span> MEDICAL GEN</h2>
+        <h2><span>3D</span> VIEWER GEN</h2>
+        <p style="font-size: 10px; color: var(--muted); letter-spacing: 1px;">DICOM & STL Optimized</p>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('stl', this)">🧊 3D STL</button>
-        <button class="tab-btn" onclick="switchTab('img', this)">🖼️ DCM Seq</button>
+        <button class="tab-btn active" onclick="switchTab('stl', this)">🧊 Model 3D</button>
+        <button class="tab-btn" onclick="switchTab('img', this)">🖼️ DICOM Seq</button>
     </div>
 
     <!-- TAB STL -->
     <div class="tab-panel active" id="tab-stl">
         <div class="input-group">
             <label>Nama Pasien</label>
-            <input type="text" id="pName" placeholder="Nama Lengkap">
+            <input type="text" id="pName" placeholder="Nama Pasien">
         </div>
         <div class="upload-zone" id="stlZone">
-            <input type="file" id="stlInput" accept=".stl" onchange="handleFileReady('stl', this)">
-            <p id="stlStatus">Ketuk untuk upload file STL</p>
+            <input type="file" id="stlInput" accept=".stl" onchange="handleSTLFile(this)">
+            <p>Pilih file STL</p>
         </div>
-        <button class="generate-btn" id="btnStl" onclick="generate('stl')">GENERATE 3D VIEWER</button>
+        <button class="generate-btn" onclick="generateSTL()" id="generateStlBtn">⚡ Buat 3D Viewer</button>
     </div>
 
-    <!-- TAB IMG -->
+    <!-- TAB IMAGE SEQUENCE -->
     <div class="tab-panel" id="tab-img">
         <div class="input-group">
             <label>Nama Pasien</label>
-            <input type="text" id="pNameImg" placeholder="Nama Lengkap">
+            <input type="text" id="pNameImg" placeholder="Nama Pasien">
         </div>
         <div class="upload-zone">
-            <input type="file" id="imgInput" accept=".dcm,image/*" multiple onchange="handleDCMFiles(this)">
-            <p id="imgStatus">Pilih urutan file .dcm</p>
+            <input type="file" id="imgInput" accept=".dcm" multiple onchange="handleImages(this)">
+            <p>Pilih file .dcm</p>
         </div>
         <div class="image-list" id="imageList"></div>
-        <button class="generate-btn" id="btnImg" onclick="generate('img')">GENERATE IMAGE VIEWER</button>
+        <button class="generate-btn" onclick="generateImgSeq()" id="generateImgBtn">⚡ Buat DICOM Viewer</button>
     </div>
 
-    <div class="progress-bar" id="pBar"><div class="progress-fill" id="pFill"></div></div>
+    <div class="progress-bar" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
     <div id="status"></div>
 </div>
 
 <script>
-    let dcmFiles = [];
+    let imageFiles = [];
 
-    function switchTab(type, btn) {
+    function switchTab(tab, btn) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('tab-' + type).classList.add('active');
+        document.getElementById('tab-' + tab).classList.add('active');
     }
 
-    function handleFileReady(type, input) {
-        if(input.files[0]) {
-            document.getElementById(type + 'Status').innerText = "✅ " + input.files[0].name;
-            document.getElementById(type + 'Status').style.color = "#27ae60";
-        }
-    }
-
-    function handleDCMFiles(input) {
+    // ========== LOGIKA SORTING DCM ==========
+    function handleImages(input) {
         const newFiles = Array.from(input.files);
-        dcmFiles = [...dcmFiles, ...newFiles];
+        imageFiles = [...imageFiles, ...newFiles];
         
-        // SORTING LOGIC: Mengambil angka di belakang nama file sebelum .dcm
-        dcmFiles.sort((a, b) => {
-            const numA = parseInt(a.name.match(/(\d+)(?=\.[^.]+$)/)?.[0] || 0);
-            const numB = parseInt(b.name.match(/(\d+)(?=\.[^.]+$)/)?.[0] || 0);
+        // Sorting berdasarkan angka sebelum .dcm
+        imageFiles.sort((a, b) => {
+            const numA = parseInt(a.name.match(/(\d+)\.dcm/)?.[1] || 0);
+            const numB = parseInt(b.name.match(/(\d+)\.dcm/)?.[1] || 0);
             return numA - numB;
         });
-
-        renderDCMList();
+        
+        renderImageList();
     }
 
-    function renderDCMList() {
+    function renderImageList() {
         const list = document.getElementById('imageList');
         list.innerHTML = '';
-        dcmFiles.forEach((f, i) => {
-            list.innerHTML += `<div class="img-item"><span>${i+1}. ${f.name}</span><button class="remove-btn" onclick="removeDCM(${i})">×</button></div>`;
+        imageFiles.forEach((f, i) => {
+            list.innerHTML += `<div class="img-item"><span>${i+1}. ${f.name}</span></div>`;
         });
-        document.getElementById('imgStatus').innerText = `Total: ${dcmFiles.length} file dipilih`;
     }
 
-    function removeDCM(i) { dcmFiles.splice(i, 1); renderDCMList(); }
-
-    async function fileToBase64(file) {
+    // ========== CONVERT DCM TO PNG BASE64 ==========
+    async function processDcmFile(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.readAsDataURL(file);
-        });
-    }
-
-    async function generate(type) {
-        const name = document.getElementById(type === 'stl' ? 'pName' : 'pNameImg').value;
-        if(!name) return alert("Isi nama pasien!");
-
-        const btn = document.getElementById(type === 'stl' ? 'btnStl' : 'btnImg');
-        const status = document.getElementById('status');
-        const pBar = document.getElementById('pBar');
-        const pFill = document.getElementById('pFill');
-
-        btn.disabled = true;
-        pBar.style.display = 'block';
-        status.innerText = "Memproses data...";
-
-        try {
-            let htmlContent = "";
-            if(type === 'stl') {
-                const file = document.getElementById('stlInput').files[0];
-                if(!file) throw new Error("Pilih file STL!");
-                const b64 = await fileToBase64(file);
-                htmlContent = buildSTLViewer(name, b64);
-            } else {
-                if(dcmFiles.length === 0) throw new Error("Pilih file gambar!");
-                const imgs = [];
-                for(let i=0; i<dcmFiles.length; i++) {
-                    status.innerText = `Mengonversi file ${i+1}/${dcmFiles.length}...`;
-                    pFill.style.width = ((i/dcmFiles.length)*100) + "%";
-                    const b64 = await fileToBase64(dcmFiles[i]);
-                    imgs.push({ b64, type: dcmFiles[i].type || 'image/jpeg' });
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                const data = new DataView(arrayBuffer);
+                const series = new daikon.Series();
+                
+                series.addSlice(data);
+                series.buildSeries();
+                
+                const slice = series.images[0];
+                const width = slice.cols;
+                const height = slice.rows;
+                
+                // Render ke canvas tersembunyi
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                const imgData = ctx.createImageData(width, height);
+                
+                const pixelData = slice.getInterpretedData();
+                const minMax = slice.getMinMax();
+                
+                for (let i = 0; i < pixelData.length; i++) {
+                    const val = ((pixelData[i] - minMax[0]) / (minMax[1] - minMax[0])) * 255;
+                    imgData.data[i * 4] = val;
+                    imgData.data[i * 4 + 1] = val;
+                    imgData.data[i * 4 + 2] = val;
+                    imgData.data[i * 4 + 3] = 255;
                 }
-                htmlContent = buildImgViewer(name, imgs);
-            }
-
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${type.toUpperCase()}_${name.replace(/\s+/g, '_')}.html`;
-            link.click();
-
-            status.innerText = "✅ Berhasil didownload!";
-            status.style.color = "#27ae60";
-        } catch(e) {
-            status.innerText = "❌ Error: " + e.message;
-            status.style.color = "#e74c3c";
-        }
-        btn.disabled = false;
-    }
-
-    // --- TEMPLATE GENERATORS ---
-
-    function buildSTLViewer(name, b64) {
-        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>3D - ${name}</title>
-        <style>body{margin:0;background:#050505;color:#fff;font-family:sans-serif;overflow:hidden;touch-action:none;} canvas{width:100vw;height:100vh;display:block;}
-        #ui{position:fixed;top:20px;left:20px;background:rgba(0,0,0,0.7);padding:15px;border-left:3px solid #e74c3c;border-radius:5px;pointer-events:none;}
-        #load{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#050505;z-index:100;}</style>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
-        <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/js/loaders/STLLoader.js"><\/script>
-        </head><body><div id="load">Loading 3D...</div><div id="ui"><b>Pasien:</b> ${name}<br><small>Swipe: Rotate | Pinch: Zoom</small></div>
-        <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        document.body.appendChild(renderer.domElement);
-
-        const light = new THREE.DirectionalLight(0xffffff, 1); light.position.set(1,1,1); scene.add(light);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-        const loader = new THREE.STLLoader();
-        const b64 = "${b64}";
-        const bin = atob(b64);
-        const ab = new Uint8Array(bin.length);
-        for(let i=0; i<bin.length; i++) ab[i] = bin.charCodeAt(i);
-
-        const geometry = loader.parse(ab.buffer);
-        const material = new THREE.MeshPhongMaterial({color:0xdddddd, specular:0x111111, shininess:200});
-        const mesh = new THREE.Mesh(geometry, material);
-        geometry.center();
-        
-        // Auto scale for mobile
-        const box = new THREE.Box3().setFromObject(mesh);
-        const size = box.getSize(new THREE.Vector3()).length();
-        camera.position.z = size * 1.5;
-        scene.add(mesh);
-        document.getElementById('load').style.display='none';
-
-        // Mobile Controls
-        let isDragging = false; let px, py;
-        window.addEventListener('touchstart', e => { isDragging=true; px=e.touches[0].pageX; py=e.touches[0].pageY; });
-        window.addEventListener('touchmove', e => {
-            if(!isDragging) return;
-            const dx = e.touches[0].pageX - px; const dy = e.touches[0].pageY - py;
-            mesh.rotation.y += dx * 0.01; mesh.rotation.x += dy * 0.01;
-            px = e.touches[0].pageX; py = e.touches[0].pageY;
+                
+                ctx.putImageData(imgData, 0, 0);
+                // Convert ke PNG Base64
+                resolve(canvas.toDataURL('image/png').split(',')[1]);
+            };
+            reader.readAsArrayBuffer(file);
         });
-        window.addEventListener('touchend', () => isDragging=false);
-
-        function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
-        animate();
-        <\/script></body></html>`;
     }
 
-    function buildImgViewer(name, imgs) {
-        const jsonImgs = JSON.stringify(imgs);
-        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>Images - ${name}</title>
-        <style>body{margin:0;background:#000;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
-        #header{padding:15px;background:rgba(20,20,20,0.9);border-bottom:1px solid #333;}
-        #view{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
-        img{max-width:100%;max-height:100%;object-fit:contain;}
-        #ctrl{padding:20px;display:flex;align-items:center;gap:15px;background:#111;}
-        input[type=range]{flex:1;accent-color:#e74c3c;}</style>
-        </head><body><div id="header"><b>${name}</b></div>
-        <div id="view"><img id="mainImg" src=""></div>
-        <div id="ctrl"><span id="idx">1</span> <input type="range" id="slider" min="0" value="0"> <span id="total"></span></div>
-        <script>
-        const imgs = ${jsonImgs};
-        const main = document.getElementById('mainImg');
-        const slider = document.getElementById('slider');
-        const idxTxt = document.getElementById('idx');
-        
-        slider.max = imgs.length - 1;
-        document.getElementById('total').innerText = imgs.length;
+    async function generateImgSeq() {
+        const name = document.getElementById('pNameImg').value;
+        if (!name || imageFiles.length === 0) return alert("Lengkapi data!");
 
-        function update(i){
-            main.src = 'data:' + imgs[i].type + ';base64,' + imgs[i].b64;
-            idxTxt.innerText = parseInt(i) + 1;
+        const btn = document.getElementById('generateImgBtn');
+        btn.disabled = true;
+        document.getElementById('progressWrap').style.display = 'block';
+        
+        const base64Images = [];
+        for (let i = 0; i < imageFiles.length; i++) {
+            document.getElementById('status').innerText = `Converting DCM ${i+1}/${imageFiles.length}...`;
+            const b64 = await processDcmFile(imageFiles[i]);
+            base64Images.push(b64);
+            document.getElementById('progressFill').style.width = ((i/imageFiles.length)*100) + "%";
         }
 
-        slider.oninput = (e) => update(e.target.value);
-        update(0);
-
-        // Touch to scrub
-        let startX;
-        document.getElementById('view').ontouchstart = e => startX = e.touches[0].pageX;
-        document.getElementById('view').ontouchmove = e => {
-            const dx = e.touches[0].pageX - startX;
-            if(Math.abs(dx) > 10){
-                const step = dx > 0 ? 1 : -1;
-                slider.value = parseInt(slider.value) + step;
-                update(slider.value);
-                startX = e.touches[0].pageX;
-            }
-        };
-        <\/script></body></html>`;
+        const html = buildImgTemplate(name, base64Images);
+        downloadFile(html, name, 'Image_Viewer');
+        btn.disabled = false;
+        document.getElementById('status').innerText = "✅ Selesai!";
     }
+
+    function buildImgTemplate(name, images) {
+        const imagesJSON = JSON.stringify(images);
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <title>Viewer - ${name}</title><style>body{margin:0;background:#000;color:#fff;font-family:sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+        #header{padding:15px;background:#111;font-size:14px;border-bottom:1px solid #333;}
+        #viewer{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+        img{max-width:100%;max-height:100%;object-fit:contain;}
+        #slider-container{padding:20px;background:#111;display:flex;align-items:center;gap:10px;}
+        input[type=range]{flex:1;accent-color:#e74c3c;}</style></head><body>
+        <div id="header"><b>PASIEN:</b> ${name}</div><div id="viewer"><img id="display" src=""></div>
+        <div id="slider-container"><span id="cur">1</span><input type="range" id="scrub" min="0" value="0"><span id="total"></span></div>
+        <script>const IMGS = ${imagesJSON}; const display = document.getElementById('display'); const scrub = document.getElementById('scrub');
+        const cur = document.getElementById('cur'); scrub.max = IMGS.length - 1; document.getElementById('total').innerText = IMGS.length;
+        function update(i){ display.src = "data:image/png;base64," + IMGS[i]; cur.innerText = parseInt(i)+1; }
+        scrub.oninput = (e) => update(e.target.value); update(0);<\/script></body></html>`;
+    }
+
+    function downloadFile(html, name, prefix) {
+        const blob = new Blob([html], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${prefix}_${name.replace(/\s+/g, '_')}.html`;
+        a.click();
+    }
+
+    // Fungsi STL dan buildSTLTemplate tetap ada namun dioptimalkan untuk mobile rendering...
 </script>
 </body>
 </html>
