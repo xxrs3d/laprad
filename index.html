@@ -591,7 +591,6 @@
 </div>
 <div class="nebula"></div>
 
-<!-- FAB Speed Dial -->
 <div class="fab-speed-dial" id="fabDial">
     <div class="fab-menu-items">
         <a href="hasil.html" class="fab-menu-item">
@@ -629,7 +628,7 @@
                     <div>
                         <label>Salam</label>
                         <select id="salam" onchange="gen()">
-                            <option value="otomatis">Auto</option>
+                    <option value="otomatis">Auto</option>
                             <option value="Selamat pagi">Selamat Pagi</option>
                             <option value="Selamat siang">Selamat Siang</option>
                             <option value="Selamat malam">Selamat Malam</option>
@@ -779,8 +778,7 @@
 
     draw();
 })();
-
-// ===== FAB =====
+                              // ===== FAB =====
 function toggleFab() {
     document.getElementById('fabDial').classList.toggle('open');
 }
@@ -796,7 +794,15 @@ var sub = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
 
 function initDate() {
     var n = new Date();
-    document.getElementById('tgl').value = n.toISOString().split('T')[0];
+    var y = n.getFullYear();
+    var m = String(n.getMonth() + 1).padStart(2, '0');
+    var d = String(n.getDate()).padStart(2, '0');
+    document.getElementById('tgl').value = y + '-' + m + '-' + d;
+
+    // Shift dinas otomatis menyesuaikan waktu lokal
+    var h = n.getHours();
+    var shiftS1 = (h >= 0 && h < 11) ? 'Pagi' : (h >= 11 && h < 15) ? 'Siang' : 'Malam';
+    document.getElementById('s1').value = shiftS1;
 }
 
 function fmtTgl(s) {
@@ -857,10 +863,13 @@ function getLaporan() {
     var p2  = document.getElementById('p2').value;
     var s2  = document.getElementById('s2').value;
     var sf  = sv;
+    
+    // Logika pergantian salam otomatis yang lebih awal
     if (sv === 'otomatis') {
         var h = new Date().getHours();
-        sf = h >= 6 && h < 12 ? 'Selamat pagi' : h >= 12 && h < 16 ? 'Selamat siang' : 'Selamat malam';
+        sf = (h >= 0 && h < 11) ? 'Selamat pagi' : (h >= 11 && h < 15) ? 'Selamat siang' : 'Selamat malam';
     }
+    
     var total = 0, detail = '';
     kat.forEach(function(k, i) {
         var items = [], counts = 0;
@@ -872,6 +881,7 @@ function getLaporan() {
         var ket = items.length > 0 ? items.join('\n                    ') : 'nihil';
         detail += (i+1) + '. ' + k.padEnd(14) + ': ' + ket + '\n';
     });
+    
     return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' + sf +
         '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n *Dinas ' +
         s1 + '*\n  ' + p1 + '\n\n *Dinas ' + s2 + '*\n  ' + p2 + '\n\nJumlah pasien : ' + total +
@@ -911,4 +921,4 @@ initDate();
 gen();
 </script>
 </body>
-</html>
+</html>                             
