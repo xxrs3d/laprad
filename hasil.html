@@ -4,8 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pembuat Hasil Radiologi</title>
+<!-- html2canvas dan jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Library pembuat QR Code otomatis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -113,26 +116,6 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-}
-
-.upload-zone {
-  border: 1.5px dashed #cbd5e1;
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-  background: #f8fafc;
-  cursor: pointer;
-  transition: border-color 0.18s, background 0.18s;
-  position: relative;
-}
-.upload-zone:hover { border-color: #3b82f6; background: #eff6ff; }
-.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-.upload-zone .uz-icon { font-size: 20px; margin-bottom: 3px; }
-.upload-zone p { font-size: 11px; color: #94a3b8; }
-.upload-zone .uz-preview {
-  width: 50px; height: 50px;
-  object-fit: contain; border-radius: 6px;
-  display: none; margin: 0 auto 4px;
 }
 
 .today-btn {
@@ -509,8 +492,6 @@ body {
         </div>
       </div>
 
-
-
       <div class="section-title">Hasil & Penandatangan</div>
       <div class="field">
         <label>Hasil Pemeriksaan</label>
@@ -518,20 +499,17 @@ body {
       </div>
       <div class="field">
         <label>Nama Penanggung Jawab</label>
-        <input type="text" id="in_pjawab" value="dr. Tharina L, Sp. Rad" oninput="updatePreview()">
+        <input type="text" id="in_pjawab" value="dr. Tharina Lawei, Sp. Rad" oninput="updatePreview()">
       </div>
       <div class="field" id="field-petugas">
         <label>Petugas Radiologi</label>
-        <input type="text" id="in_petugas" oninput="updatePreview()">
+        <input type="text" id="in_petugas" placeholder="Masukkan nama petugas..." oninput="updatePreview()">
       </div>
-      <div class="field">
-        <label>Upload Tanda Tangan / QR </label>
-        <div class="upload-zone" onclick="document.getElementById('in_qr').click()">
-          <input type="file" id="in_qr" accept="image/*" onchange="handleUpload(this,'qr-uz-preview','qr-uz-icon','qr-uz-text', updateQRPreview)">
-          <img class="uz-preview" id="qr-uz-preview" src="">
-          <div class="uz-icon" id="qr-uz-icon">✍️</div>
-          <p id="qr-uz-text">Klik untuk upload TTD / QR</p>
-        </div>
+
+      <div style="margin-top: 15px; background: #eff6ff; padding: 12px; border-radius: 8px; border: 1px solid #bfdbfe;">
+        <p style="font-size: 11px; color: #1e3a8a; line-height: 1.4;">
+          <strong>Info:</strong> QR Code tanda tangan akan otomatis terisi dengan teks: <i>"ditandatangani oleh [Nama] diterbitkan di RS TNI AD PALANGKA RAYA KALIMANTAN TENGAH Pada tanggal [Hari saat ini]"</i>
+        </p>
       </div>
 
       <button class="print-btn" onclick="generatePDF()">
@@ -584,16 +562,20 @@ body {
             <div style="height:110px; display:flex; align-items:center; justify-content:center;">
               <div class="qr-placeholder" id="prev-qr-wrap">
                 <img class="qr-preview-img" id="prev_qr" src="">
-                <span id="prev-qr-ph">TTD / QR</span>
+                <span id="prev-qr-ph">QR Otomatis</span>
               </div>
             </div>
-            <strong id="prev_pjawab">dr. Tharina L, Sp. Rad</strong>
+            <strong id="prev_pjawab">dr. Tharina Lawei, Sp. Rad</strong>
           </div>
           <div>
             <p>Petugas Radiologi,</p>
-            <div style="margin-top:110px;">
-              <strong id="prev_petugas">.......................</strong>
+            <div style="height:110px; display:flex; align-items:center; justify-content:center;">
+              <div class="qr-placeholder" id="prev-qr-petugas-wrap">
+                <img class="qr-preview-img" id="prev_qr_petugas" src="">
+                <span id="prev-qr-petugas-ph">.......................</span>
+              </div>
             </div>
+            <strong id="prev_petugas">.......................</strong>
           </div>
         </div>
       </div>
@@ -622,7 +604,7 @@ body {
               <div class="f2-sign-space">
                 <div class="qr-placeholder" id="f2-prev-qr-wrap" style="width:90px;height:90px;">
                   <img class="qr-preview-img" id="f2_prev_qr" src="" style="width:90px;height:90px;">
-                  <span id="f2-prev-qr-ph" style="font-size:10px;">TTD</span>
+                  <span id="f2-prev-qr-ph" style="font-size:10px;">QR Otomatis</span>
                 </div>
               </div>
               <strong id="f2_prev_pjawab">dr. Tharina Lawei, Sp. Rad</strong>
@@ -667,17 +649,17 @@ body {
       <div style="height: 110px; display:flex; align-items:center; justify-content:center;">
         <img id="out_qr_img" class="qr-code" style="display:none;">
       </div>
-      <strong id="out_pjawab">dr. Tharina L, Sp. Rad</strong>
+      <strong id="out_pjawab">dr. Tharina Lawei, Sp. Rad</strong>
     </div>
     <div>
       <p>Petugas Radiologi,</p>
-      <div style="margin-top: 110px;">
-        <strong id="out_petugas"></strong>
+      <div style="height: 110px; display:flex; align-items:center; justify-content:center;">
+        <img id="out_qr_petugas_img" class="qr-code" style="display:none;">
       </div>
+      <strong id="out_petugas"></strong>
     </div>
   </div>
 </div>
-
 <!-- Area tersembunyi FORMAT 2 -->
 <div id="surat-area2">
   <div class="f2-header">
@@ -688,7 +670,7 @@ body {
       <div class="f2-line3">Jl. Diponegoro No. 55 Palangka Raya Telp. 0536 3220238</div>
     </div>
   </div>
-  <div class="f2-title-bar">HASIL PEMERIKSAAN RADIOLOGI</div>
+    <div class="f2-title-bar">HASIL PEMERIKSAAN RADIOLOGI</div>
   <div class="f2-info">
     <div>Nama/Umur &nbsp;: <span id="out2_nama"></span>/<span id="out2_umur"></span></div>
     <div>Tgl Pemeriksaan : <span id="out2_tgl"></span></div>
@@ -707,8 +689,12 @@ body {
 </div>
 
 <script>
-let qrDataURL = null;
 let currentFormat = 1;
+
+// Memicu rendering preview saat pertama kali muat
+window.onload = function() {
+  updatePreview();
+};
 
 function switchFormat(fmt) {
   currentFormat = fmt;
@@ -721,38 +707,25 @@ function switchFormat(fmt) {
   updatePreview();
 }
 
-function handleUpload(input, previewId, iconId, textId, callback) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const data = e.target.result;
-    document.getElementById(previewId).src = data;
-    document.getElementById(previewId).style.display = 'block';
-    document.getElementById(iconId).style.display = 'none';
-    document.getElementById(textId).textContent = file.name;
-    callback(data);
-  };
-  reader.readAsDataURL(file);
-}
-
-function updateQRPreview(data) {
-  qrDataURL = data;
-  // Format 1
-  const img1 = document.getElementById('prev_qr');
-  img1.src = data;
-  img1.style.display = 'block';
-  document.getElementById('prev-qr-ph').style.display = 'none';
-  // Format 2
-  const img2 = document.getElementById('f2_prev_qr');
-  img2.src = data;
-  img2.style.display = 'block';
-  document.getElementById('f2-prev-qr-ph').style.display = 'none';
-}
-
 function setToday() {
   document.getElementById('in_tgl_periksa').value = new Date().toISOString().split('T')[0];
   updatePreview();
+}
+
+// Fungsi untuk mendapatkan nama hari & tanggal hari ini berbahasa Indonesia
+function getHariIniString() {
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  return new Date().toLocaleDateString('id-ID', options);
+}
+
+// Fungsi membuat data URL QR Code dari text
+function generateQRCode(text) {
+  const qr = new QRious({
+    value: text,
+    size: 250,
+    level: 'M'
+  });
+  return qr.toDataURL('image/png');
 }
 
 function formatTanggal(val) {
@@ -791,24 +764,57 @@ function updatePreview() {
   const tglPeriksa = formatTanggal(document.getElementById('in_tgl_periksa').value);
   const tglPeriksaShort = formatTanggalShort(document.getElementById('in_tgl_periksa').value);
   const hasil = document.getElementById('in_hasil').value;
-  const petugas = document.getElementById('in_petugas').value || '.......................';
-  const pjawab1 = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+  const petugas = document.getElementById('in_petugas').value;
+  const pjawab = document.getElementById('in_pjawab').value || 'dr. Tharina Lawei, Sp. Rad';
   const umur = hitungUmur(document.getElementById('in_tgl_lahir').value);
+  
+  // Format Tanggal untuk isi QR
+  const tglHariIni = getHariIniString();
 
-  // Format 1
+  // ----- PEMBUATAN QR PENANGGUNG JAWAB -----
+  const qrTextPjawab = `ditandatangani oleh ${pjawab} diterbitkan di RS TNI AD PALANGKA RAYA KALIMANTAN TENGAH Pada tanggal ${tglHariIni}`;
+  const qrDataPjawab = generateQRCode(qrTextPjawab);
+
+  // Set Preview QR Penanggung Jawab Format 1
+  document.getElementById('prev_qr').src = qrDataPjawab;
+  document.getElementById('prev_qr').style.display = 'block';
+  document.getElementById('prev-qr-ph').style.display = 'none';
+
+  // Set Preview QR Penanggung Jawab Format 2
+  document.getElementById('f2_prev_qr').src = qrDataPjawab;
+  document.getElementById('f2_prev_qr').style.display = 'block';
+  document.getElementById('f2-prev-qr-ph').style.display = 'none';
+
+  // ----- PEMBUATAN QR PETUGAS -----
+  const imgPetugas = document.getElementById('prev_qr_petugas');
+  const phPetugas = document.getElementById('prev-qr-petugas-ph');
+  const elTeksPetugas = document.getElementById('prev_petugas');
+
+  if (petugas.trim() !== '') {
+    const qrTextPetugas = `ditandatangani oleh ${petugas} diterbitkan di RS TNI AD PALANGKA RAYA KALIMANTAN TENGAH Pada tanggal ${tglHariIni}`;
+    imgPetugas.src = generateQRCode(qrTextPetugas);
+    imgPetugas.style.display = 'block';
+    phPetugas.style.display = 'none';
+    elTeksPetugas.textContent = petugas;
+  } else {
+    imgPetugas.style.display = 'none';
+    phPetugas.style.display = 'inline';
+    elTeksPetugas.textContent = '.......................';
+  }
+
+  // Isi data text Format 1
   document.getElementById('prev_nama').textContent = nama;
   document.getElementById('prev_tgl_lahir').textContent = tglLahir;
   document.getElementById('prev_tgl_periksa').textContent = tglPeriksa;
   document.getElementById('prev_hasil').textContent = hasil;
-  document.getElementById('prev_petugas').textContent = petugas;
-  document.getElementById('prev_pjawab').textContent = pjawab1;
+  document.getElementById('prev_pjawab').textContent = pjawab;
 
-  // Format 2
+  // Isi data text Format 2
   document.getElementById('f2_prev_nama').textContent = nama === '—' ? '—' : nama;
   document.getElementById('f2_prev_umur').textContent = umur;
   document.getElementById('f2_prev_tgl').textContent = tglPeriksaShort;
   document.getElementById('f2_prev_hasil').textContent = hasil;
-  document.getElementById('f2_prev_pjawab').textContent = pjawab1;
+  document.getElementById('f2_prev_pjawab').textContent = pjawab;
 }
 
 async function generatePDF() {
@@ -817,9 +823,15 @@ async function generatePDF() {
   const tglPeriksa = formatTanggal(document.getElementById('in_tgl_periksa').value);
   const tglPeriksaShort = formatTanggalShort(document.getElementById('in_tgl_periksa').value);
   const hasil = document.getElementById('in_hasil').value;
-  const petugas = document.getElementById('in_petugas').value || '....................';
-  const pjawab = document.getElementById('in_pjawab').value || 'dr. Tharina L, Sp. Rad';
+  const petugas = document.getElementById('in_petugas').value;
+  const pjawab = document.getElementById('in_pjawab').value || 'dr. Tharina Lawei, Sp. Rad';
   const umur = hitungUmur(document.getElementById('in_tgl_lahir').value);
+  
+  const tglHariIni = getHariIniString();
+
+  // QR Penanggung Jawab
+  const qrTextPjawab = `ditandatangani oleh ${pjawab} diterbitkan di RS TNI AD PALANGKA RAYA KALIMANTAN TENGAH Pada tanggal ${tglHariIni}`;
+  const qrDataPjawab = generateQRCode(qrTextPjawab);
 
   let targetEl;
 
@@ -828,12 +840,24 @@ async function generatePDF() {
     document.getElementById('out_tgl_lahir').innerText = tglLahir;
     document.getElementById('out_tgl_periksa').innerText = tglPeriksa;
     document.getElementById('out_hasil').innerText = hasil;
-    document.getElementById('out_petugas').innerText = petugas;
     document.getElementById('out_pjawab').innerText = pjawab;
-
+    
+    // Terapkan QR ke cetakan Penanggung Jawab
     const qrImg = document.getElementById('out_qr_img');
-    if (qrDataURL) { qrImg.src = qrDataURL; qrImg.style.display = 'block'; }
-    else { qrImg.style.display = 'none'; }
+    qrImg.src = qrDataPjawab; 
+    qrImg.style.display = 'block';
+
+    // Terapkan QR ke cetakan Petugas jika ada
+    const qrImgPetugas = document.getElementById('out_qr_petugas_img');
+    if (petugas.trim() !== '') {
+       document.getElementById('out_petugas').innerText = petugas;
+       const qrTextPetugas = `ditandatangani oleh ${petugas} diterbitkan di RS TNI AD PALANGKA RAYA KALIMANTAN TENGAH Pada tanggal ${tglHariIni}`;
+       qrImgPetugas.src = generateQRCode(qrTextPetugas);
+       qrImgPetugas.style.display = 'block';
+    } else {
+       document.getElementById('out_petugas').innerText = '.......................';
+       qrImgPetugas.style.display = 'none';
+    }
 
     targetEl = document.getElementById('surat-area');
   } else {
@@ -843,9 +867,10 @@ async function generatePDF() {
     document.getElementById('out2_hasil').innerText = hasil;
     document.getElementById('out2_pjawab').innerText = pjawab;
 
+    // Terapkan QR ke cetakan Format 2
     const qrImg2 = document.getElementById('out2_qr_img');
-    if (qrDataURL) { qrImg2.src = qrDataURL; qrImg2.style.display = 'block'; }
-    else { qrImg2.style.display = 'none'; }
+    qrImg2.src = qrDataPjawab;
+    qrImg2.style.display = 'block';
 
     targetEl = document.getElementById('surat-area2');
   }
