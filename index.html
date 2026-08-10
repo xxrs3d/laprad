@@ -115,7 +115,6 @@
                 padding: 28px;
                 align-items: flex-start;
                 padding-bottom: 28px;
-                /* Izinkan body scroll secara normal */
                 overflow-y: auto;
             }
 
@@ -125,7 +124,6 @@
                 padding: 32px;
                 margin: 0 auto;
                 margin-bottom: 0;
-                /* Hapus overflow:hidden agar sticky bisa bekerja */
                 overflow: visible;
             }
 
@@ -136,19 +134,12 @@
                 align-items: start;
             }
 
-            /* Panel kiri bisa scroll bebas */
-            .panel-left {
-                /* tidak ada overflow khusus */
-            }
-
-            /* Panel kanan: sticky mengikuti viewport saat scroll */
             .panel-right {
                 position: sticky;
                 top: 28px;
                 align-self: start;
             }
 
-            /* Hasil laporan: tinggi maks berdasarkan viewport agar tidak keluar layar */
             #hasil-laporan {
                 min-height: 300px;
                 max-height: calc(100vh - 220px);
@@ -581,6 +572,21 @@
         /* ===== PETUGAS LABEL GAP ===== */
         .petugas-group { margin-bottom: 10px; }
         .petugas-group:last-child { margin-bottom: 0; }
+
+        /* ===== INDICATOR STYLE ===== */
+        .shift-indicator {
+            display: inline-block;
+            font-size: 0.6rem;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .shift-indicator.pagi { background: rgba(251,191,36,0.25); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+        .shift-indicator.siang { background: rgba(56,189,248,0.25); color: #38bdf8; border: 1px solid rgba(56,189,248,0.2); }
+        .shift-indicator.malam { background: rgba(129,140,248,0.25); color: #818cf8; border: 1px solid rgba(129,140,248,0.2); }
     </style>
 </head>
 <body>
@@ -628,7 +634,7 @@
                     <div>
                         <label>Salam</label>
                         <select id="salam" onchange="gen()">
-                    <option value="otomatis">Auto</option>
+                            <option value="otomatis">Auto</option>
                             <option value="Selamat pagi">Selamat Pagi</option>
                             <option value="Selamat siang">Selamat Siang</option>
                             <option value="Selamat malam">Selamat Malam</option>
@@ -778,7 +784,8 @@
 
     draw();
 })();
-                              // ===== FAB =====
+
+// ===== FAB =====
 function toggleFab() {
     document.getElementById('fabDial').classList.toggle('open');
 }
@@ -792,6 +799,38 @@ document.addEventListener('click', function(e) {
 var kat = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
 var sub = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
 
+// ===== SHIFT LOGIC =====
+function getCurrentShift() {
+    var h = new Date().getHours();
+    // Pagi: 07:00 - 13:59 (07.00 - 14.00 WIB)
+    // Sore: 14:00 - 18:59 (14.00 - 19.00 WIB)
+    // Malam: 19:00 - 06:59 (19.00 - 07.00 WIB)
+    if (h >= 7 && h < 14) return 'Pagi';
+    if (h >= 14 && h < 19) return 'Siang';
+    return 'Malam'; // 19:00 - 06:59
+}
+
+function getPreviousShift(shift) {
+    var shifts = ['Pagi', 'Siang', 'Malam'];
+    var idx = shifts.indexOf(shift);
+    if (idx === -1) return 'Malam';
+    return shifts[(idx - 1 + 3) % 3];
+}
+
+function setShifts() {
+    var s1 = document.getElementById('s1');
+    var s2 = document.getElementById('s2');
+
+    // Petugas 2 = shift saat ini
+    var currentShift = getCurrentShift();
+    s2.value = currentShift;
+
+    // Petugas 1 = shift sebelumnya
+    var prevShift = getPreviousShift(currentShift);
+    s1.value = prevShift;
+}
+
+// ===== DATE & SHIFT INIT =====
 function initDate() {
     var n = new Date();
     var y = n.getFullYear();
@@ -799,10 +838,8 @@ function initDate() {
     var d = String(n.getDate()).padStart(2, '0');
     document.getElementById('tgl').value = y + '-' + m + '-' + d;
 
-    // Shift dinas otomatis menyesuaikan waktu lokal
-    var h = n.getHours();
-    var shiftS1 = (h >= 0 && h < 11) ? 'Pagi' : (h >= 11 && h < 15) ? 'Siang' : 'Malam';
-    document.getElementById('s1').value = shiftS1;
+    // Set shifts otomatis
+    setShifts();
 }
 
 function fmtTgl(s) {
@@ -863,13 +900,12 @@ function getLaporan() {
     var p2  = document.getElementById('p2').value;
     var s2  = document.getElementById('s2').value;
     var sf  = sv;
-    
-    // Logika pergantian salam otomatis yang lebih awal
+
     if (sv === 'otomatis') {
         var h = new Date().getHours();
         sf = (h >= 0 && h < 11) ? 'Selamat pagi' : (h >= 11 && h < 15) ? 'Selamat siang' : 'Selamat malam';
     }
-    
+
     var total = 0, detail = '';
     kat.forEach(function(k, i) {
         var items = [], counts = 0;
@@ -881,7 +917,7 @@ function getLaporan() {
         var ket = items.length > 0 ? items.join('\n                    ') : 'nihil';
         detail += (i+1) + '. ' + k.padEnd(14) + ': ' + ket + '\n';
     });
-    
+
     return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' + sf +
         '\nIjin melaporkan serah terima Dinas Radiologi Rumkit TNI AD\n*' + tgl + '*\n\nSebagai berikut :\n *Dinas ' +
         s1 + '*\n  ' + p1 + '\n\n *Dinas ' + s2 + '*\n  ' + p2 + '\n\nJumlah pasien : ' + total +
@@ -917,8 +953,19 @@ function doWA() {
     window.open('https://wa.me/?text=' + enc, '_blank');
 }
 
+// Inisialisasi
 initDate();
 gen();
+
+// Refresh shift setiap 5 menit (jika halaman tetap terbuka)
+setInterval(function() {
+    var s2 = document.getElementById('s2');
+    var newShift = getCurrentShift();
+    if (s2.value !== newShift) {
+        setShifts();
+        gen();
+    }
+}, 300000); // 5 menit
 </script>
 </body>
-</html>                             
+</html>
