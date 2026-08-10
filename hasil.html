@@ -100,7 +100,8 @@ body {
 }
 
 .field input:focus,
-.field textarea:focus {
+.field textarea:focus,
+.field select:focus {
   border-color: #3b82f6;
   background: #fff;
   box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
@@ -444,6 +445,35 @@ body {
   .app-wrapper { grid-template-columns: 1fr; }
   .form-panel { position: relative; top: 0; }
 }
+
+/* styling khusus untuk dropdown petugas agar rapi */
+.petugas-select-wrapper {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.petugas-select-wrapper select {
+  flex: 2;
+}
+.petugas-select-wrapper button {
+  flex: 1;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #475569;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.petugas-select-wrapper button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+.petugas-select-wrapper button:active {
+  transform: scale(0.96);
+}
 </style>
 </head>
 <body>
@@ -503,7 +533,15 @@ body {
       </div>
       <div class="field" id="field-petugas">
         <label>Petugas Radiologi</label>
-        <input type="text" id="in_petugas" placeholder="Masukkan nama petugas..." oninput="updatePreview()">
+        <div class="petugas-select-wrapper">
+          <select id="petugasDropdown" onchange="pilihPetugas()">
+            <option value="">-- Pilih nama tersimpan --</option>
+          </select>
+          <button type="button" onclick="simpanPetugas()">Simpan</button>
+        </div>
+        <div style="margin-top: 6px;">
+          <input type="text" id="in_petugas" placeholder="Masukkan nama petugas..." oninput="updatePreview()">
+        </div>
       </div>
 
       <div style="margin-top: 15px; background: #eff6ff; padding: 12px; border-radius: 8px; border: 1px solid #bfdbfe;">
@@ -689,10 +727,58 @@ body {
 </div>
 
 <script>
+// ===== MANAJEMEN PETUGAS RADIOLOGI =====
 let currentFormat = 1;
 
-// Memicu rendering preview saat pertama kali muat
+// Muat daftar petugas dari localStorage
+function loadPetugasList() {
+  const list = JSON.parse(localStorage.getItem('daftarPetugas')) || [];
+  const dropdown = document.getElementById('petugasDropdown');
+  dropdown.innerHTML = '<option value="">-- Pilih nama tersimpan --</option>';
+  list.forEach(nama => {
+    const opt = document.createElement('option');
+    opt.value = nama;
+    opt.textContent = nama;
+    dropdown.appendChild(opt);
+  });
+}
+
+// Simpan nama petugas baru
+function simpanPetugas() {
+  const input = document.getElementById('in_petugas');
+  const nama = input.value.trim();
+  if (!nama) {
+    alert('Masukkan nama petugas terlebih dahulu.');
+    return;
+  }
+  let list = JSON.parse(localStorage.getItem('daftarPetugas')) || [];
+  if (!list.includes(nama)) {
+    list.push(nama);
+    localStorage.setItem('daftarPetugas', JSON.stringify(list));
+    loadPetugasList();
+    // Pilih langsung di dropdown
+    document.getElementById('petugasDropdown').value = nama;
+    // Trigger update preview
+    updatePreview();
+  } else {
+    alert('Nama "' + nama + '" sudah tersimpan.');
+  }
+}
+
+// Pilih dari dropdown, isi ke input
+function pilihPetugas() {
+  const dropdown = document.getElementById('petugasDropdown');
+  const selected = dropdown.value;
+  const input = document.getElementById('in_petugas');
+  if (selected) {
+    input.value = selected;
+    updatePreview();
+  }
+}
+
+// Saat halaman dimuat, muat daftar dan update preview
 window.onload = function() {
+  loadPetugasList();
   updatePreview();
 };
 
