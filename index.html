@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Laporan Radiologi - Rumkit Palangkaraya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -587,6 +590,201 @@
         .shift-indicator.pagi { background: rgba(251,191,36,0.25); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
         .shift-indicator.siang { background: rgba(239,68,68,0.25); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
         .shift-indicator.malam { background: rgba(203,213,225,0.15); color: #cbd5e1; border: 1px solid rgba(203,213,225,0.2); }
+
+        /* ===== WIDGET TANGGAL & JAM WIB ===== */
+        .dt-widget {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            background:
+                radial-gradient(circle at 100% 0%, rgba(239,68,68,0.16) 0%, transparent 55%),
+                rgba(20,4,4,0.55);
+            border: 1px solid rgba(239,68,68,0.22);
+            border-radius: 16px;
+            padding: 14px 16px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .dt-widget:hover {
+            border-color: rgba(239,68,68,0.42);
+            box-shadow: 0 4px 20px rgba(239,68,68,0.12);
+        }
+
+        .dt-widget:active { filter: brightness(0.97); }
+
+        .dt-native-input {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .dt-left { display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+
+        .dt-figure {
+            display: flex;
+            align-items: flex-start;
+            font-family: 'Oswald', 'Segoe UI', system-ui, sans-serif;
+            line-height: 0.82;
+        }
+
+        .dt-num {
+            font-size: clamp(1.9rem, 8vw, 2.5rem);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .dt-num-sm { font-weight: 400; color: rgba(255,255,255,0.72); }
+
+        .dt-sep {
+            font-size: clamp(1.5rem, 6vw, 1.9rem);
+            font-weight: 300;
+            color: rgba(255,255,255,0.32);
+            margin: 0 2px;
+            align-self: center;
+        }
+
+        .dt-dow {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: rgba(239,68,68,0.16);
+            border: 1px solid rgba(239,68,68,0.3);
+            padding: 2px 7px;
+            border-radius: 8px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            align-self: flex-start;
+            margin: 2px 0 0 7px;
+        }
+
+        .dt-caption {
+            font-size: 0.66rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .dt-caption .dt-format-tag {
+            font-size: 0.56rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.16);
+            padding: 1px 6px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .dt-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 5px;
+            pointer-events: none;
+        }
+
+        .dt-clock-wrap {
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+            font-family: 'Oswald', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .dt-clock {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            letter-spacing: 0.5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dt-sec {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.4);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .dt-tz {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: #34d399;
+            background: rgba(52,211,153,0.14);
+            border: 1px solid rgba(52,211,153,0.28);
+            padding: 2px 6px;
+            border-radius: 7px;
+            letter-spacing: 0.6px;
+        }
+
+        .dt-edit-hint {
+            font-size: 0.56rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.34);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .dt-status-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dt-live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 0 rgba(52,211,153,0.55);
+            animation: dtPulse 1.8s ease-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes dtPulse {
+            0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.55); }
+            70%  { box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+            100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+        }
+
+        .dt-live-btn {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+            background: rgba(251,191,36,0.14);
+            border: 1px solid rgba(251,191,36,0.35);
+            color: #fbbf24;
+            font-size: 0.56rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 7px;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .dt-live-btn:active { filter: brightness(0.9); }
+
+        @media (max-width: 360px) {
+            .dt-right { align-items: flex-start; }
+        }
     </style>
 </head>
 <body>
@@ -630,8 +828,34 @@
         <div class="panel-left">
             <div class="form-section">
                 <div class="section-title">Waktu &amp; Tanggal</div>
-                <div class="input-row-2">
-                    <div>
+
+                <div class="dt-widget" id="dtWidget">
+                    <div class="dt-left">
+                        <div class="dt-figure">
+                            <span class="dt-num" id="dtDay">17</span><span class="dt-sep">/</span><span class="dt-num dt-num-sm" id="dtMonth">08</span>
+                            <span class="dt-dow" id="dtDow">SEN</span>
+                        </div>
+                        <div class="dt-caption">
+                            <span id="dtFullDate">17/08/2026</span>
+                            <span class="dt-format-tag">D/M/Y</span>
+                        </div>
+                    </div>
+                    <div class="dt-right">
+                        <div class="dt-clock-wrap">
+                            <span class="dt-clock" id="dtClock">00:00</span><span class="dt-sec" id="dtSec">:00</span>
+                            <span class="dt-tz">WIB</span>
+                        </div>
+                        <div class="dt-status-row">
+                            <span class="dt-live-dot" id="dtLiveDot"></span>
+                            <span class="dt-edit-hint" id="dtEditHint">Live &#8226; ketuk untuk ubah</span>
+                            <button type="button" class="dt-live-btn" id="dtLiveBtn" style="display:none;" onclick="resetToLive(event)">&#8635; Live</button>
+                        </div>
+                    </div>
+                    <input type="date" id="tgl" class="dt-native-input" onchange="onTglManualChange()" aria-label="Ubah tanggal laporan">
+                </div>
+
+                <div class="input-row-2" style="margin-top:10px; margin-bottom:0;">
+                    <div style="grid-column: 1 / -1;">
                         <label>Salam</label>
                         <select id="salam" onchange="gen()">
                             <option value="otomatis">Auto</option>
@@ -639,10 +863,6 @@
                             <option value="Selamat siang">Selamat Siang</option>
                             <option value="Selamat malam">Selamat Malam</option>
                         </select>
-                    </div>
-                    <div>
-                        <label>Tanggal</label>
-                        <input type="date" id="tgl" onchange="gen()">
                     </div>
                 </div>
             </div>
@@ -799,9 +1019,16 @@ document.addEventListener('click', function(e) {
 var kat = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
 var sub = ["BPJS", "Umum", "MCU", "Jasa Raharja"];
 
+// ===== WAKTU WIB (Asia/Jakarta) =====
+// Dipakai di seluruh app supaya shift, salam, dan widget tanggal selalu
+// mengikuti WIB walau perangkat diset ke zona waktu lain.
+function getJakartaNow() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+}
+
 // ===== SHIFT LOGIC =====
 function getCurrentShift() {
-    var h = new Date().getHours();
+    var h = getJakartaNow().getHours();
     // Pagi: 07:00 - 13:59 (07.00 - 14.00 WIB)
     // Sore: 14:00 - 18:59 (14.00 - 19.00 WIB)
     // Malam: 19:00 - 06:59 (19.00 - 07.00 WIB)
@@ -832,7 +1059,7 @@ function setShifts() {
 
 // ===== DATE & SHIFT INIT =====
 function initDate() {
-    var n = new Date();
+    var n = getJakartaNow();
     var y = n.getFullYear();
     var m = String(n.getMonth() + 1).padStart(2, '0');
     var d = String(n.getDate()).padStart(2, '0');
@@ -840,6 +1067,76 @@ function initDate() {
 
     // Set shifts otomatis
     setShifts();
+}
+
+// ===== WIDGET TANGGAL (D/M/Y) =====
+var hariSingkat = ["MIN","SEN","SEL","RAB","KAM","JUM","SAB"];
+
+function updateDateWidget() {
+    var v = document.getElementById('tgl').value;
+    if (!v) return;
+    var p = v.split('-'); // yyyy-mm-dd
+    var y = p[0], m = p[1], d = p[2];
+    var dt = new Date(+y, +m - 1, +d);
+
+    document.getElementById('dtDay').innerText = parseInt(d, 10);
+    document.getElementById('dtMonth').innerText = m;
+    document.getElementById('dtDow').innerText = hariSingkat[dt.getDay()];
+    document.getElementById('dtFullDate').innerText = d + '/' + m + '/' + y;
+}
+
+// ===== MODE LIVE vs MANUAL =====
+// Tanggal terisi otomatis & ikut waktu nyata Kalimantan Tengah (WIB) selama
+// belum diubah manual. Begitu user memilih tanggal sendiri lewat date-picker,
+// auto-update dihentikan supaya pilihan manual tidak ketiban balik tiap detik.
+// User bisa kembali ke mode live kapan saja lewat tombol "Live".
+var dateManuallySet = false;
+
+function onTglManualChange() {
+    dateManuallySet = true;
+    document.getElementById('dtEditHint').innerText = 'Manual \u2022 ketuk untuk ubah lagi';
+    document.getElementById('dtLiveDot').style.display = 'none';
+    document.getElementById('dtLiveBtn').style.display = 'inline-block';
+    gen();
+}
+
+function resetToLive(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    dateManuallySet = false;
+    document.getElementById('dtEditHint').innerText = 'Live \u2022 ketuk untuk ubah';
+    document.getElementById('dtLiveDot').style.display = 'block';
+    document.getElementById('dtLiveBtn').style.display = 'none';
+    syncNow();
+}
+
+// ===== JAM & TANGGAL WIB BERJALAN (real-time, Kalimantan Tengah) =====
+function syncNow() {
+    var jkt = getJakartaNow();
+
+    // Jam & detik selalu real-time, tidak peduli mode manual atau live
+    var hm = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta', hour12: false, hour: '2-digit', minute: '2-digit'
+    }).format(new Date());
+    var ss = new Intl.DateTimeFormat('id-ID', {
+        timeZone: 'Asia/Jakarta', second: '2-digit'
+    }).format(new Date());
+    document.getElementById('dtClock').innerText = hm;
+    document.getElementById('dtSec').innerText = ':' + ss;
+
+    // Tanggal ikut real-time selama belum di-override manual
+    if (!dateManuallySet) {
+        var y = jkt.getFullYear();
+        var m = String(jkt.getMonth() + 1).padStart(2, '0');
+        var d = String(jkt.getDate()).padStart(2, '0');
+        var todayStr = y + '-' + m + '-' + d;
+        var tglEl = document.getElementById('tgl');
+        if (tglEl.value !== todayStr) {
+            tglEl.value = todayStr;
+            gen(); // tanggal berganti (lewat tengah malam) -> refresh laporan & shift
+        } else {
+            updateDateWidget();
+        }
+    }
 }
 
 function fmtTgl(s) {
@@ -902,7 +1199,7 @@ function getLaporan() {
     var sf  = sv;
 
     if (sv === 'otomatis') {
-        var h = new Date().getHours();
+        var h = getJakartaNow().getHours();
         sf = (h >= 0 && h < 11) ? 'Selamat pagi' : (h >= 11 && h < 15) ? 'Selamat siang' : 'Selamat malam';
     }
 
@@ -926,6 +1223,7 @@ function getLaporan() {
 }
 
 function gen() {
+    updateDateWidget();
     document.getElementById('hasil-laporan').innerText = getLaporan();
 }
 
@@ -956,6 +1254,8 @@ function doWA() {
 // Inisialisasi
 initDate();
 gen();
+syncNow();
+setInterval(syncNow, 1000); // jam & tanggal WIB (Kalimantan Tengah) berjalan tiap detik
 
 // Refresh shift setiap 5 menit (jika halaman tetap terbuka)
 setInterval(function() {
