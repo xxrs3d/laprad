@@ -95,14 +95,16 @@
         .radio-digits { font-size: 1rem; }
         .shift-arrow-btn { width: 32px; height: 32px; font-size: 1.2rem; }
         .shift-value-display { font-size: 0.9rem; }
-        .jadwal-preview-grid { grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .jadwal-day-card { padding: 12px 10px; gap: 8px; }
-        .jadwal-name { font-size: 0.72rem; }
+        .jadwal-preview-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .jadwal-shift-card { padding: 12px 10px; gap: 8px; }
+        .jadwal-shift-name { font-size: 0.72rem; }
         .jadwal-shift-badge { font-size: 0.7rem; padding: 2px 7px; }
-        .jadwal-day-date { font-size: 0.72rem; }
-        .jadwal-day-label { font-size: 7px; }
-        .jadwal-shift-item { flex-direction: row; justify-content: space-between; }
-        .jadwal-shift-name { font-size: 0.65rem; }
+        .jadwal-shift-date { font-size: 0.72rem; }
+        .jadwal-shift-label { font-size: 7px; }
+        .jadwal-other-days { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .jadwal-other-card { padding: 10px 8px; }
+        .jadwal-other-card .jadwal-shift-name { font-size: 0.65rem; }
+        .jadwal-other-card .jadwal-shift-badge { font-size: 0.6rem; padding: 2px 6px; }
     }
     @media (min-width: 1440px) { .app-wrap { max-width: 1900px; } }
 
@@ -153,10 +155,14 @@
     .petugas-body { display: flex; flex-direction: column; gap: 7px; align-items: center; }
     .photo-frame { position: relative; width: 100%; max-width: 68px; aspect-ratio: 3 / 4; border: 1px solid var(--primary-dark); border-radius: 4px; overflow: hidden; background: radial-gradient(circle at 50% 30%, rgba(89,255,166,0.12), transparent 70%), #031209; flex-shrink: 0; cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
     .photo-frame:hover, .photo-frame:active { border-color: var(--primary); box-shadow: 0 0 10px rgba(89,255,166,0.35); }
+    .photo-frame.libur { border-color: var(--danger); box-shadow: 0 0 15px rgba(255,107,107,0.3); }
+    .photo-frame.libur .corner { border-color: var(--danger); }
     .petugas-native-select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; z-index: 6; cursor: pointer; appearance: none; -webkit-appearance: none; border: none; background: transparent; padding: 0; }
     .petugas-name-label { width: 100%; text-align: center; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--text-main); line-height: 1.25; word-break: break-word; }
+    .petugas-name-label.libur { color: var(--danger); }
     .petugas-tap-hint { width: 100%; text-align: center; font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.3px; margin-top: -4px; }
     .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.9; filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(3) brightness(0.8); }
+    .photo-frame.libur img { filter: grayscale(0.5) sepia(0.5) hue-rotate(340deg) saturate(2) brightness(0.6); }
     .photo-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--primary-dark); }
     .photo-placeholder svg { width: 32%; opacity: 0.6; }
     .photo-placeholder small { font-family: var(--font-pixel); font-size: 5px; letter-spacing: 0.5px; }
@@ -167,6 +173,7 @@
     .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
     .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
     .shift-chip { position: absolute; bottom: 3px; left: 3px; right: 3px; font-family: var(--font-pixel); font-size: 5.5px; text-align: center; background: rgba(1,6,3,0.9); border: 1px solid var(--primary-dark); padding: 1px 2px; color: var(--glow); }
+    .shift-chip.libur { border-color: var(--danger); color: var(--danger); }
     .petugas-fields { width: 100%; display: flex; flex-direction: column; gap: 6px; }
     .petugas-fields label { margin-bottom: 2px; font-size: 0.58rem; }
     .petugas-link-horiz { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 2px; }
@@ -186,7 +193,7 @@
     @keyframes barPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
     .radio-digits { font-family: var(--font-display); font-size: 0.82rem; font-weight: 700; letter-spacing: 1px; color: var(--primary); text-shadow: 0 0 6px rgba(89,255,166,0.6); }
 
-    /* ===== WIDGET JADWAL DINAS BARU ===== */
+    /* ===== WIDGET JADWAL DINAS BARU (seperti kotak petugas) ===== */
     .jadwal-widget .section-title { margin-bottom: 10px; }
     .jadwal-status-tag { font-family: var(--font-pixel); font-size: 5.5px; padding: 2px 5px; border-radius: 2px; font-weight: 700; white-space: nowrap; color: var(--bg-from); background: var(--primary); transition: background 0.2s ease, color 0.2s ease; }
     .jadwal-status-tag.offline { background: rgba(255,107,107,0.85); color: #2a0000; }
@@ -200,7 +207,6 @@
         cursor: pointer;
         transition: all 0.25s ease;
         overflow: hidden;
-        min-height: 100px;
     }
     .jadwal-preview-container:hover {
         border-color: var(--primary);
@@ -210,9 +216,9 @@
     .jadwal-preview-container .hover-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(1,6,3,0.7);
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
+        background: rgba(1,6,3,0.75);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -220,7 +226,7 @@
         transition: opacity 0.3s ease;
         border-radius: var(--radius-card);
         pointer-events: none;
-        z-index: 2;
+        z-index: 10;
     }
     .jadwal-preview-container:hover .hover-overlay {
         opacity: 1;
@@ -237,14 +243,19 @@
         letter-spacing: 0.5px;
         text-shadow: 0 0 12px rgba(89,255,166,0.4);
     }
+
+    /* Grid untuk shift hari ini - 3 kolom seperti petugas */
     .jadwal-preview-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 6px;
         position: relative;
         z-index: 1;
+        margin-bottom: 10px;
     }
-    .jadwal-day-card {
+
+    /* Setiap shift seperti kotak petugas */
+    .jadwal-shift-card {
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-card);
         background: rgba(89,255,166,0.02);
@@ -255,137 +266,238 @@
         min-width: 0;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
-    .jadwal-day-card.jadwal-day-today {
+    .jadwal-shift-card:hover {
+        border-color: rgba(89,255,166,0.4);
+    }
+    .jadwal-shift-card.jadwal-shift-active {
         border-color: var(--primary);
         box-shadow: 0 0 12px rgba(89,255,166,0.22), inset 0 0 8px rgba(89,255,166,0.08);
         background: rgba(89,255,166,0.05);
     }
-    .jadwal-day-head {
+    .jadwal-shift-card.jadwal-shift-libur {
+        border-color: var(--danger);
+        background: rgba(255,107,107,0.05);
+    }
+    .jadwal-shift-card.jadwal-shift-libur .jadwal-shift-head .jadwal-shift-label {
+        color: var(--danger);
+    }
+
+    .jadwal-shift-head {
         display: flex;
         flex-direction: column;
+        align-items: center;
         gap: 2px;
         border-bottom: 1px dashed rgba(89,255,166,0.15);
         padding-bottom: 4px;
         text-align: center;
     }
-    .jadwal-day-label {
+    .jadwal-shift-label {
         font-family: var(--font-pixel);
         font-size: clamp(5px, 1.4vw, 6.5px);
         color: var(--text-main);
         letter-spacing: 0.4px;
         line-height: 1.4;
     }
-    .jadwal-day-today .jadwal-day-label { color: var(--primary); }
-    .jadwal-day-date {
+    .jadwal-shift-active .jadwal-shift-label { color: var(--primary); }
+    .jadwal-shift-date {
         font-family: var(--font-mono);
-        font-size: 0.6rem;
+        font-size: 0.55rem;
         color: var(--text-muted);
         font-weight: 700;
     }
-    .jadwal-day-rows {
+
+    .jadwal-shift-body {
         display: flex;
         flex-direction: column;
-        gap: 3px;
-    }
-    .jadwal-shift-item {
-        display: flex;
         align-items: center;
-        justify-content: space-between;
         gap: 4px;
-        padding: 2px 4px;
-        border-radius: 3px;
-        background: rgba(89,255,166,0.04);
-        border-left: 2px solid transparent;
     }
-    .jadwal-shift-item.libur {
-        border-left-color: var(--danger);
-        background: rgba(255,107,107,0.08);
+
+    /* Mini photo frame di dalam shift card */
+    .jadwal-photo-frame {
+        position: relative;
+        width: 100%;
+        max-width: 52px;
+        aspect-ratio: 3 / 4;
+        border: 1px solid var(--primary-dark);
+        border-radius: 4px;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 30%, rgba(89,255,166,0.12), transparent 70%), #031209;
+        flex-shrink: 0;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        margin: 0 auto;
     }
-    .jadwal-shift-item.libur .jadwal-shift-name {
+    .jadwal-photo-frame.jadwal-libur-frame {
+        border-color: var(--danger);
+        box-shadow: 0 0 12px rgba(255,107,107,0.25);
+    }
+    .jadwal-photo-frame.jadwal-libur-frame .corner {
+        border-color: var(--danger);
+    }
+    .jadwal-photo-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        opacity: 0.9;
+        filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(3) brightness(0.8);
+    }
+    .jadwal-photo-frame.jadwal-libur-frame img {
+        filter: grayscale(0.5) sepia(0.5) hue-rotate(340deg) saturate(2) brightness(0.6);
+    }
+    .jadwal-photo-frame .photo-placeholder-mini {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-dark);
+    }
+    .jadwal-photo-frame .photo-placeholder-mini svg {
+        width: 30%;
+        opacity: 0.5;
+    }
+    .jadwal-photo-frame .photo-placeholder-mini small {
+        font-family: var(--font-pixel);
+        font-size: 4px;
+        letter-spacing: 0.3px;
+    }
+    .jadwal-photo-frame .scan-overlay-mini {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        mix-blend-mode: multiply;
+        background: repeating-linear-gradient(0deg, rgba(0,0,0,0.2) 0px, rgba(0,0,0,0.2) 1px, transparent 2px, transparent 4px);
+    }
+    .jadwal-photo-frame .corner {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border: 1px solid var(--primary);
+        opacity: 0.7;
+    }
+    .jadwal-photo-frame .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .jadwal-photo-frame .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+    .jadwal-photo-frame .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+    .jadwal-photo-frame .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+    .jadwal-photo-frame .shift-chip-mini {
+        position: absolute;
+        bottom: 2px;
+        left: 2px;
+        right: 2px;
+        font-family: var(--font-pixel);
+        font-size: 4.5px;
+        text-align: center;
+        background: rgba(1,6,3,0.9);
+        border: 1px solid var(--primary-dark);
+        padding: 1px 2px;
+        color: var(--glow);
+    }
+    .jadwal-photo-frame.jadwal-libur-frame .shift-chip-mini {
+        border-color: var(--danger);
         color: var(--danger);
-        font-weight: 700;
     }
+
     .jadwal-shift-name {
-        font-size: 0.55rem;
-        font-weight: 600;
+        width: 100%;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        font-weight: 700;
         color: var(--text-main);
         line-height: 1.2;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        min-width: 0;
-        flex: 1;
+        word-break: break-word;
+        min-height: 1.8em;
     }
-    .jadwal-shift-badge {
-        flex-shrink: 0;
+    .jadwal-shift-name.libur {
+        color: var(--danger);
+    }
+    .jadwal-shift-badge-mini {
+        display: inline-block;
         font-family: var(--font-mono);
         font-weight: 800;
         font-size: 0.5rem;
-        padding: 1px 4px;
+        padding: 1px 5px;
         border-radius: 4px;
         text-align: center;
         border: 1px solid transparent;
-        min-width: 20px;
+        margin-top: 2px;
     }
-    .jadwal-shift-badge.sb-P { background: rgba(89,255,166,0.16); color: var(--primary); border-color: rgba(89,255,166,0.4); }
-    .jadwal-shift-badge.sb-S { background: rgba(255,180,69,0.16); color: var(--amber); border-color: rgba(255,180,69,0.4); }
-    .jadwal-shift-badge.sb-M { background: rgba(90,200,255,0.16); color: var(--info); border-color: rgba(90,200,255,0.4); }
-    .jadwal-shift-badge.sb-L { background: rgba(255,107,107,0.16); color: var(--danger); border-color: rgba(255,107,107,0.4); }
-    .jadwal-shift-badge.sb-default { background: rgba(217,255,233,0.08); color: var(--text-muted); border-color: var(--glass-border); }
-
-    .jadwal-empty {
-        font-size: 0.58rem;
-        color: var(--text-muted);
-        text-align: center;
-        padding: 6px 2px;
-        line-height: 1.4;
-    }
+    .jadwal-shift-badge-mini.sb-P { background: rgba(89,255,166,0.16); color: var(--primary); border-color: rgba(89,255,166,0.4); }
+    .jadwal-shift-badge-mini.sb-S { background: rgba(255,180,69,0.16); color: var(--amber); border-color: rgba(255,180,69,0.4); }
+    .jadwal-shift-badge-mini.sb-M { background: rgba(90,200,255,0.16); color: var(--info); border-color: rgba(90,200,255,0.4); }
+    .jadwal-shift-badge-mini.sb-L { background: rgba(255,107,107,0.16); color: var(--danger); border-color: rgba(255,107,107,0.4); }
 
     /* Jadwal kemarin, besok, lusa di bawah */
     .jadwal-other-days {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 6px;
-        margin-top: 8px;
         padding-top: 8px;
         border-top: 1px dashed rgba(89,255,166,0.15);
+        position: relative;
+        z-index: 1;
     }
     .jadwal-other-card {
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-card);
         background: rgba(89,255,166,0.02);
-        padding: 6px 4px;
+        padding: 5px 4px;
         display: flex;
         flex-direction: column;
         gap: 3px;
         min-width: 0;
     }
-    .jadwal-other-card .jadwal-day-head {
+    .jadwal-other-card .jadwal-shift-head {
         padding-bottom: 3px;
         margin-bottom: 3px;
     }
-    .jadwal-other-card .jadwal-shift-item {
-        padding: 1px 3px;
+    .jadwal-other-card .jadwal-shift-label {
+        font-size: clamp(4.5px, 1.2vw, 5.5px);
+    }
+    .jadwal-other-card .jadwal-shift-date {
+        font-size: 0.5rem;
     }
     .jadwal-other-card .jadwal-shift-name {
         font-size: 0.5rem;
+        min-height: 1.4em;
     }
-    .jadwal-other-card .jadwal-shift-badge {
-        font-size: 0.45rem;
-        padding: 0px 3px;
-        min-width: 16px;
+    .jadwal-other-card .jadwal-shift-badge-mini {
+        font-size: 0.42rem;
+        padding: 0px 4px;
+    }
+    .jadwal-other-card .jadwal-shift-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3px;
+        padding: 1px 3px;
+        border-radius: 3px;
+        background: rgba(89,255,166,0.04);
+        border-left: 2px solid transparent;
+    }
+    .jadwal-other-card .jadwal-shift-item.libur {
+        border-left-color: var(--danger);
+        background: rgba(255,107,107,0.08);
+    }
+    .jadwal-other-card .jadwal-shift-item.libur .jadwal-shift-name {
+        color: var(--danger);
+        font-weight: 700;
     }
 
     @media (max-width: 380px) {
         .jadwal-preview-grid { gap: 4px; }
-        .jadwal-day-card { padding: 4px 3px; gap: 3px; }
-        .jadwal-shift-name { font-size: 0.48rem; }
-        .jadwal-shift-badge { font-size: 0.42rem; padding: 1px 3px; min-width: 16px; }
-        .jadwal-day-date { font-size: 0.5rem; }
-        .jadwal-day-label { font-size: 4.5px; }
+        .jadwal-shift-card { padding: 4px 3px; gap: 3px; }
+        .jadwal-photo-frame { max-width: 40px; }
+        .jadwal-shift-name { font-size: 0.5rem; min-height: 1.5em; }
+        .jadwal-shift-badge-mini { font-size: 0.42rem; padding: 0px 3px; }
+        .jadwal-shift-date { font-size: 0.48rem; }
+        .jadwal-shift-label { font-size: 4.5px; }
         .jadwal-other-days { gap: 4px; }
+        .jadwal-other-card { padding: 4px 3px; }
         .jadwal-other-card .jadwal-shift-name { font-size: 0.42rem; }
-        .jadwal-other-card .jadwal-shift-badge { font-size: 0.38rem; padding: 0px 2px; min-width: 14px; }
+        .jadwal-other-card .jadwal-shift-badge-mini { font-size: 0.38rem; padding: 0px 2px; }
     }
 
     .pasien-table-wrap { padding: 14px; }
@@ -582,10 +694,10 @@
                 </div>
             </div>
 
-            <!-- WIDGET JADWAL DINAS BARU -->
+            <!-- WIDGET JADWAL DINAS - SEPERTI KOTAK PETUGAS -->
             <div class="form-section jadwal-widget" id="jadwalWidget">
                 <div class="section-title">
-                    <span class="dot"></span><span class="st-text">Jadwal Dinas</span>
+                    <span class="dot"></span><span class="st-text">Jadwal Dinas Hari Ini</span>
                     <span class="jadwal-status-tag" id="jadwalStatusTag">LIVE</span>
                 </div>
                 <div class="jadwal-preview-container" id="jadwalPreviewContainer" onclick="openJadwalPage()">
@@ -1019,7 +1131,7 @@ function syncNow() {
 }
 
 /* ==========================================================
-   JADWAL DINAS - WIDGET BARU
+   JADWAL DINAS - WIDGET BARU SEPERTI KOTAK PETUGAS
    ========================================================== */
 var BULAN_JADWAL = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
@@ -1062,38 +1174,65 @@ function renderJadwalWidget() {
         else { tag.textContent = 'NO DATA'; tag.classList.add('offline'); }
     }
 
-    // Hari ini: tampilkan shift Pagi, Siang, Malam (urut kiri ke kanan)
+    // Hari ini: tampilkan shift Pagi, Siang, Malam (3 kolom seperti petugas)
     var todayRows = shiftRowsForDate(data, now);
+    var shiftOrder = ['P', 'S', 'M'];
+    var shiftLabels = { 'P': 'Pagi', 'S': 'Siang', 'M': 'Malam' };
+    var shiftColors = { 'P': 'sb-P', 'S': 'sb-S', 'M': 'sb-M' };
+    var currentShift = getCurrentShift();
+    var currentLabel = currentShift.charAt(0).toUpperCase();
+
     var todayHtml = '';
     if (todayRows && todayRows.length) {
         var shiftMap = {};
         todayRows.forEach(function(r) {
             shiftMap[r.shift] = r.name;
         });
-        var shiftOrder = ['P', 'S', 'M'];
-        var shiftLabels = { 'P': 'Pagi', 'S': 'Siang', 'M': 'Malam' };
-        var items = shiftOrder.map(function(sh) {
+
+        todayHtml = shiftOrder.map(function(sh) {
             var name = shiftMap[sh] || '-';
             var isLibur = (name === '-');
-            var badgeClass = isLibur ? 'sb-L' : 'sb-' + sh;
+            var isActive = (sh === currentLabel);
+            var badgeClass = isLibur ? 'sb-L' : shiftColors[sh] || 'sb-default';
             var nameDisplay = isLibur ? 'LIBUR' : name;
-            return '<div class="jadwal-shift-item' + (isLibur ? ' libur' : '') + '">' +
-                '<span class="jadwal-shift-name">' + (isLibur ? '⚠️ ' : '') + nameDisplay + '</span>' +
-                '<span class="jadwal-shift-badge ' + badgeClass + '">' + shiftLabels[sh] + '</span>' +
+            var slug = slugNama(nameDisplay);
+            var fotoSrc = (slug && !isLibur) ? (FOTO_FOLDER + slug + FOTO_EXT) : '';
+
+            return '<div class="jadwal-shift-card' +
+                (isActive ? ' jadwal-shift-active' : '') +
+                (isLibur ? ' jadwal-shift-libur' : '') +
+                '">' +
+                '<div class="jadwal-shift-head">' +
+                '<span class="jadwal-shift-label">' + shiftLabels[sh] + '</span>' +
+                '<span class="jadwal-shift-date">' + fmtTglSingkatJadwal(now) + '</span>' +
+                '</div>' +
+                '<div class="jadwal-shift-body">' +
+                '<div class="jadwal-photo-frame' + (isLibur ? ' jadwal-libur-frame' : '') + '">' +
+                '<div class="scan-overlay-mini"></div>' +
+                '<div class="corner tl"></div><div class="corner tr"></div>' +
+                '<div class="corner bl"></div><div class="corner br"></div>' +
+                (fotoSrc ? '<img src="' + fotoSrc + '" alt="' + nameDisplay + '" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">' : '') +
+                '<div class="photo-placeholder-mini" style="' + (fotoSrc ? 'display:none;' : '') + '">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">' +
+                '<circle cx="12" cy="8" r="4"/>' +
+                '<path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>' +
+                '</svg>' +
+                '<small>' + (isLibur ? 'LIBUR' : 'NO FOTO') + '</small>' +
+                '</div>' +
+                '<div class="shift-chip-mini">' + (isLibur ? 'LIBUR' : shiftLabels[sh].toUpperCase()) + '</div>' +
+                '</div>' +
+                '<div class="jadwal-shift-name' + (isLibur ? ' libur' : '') + '">' + nameDisplay + '</div>' +
+                '<span class="jadwal-shift-badge-mini ' + badgeClass + '">' + (isLibur ? 'LIBUR' : sh) + '</span>' +
+                '</div>' +
                 '</div>';
-        });
-        todayHtml = items.join('');
+        }).join('');
     } else {
-        todayHtml = '<div class="jadwal-empty">Belum ada data jadwal</div>';
+        todayHtml = '<div class="jadwal-shift-card" style="grid-column:1/-1;padding:12px;text-align:center;">' +
+            '<div class="jadwal-empty">Belum ada data jadwal</div>' +
+            '</div>';
     }
 
-    var todayCard = '<div class="jadwal-day-card jadwal-day-today">' +
-        '<div class="jadwal-day-head">' +
-        '<span class="jadwal-day-label">HARI INI</span>' +
-        '<span class="jadwal-day-date">' + fmtTglSingkatJadwal(now) + '</span>' +
-        '</div>' +
-        '<div class="jadwal-day-rows">' + todayHtml + '</div>' +
-        '</div>';
+    grid.innerHTML = todayHtml;
 
     // 3 hari lainnya: kemarin, besok, lusa (di bawah)
     var otherDays = [kemarin, besok, lusa];
@@ -1109,21 +1248,20 @@ function renderJadwalWidget() {
                 var badgeClass = ['P', 'S', 'M', 'L'].indexOf(r.shift) !== -1 ? 'sb-' + r.shift : 'sb-default';
                 return '<div class="jadwal-shift-item' + (isLibur ? ' libur' : '') + '">' +
                     '<span class="jadwal-shift-name">' + (isLibur ? '⚠️ ' : '') + r.name + '</span>' +
-                    '<span class="jadwal-shift-badge ' + badgeClass + '">' + r.shift + '</span>' +
+                    '<span class="jadwal-shift-badge-mini ' + badgeClass + '">' + r.shift + '</span>' +
                     '</div>';
             });
             body = items.join('');
         }
         return '<div class="jadwal-other-card">' +
-            '<div class="jadwal-day-head">' +
-            '<span class="jadwal-day-label">' + otherLabels[idx] + '</span>' +
-            '<span class="jadwal-day-date">' + fmtTglSingkatJadwal(d) + '</span>' +
+            '<div class="jadwal-shift-head">' +
+            '<span class="jadwal-shift-label">' + otherLabels[idx] + '</span>' +
+            '<span class="jadwal-shift-date">' + fmtTglSingkatJadwal(d) + '</span>' +
             '</div>' +
-            '<div class="jadwal-day-rows">' + body + '</div>' +
+            '<div class="jadwal-shift-body">' + body + '</div>' +
             '</div>';
     }).join('');
 
-    grid.innerHTML = todayCard;
     otherGrid.innerHTML = otherHtml;
 }
 
