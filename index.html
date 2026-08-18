@@ -113,12 +113,26 @@
         background: linear-gradient(90deg, transparent, var(--primary), transparent);
     }
 
+    /* ===== DESKTOP: layout lebih horizontal & memenuhi layar ===== */
     @media (min-width: 1024px) {
-        body { padding: 28px; align-items: center; }
-        .app-wrap { max-width: 1100px; padding: 32px; margin: 0 auto; }
-        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+        body { padding: 24px; align-items: center; }
+        .app-wrap { max-width: 1680px; width: 96vw; padding: 32px 40px; margin: 0 auto; }
+        .main-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 40px; align-items: start; }
         .panel-right { position: sticky; top: 32px; }
-        #hasil-laporan { min-height: 420px; max-height: calc(100vh - 220px); }
+        #hasil-laporan { min-height: 480px; max-height: calc(100vh - 210px); font-size: 0.92rem; }
+        .header-title { font-size: 1.75rem; }
+        .subtitle { font-size: 0.85rem; }
+        .petugas-horizontal-container { grid-template-columns: 1fr auto 1fr; gap: 16px; }
+        .photo-frame { max-width: 96px; }
+        .counter-grid { grid-template-columns: repeat(4, 1fr); }
+        .kategori-card { padding: 18px 20px; }
+        .radio-widget { max-width: 92px; }
+        .radio-bars { height: 24px; }
+        .radio-digits { font-size: 1rem; }
+    }
+
+    @media (min-width: 1440px) {
+        .app-wrap { max-width: 1900px; }
     }
 
     /* ===== HEADER MENYAMPING (Logo Kiri, Judul Kanan) ===== */
@@ -271,6 +285,39 @@
         color: var(--text-muted); pointer-events: none; font-size: 10px;
     }
 
+    /* ===== ARROW PICKER SHIFT (Kiri/Kanan) ===== */
+    .shift-picker {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--glass-input);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-input);
+        padding: 6px 4px;
+        gap: 4px;
+    }
+    .shift-arrow-btn {
+        width: 28px; height: 28px; flex-shrink: 0;
+        border: none; border-radius: 6px;
+        background: rgba(89,255,166,0.12);
+        color: var(--primary);
+        font-size: 1.05rem; font-weight: 700;
+        cursor: pointer; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.15s ease, transform 0.1s ease;
+    }
+    .shift-arrow-btn:hover { background: rgba(89,255,166,0.22); }
+    .shift-arrow-btn:active { background: rgba(89,255,166,0.35); transform: scale(0.9); }
+    .shift-value-display {
+        flex: 1;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-main);
+        letter-spacing: 0.4px;
+    }
+
     /* ===== PETUGAS DINAS HORIZONTAL (Side-by-Side Kiri Ke Kanan) ===== */
     .petugas-horizontal-container {
         display: grid;
@@ -406,30 +453,80 @@
         gap: 6px;
     }
     .petugas-fields label { margin-bottom: 2px; font-size: 0.6rem; }
-    .petugas-fields select { padding: 8px 20px 8px 8px; font-size: 0.78rem; }
 
-    /* Konektor panah horizontal antara dua petugas */
+    /* Konektor antara dua petugas - sekarang berupa widget radio PTT/MEMORY */
     .petugas-link-horiz {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
         padding: 0 2px;
     }
-    .petugas-link-horiz .link-line-h {
-        width: 12px; height: 1px;
-        background: repeating-linear-gradient(90deg, var(--primary-dark) 0 3px, transparent 3px 6px);
+
+    /* ===== Widget Radio Gaya "PTT / MEMORY" ===== */
+    .radio-widget {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        max-width: 72px;
+        border: 1.5px solid var(--primary);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #01100a;
+        box-shadow: 0 0 14px rgba(89,255,166,0.25), inset 0 0 10px rgba(0,0,0,0.6);
     }
-    .petugas-link-horiz .link-dot {
-        width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--primary-dark);
+    .radio-tag {
+        font-family: var(--font-pixel);
+        font-size: 5.5px;
+        text-align: center;
+        color: var(--bg-from);
+        background: var(--primary);
+        padding: 3px 2px;
+        letter-spacing: 1.5px;
+        font-weight: 700;
     }
-    .petugas-link-horiz .link-dot.active {
-        background: var(--primary); border-color: var(--primary);
-        box-shadow: 0 0 6px var(--primary);
-        animation: linkPulse 1.2s ease-in-out infinite;
+    .radio-screen {
+        background: #010b06;
+        padding: 7px 5px 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        border-top: 1px solid rgba(89,255,166,0.3);
+        border-bottom: 1px solid rgba(89,255,166,0.3);
     }
-    .petugas-link-horiz .link-arrow { font-size: 11px; color: var(--primary); line-height: 1; }
+    .radio-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 1.5px;
+        height: 20px;
+        width: 100%;
+        justify-content: center;
+    }
+    .radio-bars span {
+        width: 3px;
+        background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+        border-radius: 1px;
+        box-shadow: 0 0 4px rgba(89,255,166,0.5);
+        animation: barPulse 1.8s ease-in-out infinite;
+    }
+    .radio-bars span:nth-child(1) { height: 20%; animation-delay: 0s; }
+    .radio-bars span:nth-child(2) { height: 35%; animation-delay: 0.1s; }
+    .radio-bars span:nth-child(3) { height: 50%; animation-delay: 0.2s; }
+    .radio-bars span:nth-child(4) { height: 65%; animation-delay: 0.3s; }
+    .radio-bars span:nth-child(5) { height: 80%; animation-delay: 0.4s; }
+    .radio-bars span:nth-child(6) { height: 95%; animation-delay: 0.5s; }
+    .radio-bars span:nth-child(7) { height: 100%; animation-delay: 0.6s; }
+    @keyframes barPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+    .radio-digits {
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--primary);
+        text-shadow: 0 0 6px rgba(89,255,166,0.6);
+    }
 
     /* ===== Kategori Pasien Counter ===== */
     .kategori-title { font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
@@ -477,16 +574,31 @@
         margin-bottom: 14px;
     }
 
-    .btn-row { display: flex; gap: 10px; }
+    .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-row:first-of-type { margin-top: 0; }
     .action-btn {
         flex: 1; padding: 14px 10px; border: none; border-radius: var(--radius-input);
         font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700; letter-spacing: 0.4px;
         text-transform: uppercase; cursor: pointer; color: #000;
         transition: transform 0.12s ease, filter 0.2s ease, box-shadow 0.2s ease;
     }
+    a.action-btn {
+        display: flex; align-items: center; justify-content: center;
+        text-decoration: none; text-align: center;
+    }
     .action-btn:active { transform: scale(0.97); filter: brightness(0.9); }
     .btn-copy { background: linear-gradient(135deg, var(--primary), #32cb75); box-shadow: 0 4px 14px rgba(89,255,166,0.3); }
     .btn-wa { background: linear-gradient(135deg, #25d366, #128c46); color: #fff; box-shadow: 0 4px 14px rgba(37,211,102,0.3); }
+    .btn-link {
+        background: rgba(89,255,166,0.1); color: var(--text-main);
+        border: 1px solid var(--glass-border);
+        box-shadow: none;
+    }
+    .btn-link:hover { background: rgba(89,255,166,0.18); }
+    .btn-gdrive {
+        background: linear-gradient(135deg, #4285f4, #1a73e8); color: #fff;
+        box-shadow: 0 4px 14px rgba(66,133,244,0.3);
+    }
 
     .btn-clear {
         width: 100%; padding: 14px; margin-top: 14px;
@@ -497,33 +609,6 @@
         transition: background 0.2s ease;
     }
     .btn-clear:hover { background: rgba(255,107,107,0.18); }
-
-    /* ===== FAB Speed Dial ===== */
-    .fab-speed-dial { position: fixed; bottom: 25px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-    .fab-menu-items { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; opacity: 0; transform: translateY(10px) scale(0.95); pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
-    .fab-speed-dial.open .fab-menu-items { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
-
-    .fab-menu-item { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
-    .fab-menu-label {
-        background: rgba(1,8,4,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        color: var(--text-main); font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600;
-        padding: 6px 12px; border-radius: 16px; border: 1px solid rgba(89,255,166,0.25);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .fab-menu-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); border: 1px solid rgba(185,255,221,0.25); flex-shrink: 0; }
-    .fab-menu-icon.blue { background: linear-gradient(135deg, var(--primary-dark), var(--bg-from)); }
-    .fab-menu-icon.green { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #000; }
-
-    .fab-main-btn {
-        background: linear-gradient(135deg, var(--primary), #2cb873); border: 1px solid rgba(185,255,221,0.4);
-        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); height: 50px; border-radius: 25px;
-        display: flex; align-items: center; justify-content: center; color: #000;
-        box-shadow: 0 6px 22px rgba(89,255,166,0.35); padding: 0 20px; gap: 8px; cursor: pointer;
-        font-family: var(--font-mono); font-size: 0.9rem; font-weight: 800; transition: all 0.2s ease;
-    }
-    .fab-speed-dial.open .fab-main-btn { border-radius: 50%; width: 50px; padding: 0; }
-    .fab-speed-dial.open .fab-toggle-text { display: none; }
-    .fab-speed-dial.open .fab-toggle-icon { transform: rotate(45deg); }
 
     /* ===== Toast Notification ===== */
     .toast-notification {
@@ -622,24 +707,6 @@
 <div class="stars-layer"><canvas id="starCanvas"></canvas></div>
 <div class="nebula"></div>
 <div class="crt-overlay"></div>
-
-<!-- FAB SPEED DIAL -->
-<div class="fab-speed-dial" id="fabDial">
-    <div class="fab-menu-items">
-        <a href="bacaan-radiologi.html" class="fab-menu-item">
-            <span class="fab-menu-label">Pembuat Hasil Bacaan Radiologi</span>
-            <div class="fab-menu-icon blue">📋</div>
-        </a>
-        <a href="cbct.html" class="fab-menu-item">
-            <span class="fab-menu-label">Pembuat Hasil CBCT</span>
-            <div class="fab-menu-icon green">📄</div>
-        </a>
-    </div>
-    <button class="fab-main-btn" onclick="toggleFab()" aria-label="Buka Menu">
-        <span class="fab-toggle-icon">＋</span>
-        <span class="fab-toggle-text">Menu</span>
-    </button>
-</div>
 
 <!-- TOAST & MODAL -->
 <div id="toastNotif" class="toast-notification">
@@ -761,24 +828,33 @@
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
-                                    <div class="select-wrap">
-                                        <select id="s1" onchange="gen(); updateFoto(1);">
-                                            <option value="Pagi">Pagi</option>
-                                            <option value="Siang">Siang</option>
-                                            <option value="Malam">Malam</option>
-                                        </select>
+                                    <div class="shift-picker">
+                                        <button type="button" class="shift-arrow-btn" onclick="stepShift(1,-1)" aria-label="Shift sebelumnya">&#8249;</button>
+                                        <span class="shift-value-display" id="s1Display">Pagi</span>
+                                        <button type="button" class="shift-arrow-btn" onclick="stepShift(1,1)" aria-label="Shift berikutnya">&#8250;</button>
                                     </div>
+                                    <select id="s1" style="display:none;">
+                                        <option value="Pagi">Pagi</option>
+                                        <option value="Siang">Siang</option>
+                                        <option value="Malam">Malam</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Panah Konektor Serah Terima Horizontal -->
+                    <!-- Widget Radio "PTT / MEMORY" di tengah -->
                     <div class="petugas-link-horiz">
-                        <div class="link-line-h"></div>
-                        <div class="link-dot active"></div>
-                        <span class="link-arrow">&#8594;</span>
-                        <div class="link-line-h"></div>
+                        <div class="radio-widget">
+                            <div class="radio-tag">PTT</div>
+                            <div class="radio-screen">
+                                <div class="radio-bars">
+                                    <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                                </div>
+                                <div class="radio-digits" id="radioDigits">--:--</div>
+                            </div>
+                            <div class="radio-tag">MEMORY</div>
+                        </div>
                     </div>
 
                     <!-- P2: Dinas Saat Ini (Menerima) -->
@@ -815,13 +891,16 @@
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
-                                    <div class="select-wrap">
-                                        <select id="s2" onchange="gen(); updateFoto(2);">
-                                            <option value="Siang">Siang</option>
-                                            <option value="Pagi">Pagi</option>
-                                            <option value="Malam">Malam</option>
-                                        </select>
+                                    <div class="shift-picker">
+                                        <button type="button" class="shift-arrow-btn" onclick="stepShift(2,-1)" aria-label="Shift sebelumnya">&#8249;</button>
+                                        <span class="shift-value-display" id="s2Display">Siang</span>
+                                        <button type="button" class="shift-arrow-btn" onclick="stepShift(2,1)" aria-label="Shift berikutnya">&#8250;</button>
                                     </div>
+                                    <select id="s2" style="display:none;">
+                                        <option value="Siang">Siang</option>
+                                        <option value="Pagi">Pagi</option>
+                                        <option value="Malam">Malam</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -840,6 +919,13 @@
             <div class="btn-row">
                 <button class="action-btn btn-copy" onclick="doKopi()">&#128203; Salin Laporan</button>
                 <button class="action-btn btn-wa" onclick="doWA()">&#128232; Kirim WA</button>
+            </div>
+            <div class="btn-row">
+                <a href="bacaan-radiologi.html" class="action-btn btn-link">&#128203; Bacaan Radiologi</a>
+                <a href="cbct.html" class="action-btn btn-link">&#128196; Hasil CBCT</a>
+            </div>
+            <div class="btn-row">
+                <a href="https://drive.google.com/drive/folders/GANTI_DENGAN_ID_FOLDER_ANDA" target="_blank" rel="noopener" class="action-btn btn-gdrive">&#9729; Buka Folder GDrive</a>
             </div>
         </div>
     </div>
@@ -936,15 +1022,6 @@
 })();
 
 /* ==========================================================
-   FAB MENU
-   ========================================================== */
-function toggleFab() { document.getElementById('fabDial').classList.toggle('open'); }
-document.addEventListener('click', function (e) {
-    var dial = document.getElementById('fabDial');
-    if (!dial.contains(e.target)) dial.classList.remove('open');
-});
-
-/* ==========================================================
    DATA KATEGORI PASIEN
    ========================================================== */
 var kat = ["Militer", "PNS", "KBT", "Masyarakat Umum", "RO Gigi"];
@@ -1009,6 +1086,30 @@ function setShifts() {
     var currentShift = getCurrentShift();
     document.getElementById('s2').value = currentShift;
     document.getElementById('s1').value = getPreviousShift(currentShift);
+    syncShiftDisplay(1);
+    syncShiftDisplay(2);
+}
+
+/* ==========================================================
+   ARROW PICKER SHIFT (Kiri/Kanan) - fungsi otomatis tetap ada
+   ========================================================== */
+var SHIFT_ORDER = ['Pagi', 'Siang', 'Malam'];
+
+function stepShift(n, dir) {
+    var sel = document.getElementById('s' + n);
+    var idx = SHIFT_ORDER.indexOf(sel.value);
+    if (idx === -1) idx = 0;
+    idx = (idx + dir + SHIFT_ORDER.length) % SHIFT_ORDER.length;
+    sel.value = SHIFT_ORDER[idx];
+    syncShiftDisplay(n);
+    gen();
+    updateFoto(n);
+}
+
+function syncShiftDisplay(n) {
+    var sel = document.getElementById('s' + n);
+    var disp = document.getElementById('s' + n + 'Display');
+    if (sel && disp) disp.innerText = sel.value;
 }
 
 /* ==========================================================
@@ -1107,6 +1208,9 @@ function syncNow() {
     document.getElementById('dtClock').innerText = hm;
     document.getElementById('dtSec').innerText = ':' + ss;
     updateShiftCountdown();
+
+    var radioDigits = document.getElementById('radioDigits');
+    if (radioDigits) radioDigits.innerText = hm;
 
     if (!dateManuallySet) {
         var y = jkt.getFullYear();
