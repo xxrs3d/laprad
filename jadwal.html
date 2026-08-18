@@ -3,104 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generator Jadwal Dinas</title>
+    <title>Generator Jadwal Dinas - Dark Army</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .shift-P { background-color: #dcfce7; color: #166534; font-weight: 600; }
-        .shift-S { background-color: #fef08a; color: #854d0e; font-weight: 600; }
-        .shift-M { background-color: #dbeafe; color: #1e40af; font-weight: 600; }
-        .shift-L { background-color: #fee2e2; color: #991b1b; font-weight: 600; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #242c22; /* Dark Army Green Background */
+            color: #e5e7eb;
+        }
+
+        /* Warna Shift untuk diekspor (Light background) */
+        .shift-P { background-color: #dcfce7 !important; color: #166534 !important; font-weight: 600; }
+        .shift-S { background-color: #fef08a !important; color: #854d0e !important; font-weight: 600; }
+        .shift-M { background-color: #dbeafe !important; color: #1e40af !important; font-weight: 600; }
+        .shift-L { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: 600; }
         
-        /* Memastikan tabel rapi saat diekspor */
+        /* Memastikan tabel rapi saat diekspor dan tetap light mode */
         #schedule-capture {
             background-color: white;
-            padding: 20px;
+            color: #1f2937; /* Teks hitam/abu gelap untuk cetak */
+            padding: 24px;
             border-radius: 12px;
         }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #d1d5db; text-align: center; padding: 8px 4px; font-size: 0.875rem; }
-        th { background-color: #f9fafb; font-weight: 600; }
-        td:first-child { text-align: left; padding-left: 12px; font-weight: 500; white-space: nowrap; }
+        #schedule-capture table { border-collapse: collapse; width: 100%; }
+        #schedule-capture th, #schedule-capture td { border: 1px solid #d1d5db; text-align: center; padding: 8px 4px; font-size: 0.875rem; }
+        #schedule-capture th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+        #schedule-capture td:first-child { text-align: left; padding-left: 12px; font-weight: 500; white-space: nowrap; }
+
+        /* Custom Scrollbar untuk tema gelap */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #2c362a; }
+        ::-webkit-scrollbar-thumb { background: #4a5d46; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #5d7558; }
     </style>
 </head>
-<body class="text-gray-800 p-4 md:p-8">
+<body class="p-4 md:p-8">
 
     <div class="max-w-6xl mx-auto space-y-6">
         <!-- Header -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">🗓️ Pembuat Jadwal Dinas</h1>
-            <p class="text-gray-500 text-sm">Pilih personel untuk shift pertama di awal bulan, sisanya akan terisi otomatis dengan pola (Pagi 2x, Sore 2x, Malam 2x, Libur 2x).</p>
+        <div class="bg-[#2f3a2c] p-6 rounded-2xl shadow-lg border border-[#404f3d]">
+            <h1 class="text-2xl font-bold text-[#d4dfcd] mb-2">🗓️ Pembuat Jadwal Dinas</h1>
+            <p class="text-[#9bb094] text-sm">Pilih personel untuk shift pada <b>tanggal referensi (misal: hari ini)</b>, seluruh jadwal 1 bulan akan dikalkulasi otomatis menggunakan pola (Pagi 2x, Sore 2x, Malam 2x, Libur 2x).</p>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <!-- Pemilihan Bulan & Tahun -->
+        <div class="bg-[#2f3a2c] p-6 rounded-2xl shadow-lg border border-[#404f3d]">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+                <!-- Pemilihan Bulan & Tahun & Tanggal -->
                 <div class="space-y-4">
-                    <h2 class="text-lg font-semibold border-b pb-2">1. Pilih Periode</h2>
+                    <h2 class="text-lg font-semibold text-[#d4dfcd] border-b border-[#404f3d] pb-2">1. Pilih Periode & Tanggal Referensi</h2>
                     <div class="flex gap-4">
-                        <select id="month" class="w-full p-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"></select>
-                        <select id="year" class="w-full p-2 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                        <div class="w-1/3">
+                            <label class="block text-xs text-[#9bb094] mb-1">Tanggal</label>
+                            <select id="ref-date" class="w-full p-2 border border-[#4a5d46] rounded-lg bg-[#242c22] text-[#d4dfcd] focus:ring-2 focus:ring-[#6b855b] outline-none transition"></select>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="block text-xs text-[#9bb094] mb-1">Bulan</label>
+                            <select id="month" class="w-full p-2 border border-[#4a5d46] rounded-lg bg-[#242c22] text-[#d4dfcd] focus:ring-2 focus:ring-[#6b855b] outline-none transition"></select>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="block text-xs text-[#9bb094] mb-1">Tahun</label>
+                            <select id="year" class="w-full p-2 border border-[#4a5d46] rounded-lg bg-[#242c22] text-[#d4dfcd] focus:ring-2 focus:ring-[#6b855b] outline-none transition"></select>
+                        </div>
                     </div>
+                    <p class="text-xs text-[#8aa182]">Atur siapa yang dinas pada tanggal di atas. Jadwal bulan tersebut akan menyesuaikan mundur dan maju.</p>
                 </div>
 
-                <!-- Pemilihan Shift Hari Pertama -->
+                <!-- Pemilihan Shift -->
                 <div class="space-y-4">
-                    <h2 class="text-lg font-semibold border-b pb-2">2. Penempatan Shift Tanggal 1</h2>
+                    <h2 class="text-lg font-semibold text-[#d4dfcd] border-b border-[#404f3d] pb-2">2. Penempatan Shift pada Tanggal Tsb</h2>
                     
                     <div class="flex items-center gap-3">
-                        <label class="w-24 font-medium text-green-700">Pagi</label>
-                        <select id="shift-pagi" class="w-full p-2 border rounded-lg bg-green-50 outline-none shift-select" data-shift="P"></select>
+                        <label class="w-24 font-medium text-[#6EE7B7]">Pagi</label>
+                        <select id="shift-pagi" class="w-full p-2 border border-[#2E5A48] rounded-lg bg-[#1E3A2F] text-gray-200 outline-none shift-select" data-shift="P"></select>
                     </div>
                     
                     <div class="flex items-center gap-3">
-                        <label class="w-24 font-medium text-yellow-700">Sore</label>
-                        <select id="shift-sore" class="w-full p-2 border rounded-lg bg-yellow-50 outline-none shift-select" data-shift="S"></select>
+                        <label class="w-24 font-medium text-[#FCD34D]">Sore</label>
+                        <select id="shift-sore" class="w-full p-2 border border-[#664C28] rounded-lg bg-[#42311C] text-gray-200 outline-none shift-select" data-shift="S"></select>
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <label class="w-24 font-medium text-blue-700">Malam</label>
-                        <select id="shift-malam" class="w-full p-2 border rounded-lg bg-blue-50 outline-none shift-select" data-shift="M"></select>
+                        <label class="w-24 font-medium text-[#93C5FD]">Malam</label>
+                        <select id="shift-malam" class="w-full p-2 border border-[#29486D] rounded-lg bg-[#1A2E46] text-gray-200 outline-none shift-select" data-shift="M"></select>
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <label class="w-24 font-medium text-red-700">Libur</label>
-                        <input type="text" id="shift-libur" readonly class="w-full p-2 border rounded-lg bg-red-50 text-red-700 font-medium outline-none cursor-not-allowed" placeholder="Terisi Otomatis">
+                        <label class="w-24 font-medium text-[#FCA5A5]">Libur</label>
+                        <input type="text" id="shift-libur" readonly class="w-full p-2 border border-[#6D2929] rounded-lg bg-[#451A1A] text-[#FCA5A5] font-medium outline-none cursor-not-allowed" placeholder="Terisi Otomatis">
                     </div>
                 </div>
             </div>
 
-            <button onclick="generateSchedule()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-sm">
+            <button onclick="generateSchedule()" class="w-full py-3 bg-[#546b45] hover:bg-[#6b855b] text-white font-semibold rounded-xl transition shadow-md border border-[#769165]">
                 Buat Jadwal & Sinkronkan
             </button>
         </div>
 
         <div id="output-section" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold">Hasil Jadwal</h2>
-                <button onclick="downloadAsImage()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg flex items-center gap-2 transition shadow-sm">
+                <h2 class="text-xl font-bold text-[#d4dfcd]">Hasil Jadwal</h2>
+                <button onclick="downloadAsImage()" class="px-4 py-2 bg-[#4a5d46] hover:bg-[#5d7558] text-white font-semibold rounded-lg flex items-center gap-2 transition shadow-md border border-[#667d60]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                     Simpan sbg Foto
                 </button>
             </div>
 
-            <!-- Kontainer ini yang akan dijadikan foto -->
-            <div class="overflow-x-auto shadow-sm border border-gray-200 rounded-2xl bg-white">
+            <!-- Kontainer ini yang akan dijadikan foto (Tetap terang untuk dicetak) -->
+            <div class="overflow-x-auto shadow-xl rounded-2xl ring-4 ring-[#404f3d]">
                 <div id="schedule-capture">
                     <div class="text-center mb-6">
-                        <h2 class="text-2xl font-bold uppercase tracking-wide" id="title-month">JADWAL DINAS</h2>
+                        <h2 class="text-2xl font-bold uppercase tracking-wide text-gray-900" id="title-month">JADWAL DINAS</h2>
                         <p class="text-gray-500 font-medium">Instalasi Radiologi / Keperawatan</p>
                     </div>
                     <div id="table-container" class="overflow-x-auto">
                         <!-- Tabel digenerate lewat JS -->
                     </div>
-                    <div class="mt-6 flex justify-center gap-6 text-sm font-medium">
-                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#dcfce7] border border-green-200"></span> P = Pagi</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#fef08a] border border-yellow-200"></span> S = Sore</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#dbeafe] border border-blue-200"></span> M = Malam</div>
-                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#fee2e2] border border-red-200"></span> L = Libur</div>
+                    <div class="mt-6 flex justify-center gap-6 text-sm font-medium text-gray-700">
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#dcfce7] border border-green-300"></span> P = Pagi</div>
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#fef08a] border border-yellow-300"></span> S = Sore</div>
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#dbeafe] border border-blue-300"></span> M = Malam</div>
+                        <div class="flex items-center gap-2"><span class="w-4 h-4 rounded block bg-[#fee2e2] border border-red-300"></span> L = Libur</div>
                     </div>
                 </div>
             </div>
@@ -118,25 +142,33 @@
         // Pola 8 hari: Pagi 2x, Sore 2x, Malam 2x, Libur 2x
         const shiftPattern = ['P', 'P', 'S', 'S', 'M', 'M', 'L', 'L'];
         
-        // Offset (Indeks mulai) untuk hari ke-1 berdasarkan pilihan
+        // Offset (Indeks mulai) untuk hari referensi
         const startOffset = { 'P': 0, 'S': 2, 'M': 4, 'L': 6 };
 
         const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
         
         // Inisialisasi Dropdown
         function initDropdowns() {
-            // Bulan dan Tahun
             const now = new Date();
             const monthSelect = document.getElementById('month');
             const yearSelect = document.getElementById('year');
             
+            // Setup Bulan
             monthNames.forEach((m, i) => {
                 monthSelect.add(new Option(m, i, false, i === now.getMonth()));
             });
             
+            // Setup Tahun
             for(let y = now.getFullYear() - 1; y <= now.getFullYear() + 2; y++) {
                 yearSelect.add(new Option(y, y, false, y === now.getFullYear()));
             }
+
+            // Setup Tanggal berdasarkan bulan & tahun terpilih
+            updateDateDropdown();
+
+            // Event listener jika bulan/tahun berubah, update jumlah hari di bulan tersebut
+            monthSelect.addEventListener('change', updateDateDropdown);
+            yearSelect.addEventListener('change', updateDateDropdown);
 
             // Select Shift
             updateShiftSelects();
@@ -144,6 +176,28 @@
             document.querySelectorAll('.shift-select').forEach(sel => {
                 sel.addEventListener('change', updateShiftSelects);
             });
+        }
+
+        // Fungsi memperbarui dropdown tanggal (karena setiap bulan jumlah harinya beda)
+        function updateDateDropdown() {
+            const month = parseInt(document.getElementById('month').value);
+            const year = parseInt(document.getElementById('year').value);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const dateSelect = document.getElementById('ref-date');
+            
+            // Simpan tanggal yang sedang dipilih (atau gunakan hari ini untuk default awal)
+            let selectedDate = dateSelect.value ? parseInt(dateSelect.value) : new Date().getDate();
+            
+            // Validasi jangan sampai melebihi jumlah hari di bulan terpilih (misal Feb 28)
+            if (selectedDate > daysInMonth) selectedDate = daysInMonth;
+
+            dateSelect.innerHTML = '';
+            for (let i = 1; i <= daysInMonth; i++) {
+                const opt = new Option(`${i} ${monthNames[month]}`, i);
+                if (i === selectedDate) opt.selected = true;
+                dateSelect.add(opt);
+            }
         }
 
         // Logika agar tidak ada nama duplikat di shift dan mengisi Libur otomatis
@@ -163,7 +217,7 @@
 
             selects.forEach((sel, index) => {
                 const currentValue = sel.value;
-                sel.innerHTML = '<option value="">-- Pilih Nama --</option>';
+                sel.innerHTML = '<option value="" class="text-gray-500">-- Pilih Nama --</option>';
                 
                 names.forEach(name => {
                     // Jika nama belum dipilih oleh dropdown lain, atau ini adalah pilihan dia saat ini
@@ -188,6 +242,7 @@
         }
 
         function generateSchedule() {
+            const refDate = parseInt(document.getElementById('ref-date').value);
             const month = parseInt(document.getElementById('month').value);
             const year = parseInt(document.getElementById('year').value);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -202,45 +257,54 @@
                 return;
             }
 
-            // Map siapa mulai dari indeks mana
-            const userOffsets = {};
-            userOffsets[pagiName] = startOffset['P'];
-            userOffsets[soreName] = startOffset['S'];
-            userOffsets[malamName] = startOffset['M'];
-            userOffsets[liburName] = startOffset['L'];
+            // Map siapa mendapat shift apa pada Tanggal Referensi
+            const userRefOffsets = {};
+            userRefOffsets[pagiName] = startOffset['P'];
+            userRefOffsets[soreName] = startOffset['S'];
+            userRefOffsets[malamName] = startOffset['M'];
+            userRefOffsets[liburName] = startOffset['L'];
 
             // Mulai buat tabel HTML
             let html = `<table><thead><tr><th>Nama Personel</th>`;
             
             for(let i = 1; i <= daysInMonth; i++) {
-                // Highlight hari minggu (opsional)
+                // Highlight hari minggu
                 const dateObj = new Date(year, month, i);
                 const isSunday = dateObj.getDay() === 0;
-                html += `<th style="${isSunday ? 'color: red;' : ''}">${i}</th>`;
+                // Highlight jika itu adalah tanggal referensi
+                const isRef = i === refDate;
+                
+                let thStyle = isSunday ? 'color: #dc2626;' : ''; // Red untuk minggu
+                let thClass = isRef ? 'bg-blue-100 ring-2 ring-blue-400 font-bold' : '';
+
+                html += `<th style="${thStyle}" class="${thClass}" title="${isRef ? 'Tanggal Referensi' : ''}">${i}</th>`;
             }
             html += `</tr></thead><tbody>`;
 
-            // Data untuk disinkronisasi ke Widget
-            let syncData = {
-                monthName: monthNames[month],
-                year: year,
-                days: daysInMonth,
-                rows: []
-            };
+            let syncData = { monthName: monthNames[month], year: year, days: daysInMonth, rows: [] };
 
-            // Loop untuk setiap orang, urutkan sesuai array asli agar rapi
+            // Loop untuk setiap orang
             names.forEach(name => {
                 html += `<tr><td>${name}</td>`;
                 let rowSyncData = { name: name, shifts: [] };
 
-                const offset = userOffsets[name];
+                const refOffset = userRefOffsets[name];
+                
+                // Kalkulasi mundur untuk menemukan pola index di Hari ke-1
+                // Rumus: (((RefOffset - (RefDate - 1)) % 8) + 8) % 8
+                // Hal ini memastikan hasil modulo tidak negatif di JavaScript
+                let day1Offset = (((refOffset - (refDate - 1)) % 8) + 8) % 8;
                 
                 for(let day = 1; day <= daysInMonth; day++) {
-                    // Kalkulasi shift berdasarkan offset awal dan hari berjalan (hari - 1)
-                    const shiftIndex = (offset + (day - 1)) % 8;
+                    // Kalkulasi shift berdasarkan Hari ke-1 berjalan
+                    const shiftIndex = (day1Offset + (day - 1)) % 8;
                     const shift = shiftPattern[shiftIndex];
                     
-                    html += `<td class="shift-${shift}">${shift}</td>`;
+                    // Highlight sel jika merupakan tanggal referensi
+                    const isRef = day === refDate;
+                    const borderClass = isRef ? 'border-l-2 border-r-2 border-blue-500' : '';
+
+                    html += `<td class="shift-${shift} ${borderClass}">${shift}</td>`;
                     rowSyncData.shifts.push(shift);
                 }
                 html += `</tr>`;
@@ -261,10 +325,10 @@
             const btn = document.querySelector('button');
             const oldText = btn.innerText;
             btn.innerText = "Berhasil Dibuat & Tersinkronisasi! ✓";
-            btn.classList.add("bg-green-600");
+            btn.classList.add("bg-[#4ade80]", "text-gray-900");
             setTimeout(() => {
                 btn.innerText = oldText;
-                btn.classList.remove("bg-green-600");
+                btn.classList.remove("bg-[#4ade80]", "text-gray-900");
             }, 2000);
         }
 
