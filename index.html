@@ -78,7 +78,7 @@
     }
     .app-wrap::before { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 1px; background: linear-gradient(90deg, transparent, var(--primary), transparent); }
 
-    @media (max-width: 380px) { .app-wrap { padding: 12px; } .form-section, .pasien-table-wrap { padding: 10px; margin-bottom: 10px; } .header-title { font-size: 0.98rem; } .dt-num { font-size: 1.55rem; } .photo-frame { max-width: 58px; } .kategori-name { font-size: 0.62rem; } .kategori-total-badge { font-size: 0.56rem; padding: 2px 6px; } .sub-box { min-width: 70px; padding: 6px 4px; } .sub-label { font-size: 0.52rem; } .pc-btn { width: 20px; height: 20px; font-size: 0.8rem; } .pc-val { font-size: 0.68rem; } }
+    @media (max-width: 380px) { .app-wrap { padding: 12px; } .form-section, .pasien-table-wrap { padding: 10px; margin-bottom: 10px; } .header-title { font-size: 0.98rem; } .dt-num { font-size: 1.55rem; } .photo-frame { max-width: 78px; } .jadwal-photo-frame { max-width: 56px; } .kategori-name { font-size: 0.62rem; } .sub-box { min-width: 70px; padding: 6px 4px; } .sub-label { font-size: 0.52rem; } .pc-btn { width: 20px; height: 20px; font-size: 0.8rem; } .pc-val { font-size: 0.68rem; } }
     @media (min-width: 1024px) {
         body { padding: 24px; align-items: center; }
         .app-wrap { max-width: 1680px; width: 96vw; padding: 32px 40px; margin: 0 auto; }
@@ -89,7 +89,8 @@
         .subtitle { font-size: 0.85rem; }
         .form-section, .pasien-table-wrap { padding: 20px; }
         .petugas-horizontal-container { grid-template-columns: 1fr auto 1fr; gap: 18px; }
-        .photo-frame { max-width: 96px; }
+        .photo-frame { max-width: 132px; }
+        .jadwal-photo-frame { max-width: 96px; }
         .radio-widget { max-width: 92px; }
         .radio-bars { height: 24px; }
         .radio-digits { font-size: 1rem; }
@@ -153,16 +154,21 @@
     .petugas-head-title { font-family: var(--font-pixel); font-size: clamp(6px, 1.5vw, 7.5px); color: var(--text-main); line-height: 1.2; }
     .petugas-badge { color: var(--bg-from); background: var(--primary); font-family: var(--font-pixel); font-size: 5.5px; padding: 2px 4px; border-radius: 2px; font-weight: bold; }
     .petugas-body { display: flex; flex-direction: column; gap: 7px; align-items: center; }
-    .photo-frame { position: relative; width: 100%; max-width: 68px; aspect-ratio: 3 / 4; border: 1px solid var(--primary-dark); border-radius: 4px; overflow: hidden; background: radial-gradient(circle at 50% 30%, rgba(89,255,166,0.12), transparent 70%), #031209; flex-shrink: 0; cursor: pointer; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-    .photo-frame:hover, .photo-frame:active { border-color: var(--primary); box-shadow: 0 0 10px rgba(89,255,166,0.35); }
+    .photo-frame { position: relative; width: 100%; max-width: 96px; aspect-ratio: 9 / 16; border: 1px solid var(--primary-dark); border-radius: 4px; overflow: hidden; background: radial-gradient(circle at 50% 30%, rgba(89,255,166,0.12), transparent 70%), #031209; flex-shrink: 1; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
     .photo-frame.libur { border-color: var(--danger); box-shadow: 0 0 15px rgba(255,107,107,0.3); }
     .photo-frame.libur .corner { border-color: var(--danger); }
-    .petugas-native-select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; z-index: 6; cursor: pointer; appearance: none; -webkit-appearance: none; border: none; background: transparent; padding: 0; }
+    .photo-frame.photo-settled { border-color: var(--primary); box-shadow: 0 0 14px rgba(89,255,166,0.55), 0 0 28px rgba(89,255,166,0.25), inset 0 0 10px rgba(89,255,166,0.08); }
+    .photo-frame.photo-settled .corner { border-color: var(--glow); }
+    .photo-switcher { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+    .photo-nav-btn { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--glass-border); background: rgba(89,255,166,0.12); color: var(--primary); font-size: 0.95rem; font-weight: 700; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease; }
+    .photo-nav-btn:hover { background: rgba(89,255,166,0.24); border-color: var(--primary); }
+    .photo-nav-btn:active { transform: scale(0.86); background: rgba(89,255,166,0.35); }
+    .photo-track-viewport { position: absolute; inset: 0; overflow: hidden; border-radius: 4px; }
+    .photo-track { display: flex; width: 100%; height: 100%; transition: transform 0.38s cubic-bezier(0.4,0,0.2,1); will-change: transform; }
+    .photo-slide { position: relative; flex: 0 0 100%; width: 100%; height: 100%; }
+    .photo-slide img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.9; filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(3) brightness(0.8); }
     .petugas-name-label { width: 100%; text-align: center; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--text-main); line-height: 1.25; word-break: break-word; }
     .petugas-name-label.libur { color: var(--danger); }
-    .petugas-tap-hint { width: 100%; text-align: center; font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.3px; margin-top: -4px; }
-    .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0.9; filter: grayscale(1) sepia(1) hue-rotate(65deg) saturate(3) brightness(0.8); }
-    .photo-frame.libur img { filter: grayscale(0.5) sepia(0.5) hue-rotate(340deg) saturate(2) brightness(0.6); }
     .photo-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--primary-dark); }
     .photo-placeholder svg { width: 32%; opacity: 0.6; }
     .photo-placeholder small { font-family: var(--font-pixel); font-size: 5px; letter-spacing: 0.5px; }
@@ -317,8 +323,8 @@
     .jadwal-photo-frame {
         position: relative;
         width: 100%;
-        max-width: 52px;
-        aspect-ratio: 3 / 4;
+        max-width: 72px;
+        aspect-ratio: 9 / 16;
         border: 1px solid var(--primary-dark);
         border-radius: 4px;
         overflow: hidden;
@@ -344,6 +350,29 @@
     }
     .jadwal-photo-frame.jadwal-libur-frame img {
         filter: grayscale(0.5) sepia(0.5) hue-rotate(340deg) saturate(2) brightness(0.6);
+    }
+    /* Petugas yang sedang bertugas saat ini: glow hijau pulsing */
+    @keyframes jadwalActiveGlow {
+        0%, 100% { box-shadow: 0 0 6px rgba(89,255,166,0.45), 0 0 0px rgba(89,255,166,0); border-color: var(--primary); }
+        50% { box-shadow: 0 0 20px rgba(89,255,166,0.95), 0 0 32px rgba(89,255,166,0.55); border-color: var(--glow); }
+    }
+    .jadwal-photo-frame.jadwal-photo-active {
+        animation: jadwalActiveGlow 1.6s ease-in-out infinite;
+        z-index: 1;
+    }
+    .jadwal-photo-frame.jadwal-photo-active .corner {
+        border-color: var(--glow);
+    }
+    /* Petugas yang dinasnya sudah berlalu hari ini: grey statis */
+    .jadwal-photo-frame.jadwal-photo-past {
+        border-color: rgba(190,200,195,0.3);
+        opacity: 0.5;
+    }
+    .jadwal-photo-frame.jadwal-photo-past img {
+        filter: grayscale(1) brightness(0.55) !important;
+    }
+    .jadwal-photo-frame.jadwal-photo-past .corner {
+        border-color: rgba(190,200,195,0.45);
     }
     .jadwal-photo-frame .photo-placeholder-mini {
         position: absolute;
@@ -489,7 +518,7 @@
     @media (max-width: 380px) {
         .jadwal-preview-grid { gap: 4px; }
         .jadwal-shift-card { padding: 4px 3px; gap: 3px; }
-        .jadwal-photo-frame { max-width: 40px; }
+        .jadwal-photo-frame { max-width: 56px; }
         .jadwal-shift-name { font-size: 0.5rem; min-height: 1.5em; }
         .jadwal-shift-badge-mini { font-size: 0.42rem; padding: 0px 3px; }
         .jadwal-shift-date { font-size: 0.48rem; }
@@ -506,7 +535,6 @@
     .kategori-card:hover { border-color: rgba(89,255,166,0.4); }
     .kategori-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed rgba(89,255,166,0.15); }
     .kategori-name { font-size: 0.68rem; font-weight: 700; color: var(--text-main); line-height: 1.2; word-break: break-word; }
-    .kategori-total-badge { flex-shrink: 0; white-space: nowrap; font-family: var(--font-mono); font-weight: 800; font-size: 0.62rem; color: var(--bg-from); background: var(--primary); padding: 3px 8px; border-radius: 20px; }
     .sub-grid { display: flex; flex-wrap: wrap; gap: 6px; }
     .sub-box { flex: 1 1 45%; min-width: 82px; background: rgba(89,255,166,0.04); border: 1px solid rgba(89,255,166,0.15); border-radius: 8px; padding: 7px 6px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
     .sub-box.sub-box-wide { flex: 1 1 100%; }
@@ -520,7 +548,6 @@
         .kategori-list { gap: 12px; }
         .kategori-card { padding: 14px 16px; }
         .kategori-name { font-size: 0.82rem; }
-        .kategori-total-badge { font-size: 0.72rem; padding: 4px 10px; }
         .sub-grid { gap: 10px; }
         .sub-box { flex-basis: 22%; min-width: 110px; padding: 10px 8px; }
         .sub-label { font-size: 0.64rem; }
@@ -716,30 +743,26 @@
                             <span class="petugas-badge">MENYERAHKAN</span>
                         </div>
                         <div class="petugas-body">
-                            <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
-                                <div class="scan-overlay"></div>
-                                <div class="corner tl"></div><div class="corner tr"></div>
-                                <div class="corner bl"></div><div class="corner br"></div>
-                                <img id="foto1" alt="" style="display:none;"
-                                     onload="this.style.display='block'; document.getElementById('placeholder1').style.display='none';"
-                                     onerror="this.style.display='none'; document.getElementById('placeholder1').style.display='flex';">
-                                <div class="photo-placeholder" id="placeholder1">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-                                        <circle cx="12" cy="8" r="4"/>
-                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
-                                    </svg>
-                                    <small>NO FOTO</small>
+                            <div class="photo-switcher">
+                                <button type="button" class="photo-nav-btn" onclick="stepPetugas(1,-1)" aria-label="Petugas sebelumnya">&#8249;</button>
+                                <div class="photo-frame" id="photoFrame1">
+                                    <div class="scan-overlay"></div>
+                                    <div class="corner tl"></div><div class="corner tr"></div>
+                                    <div class="corner bl"></div><div class="corner br"></div>
+                                    <div class="photo-track-viewport">
+                                        <div class="photo-track" id="photoTrack1"></div>
+                                    </div>
+                                    <div class="shift-chip" id="chipShift1">PAGI</div>
                                 </div>
-                                <div class="shift-chip" id="chipShift1">PAGI</div>
-                                <select id="p1" class="petugas-native-select" onchange="gen(); updateFoto(1);" aria-label="Pilih petugas dinas sebelumnya">
-                                    <option value="PELTU Alfried">PELTU Alfried</option>
-                                    <option value="SUKWAN Dian">SUKWAN Dian</option>
-                                    <option value="SUKWAN Jo">SUKWAN Jo</option>
-                                    <option value="SUKWAN Algie">SUKWAN Algie</option>
-                                </select>
+                                <button type="button" class="photo-nav-btn" onclick="stepPetugas(1,1)" aria-label="Petugas berikutnya">&#8250;</button>
                             </div>
+                            <select id="p1" style="display:none;" onchange="gen(); updateFoto(1); positionPhotoTrack(1, true);" aria-hidden="true" tabindex="-1" aria-label="Pilih petugas dinas sebelumnya">
+                                <option value="PELTU Alfried">PELTU Alfried</option>
+                                <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                <option value="SUKWAN Algie">SUKWAN Algie</option>
+                            </select>
                             <div class="petugas-name-label" id="nameLabel1">PELTU Alfried</div>
-                            <div class="petugas-tap-hint">&#9679; ketuk foto u/ ganti</div>
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
@@ -777,30 +800,26 @@
                             <span class="petugas-badge">MENERIMA</span>
                         </div>
                         <div class="petugas-body">
-                            <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
-                                <div class="scan-overlay"></div>
-                                <div class="corner tl"></div><div class="corner tr"></div>
-                                <div class="corner bl"></div><div class="corner br"></div>
-                                <img id="foto2" alt="" style="display:none;"
-                                     onload="this.style.display='block'; document.getElementById('placeholder2').style.display='none';"
-                                     onerror="this.style.display='none'; document.getElementById('placeholder2').style.display='flex';">
-                                <div class="photo-placeholder" id="placeholder2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-                                        <circle cx="12" cy="8" r="4"/>
-                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
-                                    </svg>
-                                    <small>NO FOTO</small>
+                            <div class="photo-switcher">
+                                <button type="button" class="photo-nav-btn" onclick="stepPetugas(2,-1)" aria-label="Petugas sebelumnya">&#8249;</button>
+                                <div class="photo-frame" id="photoFrame2">
+                                    <div class="scan-overlay"></div>
+                                    <div class="corner tl"></div><div class="corner tr"></div>
+                                    <div class="corner bl"></div><div class="corner br"></div>
+                                    <div class="photo-track-viewport">
+                                        <div class="photo-track" id="photoTrack2"></div>
+                                    </div>
+                                    <div class="shift-chip" id="chipShift2">SIANG</div>
                                 </div>
-                                <div class="shift-chip" id="chipShift2">SIANG</div>
-                                <select id="p2" class="petugas-native-select" onchange="gen(); updateFoto(2);" aria-label="Pilih petugas dinas saat ini">
-                                    <option value="SUKWAN Dian">SUKWAN Dian</option>
-                                    <option value="PELTU Alfried">PELTU Alfried</option>
-                                    <option value="SUKWAN Jo">SUKWAN Jo</option>
-                                    <option value="SUKWAN Algie">SUKWAN Algie</option>
-                                </select>
+                                <button type="button" class="photo-nav-btn" onclick="stepPetugas(2,1)" aria-label="Petugas berikutnya">&#8250;</button>
                             </div>
+                            <select id="p2" style="display:none;" onchange="gen(); updateFoto(2); positionPhotoTrack(2, true);" aria-hidden="true" tabindex="-1" aria-label="Pilih petugas dinas saat ini">
+                                <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                <option value="PELTU Alfried">PELTU Alfried</option>
+                                <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                <option value="SUKWAN Algie">SUKWAN Algie</option>
+                            </select>
                             <div class="petugas-name-label" id="nameLabel2">SUKWAN Dian</div>
-                            <div class="petugas-tap-hint">&#9679; ketuk foto u/ ganti</div>
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
@@ -1029,18 +1048,115 @@ function slugNama(nama) {
         .replace(/^-+|-+$/g, '');
 }
 
+/* Ambil nama depan (kata terakhir, mis. "SUKWAN Dian" -> "dian") supaya
+   nama dari jadwal dinas bisa dicocokkan dengan nama di kotak Petugas Dinas
+   walau formatnya beda (dengan/tanpa pangkat). */
+function firstNameOf(nama) {
+    var parts = String(nama || '').trim().split(/\s+/);
+    return parts.length ? parts[parts.length - 1].toLowerCase() : '';
+}
+
+/* Daftar petugas resmi diambil dari pilihan di kotak Petugas Dinas (p1 & p2)
+   supaya widget Jadwal Dinas selalu memakai foto yang sama persis. */
+function getPetugasList() {
+    var names = [];
+    ['p1', 'p2'].forEach(function (id) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        Array.prototype.forEach.call(sel.options, function (opt) {
+            if (names.indexOf(opt.value) === -1) names.push(opt.value);
+        });
+    });
+    return names;
+}
+
+/* Cocokkan nama dari jadwal dinas dengan nama depan petugas di kotak
+   Petugas Dinas, lalu pakai foto petugas tsb (slug dari nama lengkapnya). */
+function fotoSlugForNama(nama) {
+    var target = firstNameOf(nama);
+    if (!target) return '';
+    var list = getPetugasList();
+    for (var i = 0; i < list.length; i++) {
+        if (firstNameOf(list[i]) === target) return slugNama(list[i]);
+    }
+    return slugNama(nama);
+}
+
 function updateFoto(n) {
     var nama = document.getElementById('p' + n).value;
     var shift = document.getElementById('s' + n).value;
-    var slug = slugNama(nama);
-
-    var img = document.getElementById('foto' + n);
-    img.alt = nama;
-    img.src = slug ? (FOTO_FOLDER + slug + FOTO_EXT) : '';
 
     document.getElementById('chipShift' + n).innerText = (shift || '').toUpperCase();
     var nameLabel = document.getElementById('nameLabel' + n);
     if (nameLabel) nameLabel.innerText = nama;
+}
+
+/* Bangun slide foto untuk tiap pilihan petugas di select p1/p2, satu slide
+   per orang, supaya bisa digeser (slide) dengan tombol panah kiri/kanan. */
+function buildPhotoSwitcher(n) {
+    var sel = document.getElementById('p' + n);
+    var track = document.getElementById('photoTrack' + n);
+    if (!sel || !track) return;
+    var html = '';
+    Array.prototype.forEach.call(sel.options, function (opt) {
+        var nama = opt.value;
+        var slug = slugNama(nama);
+        var namaAttr = String(nama).replace(/"/g, '&quot;');
+        html += '<div class="photo-slide">' +
+            '<img src="' + (slug ? FOTO_FOLDER + slug + FOTO_EXT : '') + '" alt="' + namaAttr + '" style="display:none;" ' +
+            'onload="this.style.display=\'block\'; this.nextElementSibling.style.display=\'none\';" ' +
+            'onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'flex\';">' +
+            '<div class="photo-placeholder">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">' +
+            '<circle cx="12" cy="8" r="4"/>' +
+            '<path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>' +
+            '</svg>' +
+            '<small>NO FOTO</small>' +
+            '</div>' +
+            '</div>';
+    });
+    track.innerHTML = html;
+}
+
+/* Geser track foto ke posisi index petugas yang sedang dipilih. */
+function positionPhotoTrack(n, animate) {
+    var sel = document.getElementById('p' + n);
+    var track = document.getElementById('photoTrack' + n);
+    if (!sel || !track) return;
+    var idx = sel.selectedIndex;
+    if (idx < 0) idx = 0;
+    if (!animate) {
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        void track.offsetWidth; /* paksa reflow supaya transition:none berlaku dulu */
+        track.style.transition = '';
+    } else {
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    }
+}
+
+/* Ganti petugas dengan tombol panah kiri/kanan, foto slide, lalu glow saat berhenti. */
+var photoSettleTimers = {};
+function stepPetugas(n, dir) {
+    var sel = document.getElementById('p' + n);
+    var frame = document.getElementById('photoFrame' + n);
+    if (!sel) return;
+    var len = sel.options.length;
+    if (!len) return;
+    var idx = sel.selectedIndex;
+    if (idx < 0) idx = 0;
+    idx = (idx + dir + len) % len;
+    sel.selectedIndex = idx;
+
+    if (frame) frame.classList.remove('photo-settled');
+    positionPhotoTrack(n, true);
+    updateFoto(n);
+    gen();
+
+    clearTimeout(photoSettleTimers[n]);
+    photoSettleTimers[n] = setTimeout(function () {
+        if (frame) frame.classList.add('photo-settled');
+    }, 400);
 }
 
 /* ==========================================================
@@ -1181,6 +1297,7 @@ function renderJadwalWidget() {
     var shiftColors = { 'P': 'sb-P', 'S': 'sb-S', 'M': 'sb-M' };
     var currentShift = getCurrentShift();
     var currentLabel = currentShift.charAt(0).toUpperCase();
+    var currentIdx = shiftOrder.indexOf(currentLabel);
 
     var todayHtml = '';
     if (todayRows && todayRows.length) {
@@ -1189,14 +1306,16 @@ function renderJadwalWidget() {
             shiftMap[r.shift] = r.name;
         });
 
-        todayHtml = shiftOrder.map(function(sh) {
+        todayHtml = shiftOrder.map(function(sh, shIdx) {
             var name = shiftMap[sh] || '-';
             var isLibur = (name === '-');
             var isActive = (sh === currentLabel);
+            var isPast = (!isLibur && !isActive && currentIdx !== -1 && shIdx < currentIdx);
             var badgeClass = isLibur ? 'sb-L' : shiftColors[sh] || 'sb-default';
             var nameDisplay = isLibur ? 'LIBUR' : name;
-            var slug = slugNama(nameDisplay);
+            var slug = isLibur ? '' : fotoSlugForNama(nameDisplay);
             var fotoSrc = (slug && !isLibur) ? (FOTO_FOLDER + slug + FOTO_EXT) : '';
+            var photoStateClass = isActive ? ' jadwal-photo-active' : (isPast ? ' jadwal-photo-past' : '');
 
             return '<div class="jadwal-shift-card' +
                 (isActive ? ' jadwal-shift-active' : '') +
@@ -1207,7 +1326,7 @@ function renderJadwalWidget() {
                 '<span class="jadwal-shift-date">' + fmtTglSingkatJadwal(now) + '</span>' +
                 '</div>' +
                 '<div class="jadwal-shift-body">' +
-                '<div class="jadwal-photo-frame' + (isLibur ? ' jadwal-libur-frame' : '') + '">' +
+                '<div class="jadwal-photo-frame' + (isLibur ? ' jadwal-libur-frame' : '') + photoStateClass + '">' +
                 '<div class="scan-overlay-mini"></div>' +
                 '<div class="corner tl"></div><div class="corner tr"></div>' +
                 '<div class="corner bl"></div><div class="corner br"></div>' +
@@ -1330,7 +1449,6 @@ function updateRowTotal(i) {
         return '<div class="kategori-card">' +
             '<div class="kategori-head">' +
             '<span class="kategori-name">' + k + '</span>' +
-            '<span class="kategori-total-badge" id="rowtotal-' + i + '">0 org</span>' +
             '</div>' +
             '<div class="sub-grid">' + boxes + '</div>' +
             '</div>';
@@ -1549,8 +1667,14 @@ function doWA() {
    INISIALISASI
    ========================================================== */
 initDate();
+buildPhotoSwitcher(1);
+buildPhotoSwitcher(2);
+positionPhotoTrack(1, false);
+positionPhotoTrack(2, false);
 updateFoto(1);
 updateFoto(2);
+document.getElementById('photoFrame1').classList.add('photo-settled');
+document.getElementById('photoFrame2').classList.add('photo-settled');
 gen();
 syncNow();
 setInterval(syncNow, 1000);
