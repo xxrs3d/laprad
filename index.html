@@ -503,6 +503,32 @@
     .jadwal-shift-badge-mini.sb-M { background: rgba(90,200,255,0.16); color: var(--info); border-color: rgba(90,200,255,0.4); }
     .jadwal-shift-badge-mini.sb-L { background: rgba(255,107,107,0.16); color: var(--danger); border-color: rgba(255,107,107,0.4); }
 
+    /* Status kehadiran real-time (mengikuti jam dinas & saklar Sedang Keluar/Di
+       Tempat dari jadwal.html), ditampilkan di bawah badge shift P/S/M. */
+    .jadwal-status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 0.46rem;
+        letter-spacing: 0.03em;
+        padding: 1px 6px;
+        border-radius: 999px;
+        text-align: center;
+        border: 1px solid transparent;
+        margin-top: 3px;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+    .jadwal-status-pill .dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+    .jadwal-status-pill.js-duty { background: rgba(89,255,166,0.14); color: var(--primary); border-color: rgba(89,255,166,0.4); }
+    .jadwal-status-pill.js-duty .dot { background: var(--primary); box-shadow: 0 0 4px var(--primary); }
+    .jadwal-status-pill.js-out { background: rgba(255,180,69,0.16); color: var(--amber); border-color: rgba(255,180,69,0.4); }
+    .jadwal-status-pill.js-out .dot { background: var(--amber); box-shadow: 0 0 4px var(--amber); }
+    .jadwal-status-pill.js-off { background: rgba(185,255,221,0.06); color: var(--text-muted); border-color: var(--glass-border); }
+    .jadwal-status-pill.js-off .dot { background: var(--text-muted); }
+
     /* Jadwal kemarin, besok, lusa di bawah — kolom "besok" dibuat lebih lebar
        supaya lebih mudah dilihat dibanding jadwal kemarin/lusa. */
     .jadwal-other-days {
@@ -1424,7 +1450,56 @@ var BULAN_JADWAL = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Jul
 
 var JADWAL_API_URL = 'https://script.google.com/macros/s/AKfycbyD9YUV03H-51Dvdm0Lg-MGk9YgeWajMWQl2DAZyJ7hSyrhL-g6xCWV1Q0N9RrOMiuEgQ/exec';
 var jadwalDataCache = null;
+var statusDataCache = {};
 var jadwalFetchInFlight = false;
+
+// ===== Rentang jam tiap shift (harus sama dengan jadwal.html & informasi-radiologi.html) =====
+var SHIFT_RANGES = {
+    P: { start: 7 * 60,  end: 14 * 60 },   // Pagi  07.00–14.00
+    S: { start: 14 * 60, end: 21 * 60 },   // Siang/Sore 14.00–21.00
+    M: { start: 21 * 60, end: 7 * 60 }     // Malam 21.00–07.00 (lewat tengah malam)
+};
+
+// Menentukan fase dinas untuk sebuah slot shift (P/S/M) pada jam saat ini:
+// 'belum' (belum waktunya) | 'aktif' (sedang berjalan) | 'sudah' (sudah lewat)
+function getDutyPhase(shiftCode, nowMinutes) {
+    var range = SHIFT_RANGES[shiftCode];
+    if (!range) return 'unknown';
+    if (range.start <= range.end) {
+        if (nowMinutes < range.start) return 'belum';
+        if (nowMinutes < range.end) return 'aktif';
+        return 'sudah';
+    }
+    // Rentang yang melewati tengah malam (Malam)
+    if (nowMinutes >= range.start || nowMinutes < range.end) return 'aktif';
+    return 'belum';
+}
+
+/* Backend (Google Apps Script) menyimpan semua data sebagai key-value, dengan
+   value berupa string JSON (lihat remoteSet() di jadwal.html). GET tanpa
+   parameter key mengembalikan semua key sekaligus, mis:
+   { jadwalDinasData: "...json...", petugasStatus: "...json..." }.
+   Fungsi ini membongkar bentuk itu, dengan fallback ke bentuk lama (objek
+   jadwal langsung di top-level) supaya tetap kompatibel. */
+function extractJadwalAndStatus(raw) {
+    var jadwal = null, status = {};
+    if (!raw) return { jadwal: jadwal, status: status };
+
+    if (raw.jadwalDinasData !== undefined || raw.petugasStatus !== undefined) {
+        if (raw.jadwalDinasData) {
+            try { jadwal = typeof raw.jadwalDinasData === 'string' ? JSON.parse(raw.jadwalDinasData) : raw.jadwalDinasData; }
+            catch (e) { jadwal = null; }
+        }
+        if (raw.petugasStatus) {
+            try { status = typeof raw.petugasStatus === 'string' ? JSON.parse(raw.petugasStatus) : raw.petugasStatus; }
+            catch (e) { status = {}; }
+        }
+    } else if (raw.rows && raw.monthName) {
+        // Bentuk lama/fallback: respons langsung berupa objek jadwal
+        jadwal = raw;
+    }
+    return { jadwal: jadwal, status: status };
+}
 
 function getJadwalData() {
     return jadwalDataCache;
@@ -1439,11 +1514,14 @@ function fetchJadwalData() {
             return res.json();
         })
         .then(function (data) {
-            jadwalDataCache = data || null;
+            var extracted = extractJadwalAndStatus(data);
+            jadwalDataCache = extracted.jadwal;
+            statusDataCache = extracted.status;
         })
         .catch(function (err) {
             console.error('Gagal mengambil data jadwal dari web app:', err);
             jadwalDataCache = null;
+            statusDataCache = {};
         })
         .finally(function () {
             jadwalFetchInFlight = false;
@@ -1493,6 +1571,7 @@ function renderJadwalWidget() {
     var currentShift = getCurrentShift();
     var currentLabel = currentShift.charAt(0).toUpperCase();
     var currentIdx = shiftOrder.indexOf(currentLabel);
+    var nowMinutesToday = now.getHours() * 60 + now.getMinutes();
 
     var todayHtml = '';
     if (todayRows && todayRows.length) {
@@ -1504,7 +1583,8 @@ function renderJadwalWidget() {
         todayHtml = shiftOrder.map(function(sh, shIdx) {
             var name = shiftMap[sh] || '-';
             var isLibur = (name === '-');
-            var isActive = (sh === currentLabel);
+            var phase = getDutyPhase(sh, nowMinutesToday); // 'belum' | 'aktif' | 'sudah'
+            var isActive = (sh === currentLabel) && phase === 'aktif';
             /* "Tidak berdinas" = bukan shift yang sedang berjalan saat ini,
                berlaku untuk shift sebelum maupun sesudahnya (bukan cuma yang sudah lewat). */
             var isInactive = (!isLibur && !isActive);
@@ -1513,6 +1593,24 @@ function renderJadwalWidget() {
             var slug = isLibur ? '' : fotoSlugForNama(nameDisplay);
             var fotoSrc = (slug && !isLibur) ? (FOTO_FOLDER + slug + FOTO_EXT) : '';
             var photoStateClass = isActive ? ' jadwal-photo-active' : (isInactive ? ' jadwal-photo-inactive' : '');
+
+            // Status kehadiran real-time (Belum Dinas / Di Tempat / Sedang Keluar / Sudah Dinas)
+            var statusPillHtml = '';
+            if (!isLibur) {
+                var isOut = !!(statusDataCache[name] && statusDataCache[name].keluar);
+                var pillClass, pillText;
+                if (phase === 'aktif') {
+                    pillClass = isOut ? 'js-out' : 'js-duty';
+                    pillText = isOut ? 'Sedang Keluar' : 'Di Tempat';
+                } else if (phase === 'belum') {
+                    pillClass = 'js-off'; pillText = 'Belum Dinas';
+                } else if (phase === 'sudah') {
+                    pillClass = 'js-off'; pillText = 'Sudah Dinas';
+                } else {
+                    pillClass = 'js-off'; pillText = '-';
+                }
+                statusPillHtml = '<span class="jadwal-status-pill ' + pillClass + '"><span class="dot"></span>' + pillText + '</span>';
+            }
 
             return '<div class="jadwal-shift-card' +
                 (isActive ? ' jadwal-shift-active' : '') +
@@ -1542,6 +1640,7 @@ function renderJadwalWidget() {
                 '</div>' +
                 '<div class="jadwal-shift-name' + (isLibur ? ' libur' : '') + '">' + nameDisplay + '</div>' +
                 '<span class="jadwal-shift-badge-mini ' + badgeClass + '">' + (isLibur ? 'LIBUR' : sh) + '</span>' +
+                statusPillHtml +
                 '</div>' +
                 '</div>';
         }).join('');
