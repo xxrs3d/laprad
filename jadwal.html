@@ -163,7 +163,7 @@
             <h2 class="text-lg font-semibold text-[#d4dfcd] border-b border-[#404f3d] pb-2 mb-1 flex items-center gap-2">
                 <span>📡</span> Status Kehadiran Petugas
             </h2>
-            <p class="text-xs text-[#8aa182] mb-4">Nyalakan saklar jika petugas sedang keluar ruangan. Status ini langsung tersinkron ke layar informasi petugas (papan-status-petugas.html).</p>
+            <p class="text-xs text-[#8aa182] mb-4">Saklar hanya muncul untuk petugas yang sedang berada dalam jam dinasnya saat ini — nyalakan jika petugas tersebut sedang keluar ruangan. Di luar jam dinas, status otomatis menjadi "Belum Dinas" atau "Sudah Dinas" mengikuti jadwal. Status ini langsung tersinkron ke layar informasi petugas (informasi-radiologi.html).</p>
             <div id="status-toggle-list" class="space-y-2"></div>
         </div>
 
@@ -257,6 +257,49 @@
             "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
             "Juli", "Agustus", "September", "Oktober", "November", "Desember"
         ];
+
+        const shiftLabel = { P: "Pagi", S: "Sore", M: "Malam", L: "Libur" };
+
+        // ===== Rentang jam tiap shift (harus sama dengan informasi-radiologi.html) =====
+        const SHIFT_RANGES = {
+            P: { start: 7 * 60,  end: 14 * 60 },   // Pagi  07.00–14.00
+            S: { start: 14 * 60, end: 21 * 60 },   // Sore  14.00–21.00
+            M: { start: 21 * 60, end: 7 * 60 }     // Malam 21.00–07.00 (lewat tengah malam)
+        };
+
+        // Menentukan fase dinas seseorang berdasarkan kode shift & jam saat ini:
+        // 'libur' | 'belum' (belum waktunya) | 'aktif' (sedang dalam jam dinas) | 'sudah' (sudah lewat jam dinas)
+        function getDutyPhase(shiftCode, nowMinutes) {
+            if (!shiftCode || shiftCode === 'L' || shiftCode === '-') return 'libur';
+            const range = SHIFT_RANGES[shiftCode];
+            if (!range) return 'unknown';
+            if (range.start <= range.end) {
+                if (nowMinutes < range.start) return 'belum';
+                if (nowMinutes < range.end) return 'aktif';
+                return 'sudah';
+            }
+            // Rentang yang melewati tengah malam (Malam)
+            if (nowMinutes >= range.start || nowMinutes < range.end) return 'aktif';
+            return 'belum';
+        }
+
+        // Ambil peta shift hari ini {nama: kodeShift} dari jadwal yang sudah dibuat & tersimpan.
+        // Mengembalikan null jika jadwal belum ada / belum sesuai bulan berjalan.
+        function getTodayShiftMap() {
+            try {
+                const raw = localStorage.getItem('jadwalDinasData');
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                const now = new Date();
+                if (data.monthName !== monthNames[now.getMonth()] || data.year !== now.getFullYear()) return null;
+                const dayIndex = now.getDate() - 1;
+                const map = {};
+                (data.rows || []).forEach(r => { map[r.name] = r.shifts ? r.shifts[dayIndex] : null; });
+                return map;
+            } catch (e) {
+                return null;
+            }
+        }
         
         // ===== Status Kehadiran Petugas (Sedang Keluar / Di Tempat) =====
         const STATUS_KEY = 'petugasStatus';
@@ -287,22 +330,53 @@
         async function renderStatusToggles() {
             const container = document.getElementById('status-toggle-list');
             const statusData = await loadStatusData();
+            const shiftMap = getTodayShiftMap();
+            const now = new Date();
+            const nowMinutes = now.getHours() * 60 + now.getMinutes();
             container.innerHTML = '';
 
+            if (!shiftMap) {
+                const warn = document.createElement('div');
+                warn.className = 'text-xs text-[#f3c78a] bg-[#3a2f1f] border border-[#5c4a27] rounded-lg px-4 py-3 mb-1';
+                warn.innerText = 'Jadwal bulan ini belum dibuat / belum sesuai. Klik "Buat Jadwal & Sinkronkan" agar status kehadiran otomatis mengikuti jam dinas masing-masing petugas.';
+                container.appendChild(warn);
+            }
+
             names.forEach(name => {
+                const shiftCode = shiftMap ? (shiftMap[name] || null) : null;
+                // Tanpa jadwal tersimpan, fase tidak bisa ditentukan otomatis -> anggap 'unknown' (fallback ke saklar manual)
+                const phase = shiftMap ? getDutyPhase(shiftCode, nowMinutes) : 'unknown';
                 const isOut = !!(statusData[name] && statusData[name].keluar);
 
                 const row = document.createElement('div');
                 row.className = 'flex items-center justify-between bg-[#242c22] rounded-xl px-4 py-3 border border-[#3a4736]';
+
+                const shiftBadge = (shiftCode && shiftLabel[shiftCode])
+                    ? `<span class="text-[10px] font-bold uppercase tracking-wide text-[#7a9370] ml-2">(${shiftLabel[shiftCode]})</span>`
+                    : '';
+
+                let rightHtml;
+                if (phase === 'libur') {
+                    rightHtml = `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#3a4736] text-[#9bb094]">Libur</span>`;
+                } else if (phase === 'belum') {
+                    rightHtml = `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#3a4736] text-[#9bb094]">Belum Dinas</span>`;
+                } else if (phase === 'sudah') {
+                    rightHtml = `<span class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#3a4736] text-[#9bb094]">Sudah Dinas</span>`;
+                } else {
+                    // 'aktif' (sedang dalam jam dinas) atau 'unknown' (jadwal belum tersedia) -> saklar manual aktif
+                    rightHtml = `
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-xs font-semibold w-24 text-right ${isOut ? 'text-[#f3a56b]' : 'text-[#8fd19e]'}">${isOut ? 'Sedang Keluar' : 'Di Tempat'}</span>
+                            <button type="button" role="switch" aria-checked="${isOut}" data-name="${name}"
+                                class="status-switch relative w-12 h-6 rounded-full transition-colors duration-200 ${isOut ? 'bg-[#c2652f]' : 'bg-[#4a5d46]'}">
+                                <span class="absolute top-0.5 ${isOut ? 'left-6' : 'left-0.5'} w-5 h-5 bg-white rounded-full shadow transition-all duration-200"></span>
+                            </button>
+                        </div>`;
+                }
+
                 row.innerHTML = `
-                    <span class="text-sm text-[#d4dfcd] font-medium pr-3">${name}</span>
-                    <div class="flex items-center gap-3 shrink-0">
-                        <span class="text-xs font-semibold w-24 text-right ${isOut ? 'text-[#f3a56b]' : 'text-[#8fd19e]'}">${isOut ? 'Sedang Keluar' : 'Di Tempat'}</span>
-                        <button type="button" role="switch" aria-checked="${isOut}" data-name="${name}"
-                            class="status-switch relative w-12 h-6 rounded-full transition-colors duration-200 ${isOut ? 'bg-[#c2652f]' : 'bg-[#4a5d46]'}">
-                            <span class="absolute top-0.5 ${isOut ? 'left-6' : 'left-0.5'} w-5 h-5 bg-white rounded-full shadow transition-all duration-200"></span>
-                        </button>
-                    </div>
+                    <span class="text-sm text-[#d4dfcd] font-medium pr-3">${name}${shiftBadge}</span>
+                    ${rightHtml}
                 `;
                 container.appendChild(row);
             });
@@ -521,6 +595,9 @@
                     btn.classList.remove("bg-[#4ade80]", "bg-[#b45309]", "text-gray-900");
                 }, 2500);
             });
+
+            // Perbarui panel status kehadiran agar langsung mengikuti jadwal baru
+            renderStatusToggles();
         }
 
         function downloadAsImage() {
@@ -544,6 +621,9 @@
             initDropdowns();
             renderStatusToggles();
         };
+
+        // Perbarui otomatis setiap menit agar transisi Belum Dinas -> Aktif -> Sudah Dinas mengikuti jam berjalan
+        setInterval(renderStatusToggles, 60000);
     </script>
 </body>
 </html>
