@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Papan Status Petugas — Instalasi Radiologi & Keperawatan</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap');
+
+  :root{
+    --board:#12211D;
+    --board-panel:#1B3129;
+    --board-line:#2C4A3D;
+    --paper:#F5F1E4;
+    --paper-edge:#E6DFC9;
+    --ink:#22261F;
+    --ink-soft:#5B6156;
+    --pin:#C9A227;
+    --duty:#2F6E4F;
+    --duty-bg:#E4EEE3;
+    --out:#B5651D;
+    --out-bg:#F5E6D5;
+    --off:#8A8578;
+    --off-bg:#EAE7DC;
+    --tag-p:#3B6E67;
+    --tag-s:#B08A2E;
+    --tag-m:#2F4A73;
+    --tag-l:#8A8578;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,0.03), transparent 40%),
+      var(--board);
+    min-height:100vh;
+    font-family:'Work Sans', sans-serif;
+    color:var(--paper);
+    padding:28px 20px 60px;
+  }
+
+  .board-frame{
+    max-width:1180px;
+    margin:0 auto;
+    background:var(--board-panel);
+    border:1px solid var(--board-line);
+    border-radius:18px;
+    padding:28px 28px 34px;
+    box-shadow: inset 0 0 0 6px rgba(0,0,0,0.12);
+  }
+
+  header{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:1px solid var(--board-line);
+    padding-bottom:20px;
+    margin-bottom:26px;
+  }
+
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.9rem;
+    line-height:1.15;
+    margin:0 0 4px;
+    letter-spacing:0.2px;
+  }
+  .masthead p{
+    margin:0;
+    color:#A9C0B4;
+    font-size:0.9rem;
+  }
+
+  .clock-block{
+    text-align:right;
+  }
+  .clock{
+    font-family:'Fraunces', serif;
+    font-variant-numeric:tabular-nums;
+    font-size:2rem;
+    font-weight:600;
+    color:#E9DFC2;
+  }
+  .date-line{
+    color:#A9C0B4;
+    font-size:0.85rem;
+    margin-top:2px;
+  }
+
+  .toolbar{
+    display:flex;
+    justify-content:flex-end;
+    margin-bottom:18px;
+  }
+  .refresh-btn{
+    background:transparent;
+    border:1px solid var(--board-line);
+    color:#CFE0D6;
+    font-size:0.8rem;
+    font-family:'Work Sans', sans-serif;
+    padding:8px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .refresh-btn:hover{ background:rgba(255,255,255,0.06); }
+
+  .notice{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:14px;
+    padding:26px;
+    text-align:center;
+    font-size:0.95rem;
+  }
+  .notice b{ font-family:'Fraunces', serif; font-size:1.1rem; display:block; margin-bottom:6px;}
+
+  .cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+    gap:20px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--paper-edge);
+    border-radius:4px;
+    padding:22px 18px 18px;
+    color:var(--ink);
+    box-shadow: 2px 4px 0 rgba(0,0,0,0.18);
+    transform:rotate(var(--tilt, 0deg));
+  }
+  .card:nth-child(odd){ --tilt: -0.6deg; }
+  .card:nth-child(even){ --tilt: 0.5deg; }
+
+  .pin{
+    position:absolute;
+    top:-9px;
+    left:50%;
+    transform:translateX(-50%);
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #F0D876, var(--pin));
+    box-shadow:0 2px 3px rgba(0,0,0,0.35);
+  }
+
+  .shift-tag{
+    position:absolute;
+    top:14px;
+    right:14px;
+    font-size:0.68rem;
+    font-weight:700;
+    letter-spacing:0.03em;
+    color:#fff;
+    padding:3px 9px;
+    border-radius:999px;
+  }
+  .shift-P{ background:var(--tag-p); }
+  .shift-S{ background:var(--tag-s); }
+  .shift-M{ background:var(--tag-m); }
+  .shift-L{ background:var(--tag-l); }
+
+  .avatar{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:#DCD5BE;
+    border:1px solid var(--paper-edge);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    margin-bottom:12px;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .avatar svg{ width:34px; height:34px; color:#8A8368; }
+
+  .name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:1.05rem;
+    line-height:1.25;
+    margin:0 0 2px;
+    padding-right:56px;
+  }
+  .role{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-bottom:12px;
+  }
+
+  .status-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.78rem;
+    font-weight:600;
+    padding:5px 11px;
+    border-radius:999px;
+    margin-bottom:16px;
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; }
+  .status-duty{ background:var(--duty-bg); color:var(--duty); }
+  .status-duty .dot{ background:var(--duty); }
+  .status-out{ background:var(--out-bg); color:var(--out); }
+  .status-out .dot{ background:var(--out); }
+  .status-off{ background:var(--off-bg); color:var(--off); }
+  .status-off .dot{ background:var(--off); }
+
+  .contact-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border-top:1px dashed var(--paper-edge);
+    padding-top:14px;
+  }
+
+  .qr-box{
+    width:64px;
+    height:64px;
+    background:#fff;
+    border:1px solid var(--paper-edge);
+    border-radius:6px;
+    padding:4px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .qr-box canvas, .qr-box img{ width:100% !important; height:100% !important; }
+
+  .contact-info{ flex:1; min-width:0; }
+  .contact-info small{
+    display:block;
+    color:var(--ink-soft);
+    font-size:0.68rem;
+    margin-bottom:3px;
+  }
+  .wa-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--duty);
+    color:#fff;
+    text-decoration:none;
+    font-size:0.78rem;
+    font-weight:600;
+    padding:6px 11px;
+    border-radius:7px;
+  }
+  .wa-btn:hover{ background:#25563c; }
+
+  footer{
+    max-width:1180px;
+    margin:16px auto 0;
+    color:#7C9187;
+    font-size:0.75rem;
+    text-align:center;
+  }
+
+  /* Modal QR besar */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(10,16,13,0.75);
+    display:none; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:var(--paper); color:var(--ink); border-radius:12px;
+    padding:26px; text-align:center; max-width:280px; width:100%;
+  }
+  .modal-box .qr-large{ width:200px; height:200px; margin:0 auto 14px; background:#fff; padding:8px; border-radius:8px;}
+  .modal-box .qr-large canvas, .modal-box .qr-large img{ width:100% !important; height:100% !important; }
+  .modal-close{
+    margin-top:14px; background:transparent; border:1px solid var(--paper-edge);
+    padding:7px 16px; border-radius:999px; cursor:pointer; font-family:'Work Sans', sans-serif;
+  }
+
+  @media (max-width:520px){
+    .clock{ font-size:1.5rem; }
+    header{ align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="board-frame">
+    <header>
+      <div class="masthead">
+        <h1>Papan Status Petugas</h1>
+        <p>Instalasi Radiologi &amp; Keperawatan</p>
+      </div>
+      <div class="clock-block">
+        <div class="clock" id="clock">--:--</div>
+        <div class="date-line" id="date-line">-</div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button class="refresh-btn" onclick="renderBoard()">↻ Muat ulang</button>
+    </div>
+
+    <div id="board-body"></div>
+  </div>
+
+  <footer>
+    Data jadwal &amp; status diambil dari perangkat/browser yang sama dengan halaman Generator Jadwal Dinas.
+  </footer>
+
+  <!-- Modal QR -->
+  <div class="modal-overlay" id="qr-modal">
+    <div class="modal-box">
+      <div id="qr-large-target" class="qr-large"></div>
+      <div id="qr-modal-name" style="font-family:'Fraunces',serif; font-weight:600;"></div>
+      <button class="modal-close" onclick="closeQrModal()">Tutup</button>
+    </div>
+  </div>
+
+<script>
+  // ===== Data kontak petugas =====
+  // Untuk mengganti foto placeholder: isi value "photo" dengan link gambar langsung
+  // (mis. dari Google Drive: https://drive.google.com/uc?export=view&id=FILE_ID)
+  const staffDirectory = [
+    { name: "Alfried R, A.Md, Kep",              role: "Perawat",     phone: "6281349133377", photo: "" },
+    { name: "Algie Ekatara P, S.Tr,T",           role: "Radiografer", phone: "6285657437509", photo: "" },
+    { name: "Dian Pratama, A.Md, Kes (RAD)",     role: "Radiografer", phone: "6283150840926", photo: "" },
+    { name: "Jo Sebastian, A.Md, Kes (RAD)",     role: "Radiografer", phone: "6281256144331", photo: "" },
+  ];
+
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+  const dayNames = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+
+  const shiftLabel = { P: "Pagi", S: "Sore", M: "Malam", L: "Libur" };
+
+  function personIcon(){
+    return `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.8 1.6-9.8 4.9v2.5h19.6v-2.5c0-3.3-6.5-4.9-9.8-4.9z"/></svg>`;
+  }
+
+  // ===== Konfigurasi Backend (Google Apps Script Web App) =====
+  // Tempel URL yang sama dengan yang dipakai di jadwal.html
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyD9YUV03H-51Dvdm0Lg-MGk9YgeWajMWQl2DAZyJ7hSyrhL-g6xCWV1Q0N9RrOMiuEgQ/exec";
+
+  async function fetchRemoteData() {
+    try {
+      const res = await fetch(SCRIPT_URL);
+      const all = await res.json();
+      if (all.petugasStatus) localStorage.setItem('petugasStatus', all.petugasStatus);
+      if (all.jadwalDinasData) localStorage.setItem('jadwalDinasData', all.jadwalDinasData);
+      return true;
+    } catch (e) {
+      console.error("Gagal mengambil data dari server:", e);
+      return false;
+    }
+  }
+
+  function getStatusData() {
+    try { return JSON.parse(localStorage.getItem('petugasStatus')) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function getScheduleToday() {
+    const raw = localStorage.getItem('jadwalDinasData');
+    if (!raw) return { state: 'empty' };
+    let data;
+    try { data = JSON.parse(raw); } catch (e) { return { state: 'empty' }; }
+
+    const now = new Date();
+    const currentMonthName = monthNames[now.getMonth()];
+    if (data.monthName !== currentMonthName || data.year !== now.getFullYear()) {
+      return { state: 'mismatch', data };
+    }
+    const dayIndex = now.getDate() - 1;
+    const shiftsByName = {};
+    (data.rows || []).forEach(r => { shiftsByName[r.name] = r.shifts ? r.shifts[dayIndex] : null; });
+    return { state: 'ok', shiftsByName };
+  }
+
+  function waLink(phone, name) {
+    const firstName = name.split(',')[0];
+    const msg = `Halo ${firstName}, saya ingin menghubungi terkait tugas jaga hari ini.`;
+    return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  }
+
+  function renderQr(targetEl, link, size) {
+    targetEl.innerHTML = '';
+    if (window.QRCode) {
+      new QRCode(targetEl, { text: link, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+    } else {
+      targetEl.innerHTML = `<a href="${link}" style="font-size:10px;color:#22261F;">Buka WhatsApp</a>`;
+    }
+  }
+
+  function openQrModal(link, name) {
+    document.getElementById('qr-modal-name').textContent = name;
+    renderQr(document.getElementById('qr-large-target'), link, 200);
+    document.getElementById('qr-modal').classList.add('show');
+  }
+  function closeQrModal() {
+    document.getElementById('qr-modal').classList.remove('show');
+  }
+  document.getElementById('qr-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'qr-modal') closeQrModal();
+  });
+
+  async function renderBoard() {
+    await fetchRemoteData();
+    const body = document.getElementById('board-body');
+    const schedule = getScheduleToday();
+    const statusData = getStatusData();
+
+    if (schedule.state === 'empty') {
+      body.innerHTML = `<div class="notice"><b>Jadwal belum dibuat</b>Buka Generator Jadwal Dinas (jadwal.html) dan klik "Buat Jadwal &amp; Sinkronkan" terlebih dahulu.</div>`;
+      return;
+    }
+    if (schedule.state === 'mismatch') {
+      body.innerHTML = `<div class="notice"><b>Jadwal bulan ini belum tersedia</b>Jadwal tersimpan untuk periode lain. Buat ulang jadwal untuk bulan berjalan di jadwal.html.</div>`;
+      return;
+    }
+
+    const cardsWrap = document.createElement('div');
+    cardsWrap.className = 'cards';
+
+    staffDirectory.forEach(person => {
+      const shift = schedule.shiftsByName[person.name] || '-';
+      const isLibur = shift === 'L';
+      const isOut = !!(statusData[person.name] && statusData[person.name].keluar);
+
+      let statusClass = 'status-off', statusText = 'Libur';
+      if (!isLibur) {
+        statusClass = isOut ? 'status-out' : 'status-duty';
+        statusText = isOut ? 'Sedang Keluar' : 'Di Tempat';
+      }
+
+      const link = waLink(person.phone, person.name);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <span class="pin"></span>
+        <span class="shift-tag shift-${shift}">${shiftLabel[shift] || shift}</span>
+        <div class="avatar">${person.photo ? `<img src="${person.photo}" alt="${person.name}">` : personIcon()}</div>
+        <p class="name">${person.name}</p>
+        <p class="role">${person.role}</p>
+        <span class="status-pill ${statusClass}"><span class="dot"></span>${statusText}</span>
+        <div class="contact-row">
+          <div class="qr-box" data-link="${link}" data-name="${person.name}"></div>
+          <div class="contact-info">
+            <small>Pindai untuk WhatsApp</small>
+            <a class="wa-btn" href="${link}" target="_blank" rel="noopener">Hubungi</a>
+          </div>
+        </div>
+      `;
+      cardsWrap.appendChild(card);
+    });
+
+    body.innerHTML = '';
+    body.appendChild(cardsWrap);
+
+    cardsWrap.querySelectorAll('.qr-box').forEach(box => {
+      renderQr(box, box.dataset.link, 56);
+      box.addEventListener('click', () => openQrModal(box.dataset.link, box.dataset.name));
+    });
+  }
+
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    document.getElementById('date-line').textContent =
+      `${dayNames[now.getDay()]}, ${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  // Sinkron antar-tab pada perangkat yang sama (bonus, instan)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'petugasStatus' || e.key === 'jadwalDinasData') renderBoard();
+  });
+
+  setInterval(tickClock, 1000);
+  setInterval(renderBoard, 8000); // sinkron antar-perangkat lewat server tiap 8 detik
+  tickClock();
+  renderBoard();
+</script>
+</body>
+</html>
