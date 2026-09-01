@@ -1422,9 +1422,33 @@ function syncNow() {
    ========================================================== */
 var BULAN_JADWAL = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
+var JADWAL_API_URL = 'https://script.google.com/macros/s/AKfycbyD9YUV03H-51Dvdm0Lg-MGk9YgeWajMWQl2DAZyJ7hSyrhL-g6xCWV1Q0N9RrOMiuEgQ/exec';
+var jadwalDataCache = null;
+var jadwalFetchInFlight = false;
+
 function getJadwalData() {
-    try { return JSON.parse(localStorage.getItem('jadwalDinasData') || 'null'); }
-    catch (e) { return null; }
+    return jadwalDataCache;
+}
+
+function fetchJadwalData() {
+    if (jadwalFetchInFlight) return Promise.resolve();
+    jadwalFetchInFlight = true;
+    return fetch(JADWAL_API_URL + (JADWAL_API_URL.indexOf('?') === -1 ? '?' : '&') + '_t=' + Date.now(), { cache: 'no-store' })
+        .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function (data) {
+            jadwalDataCache = data || null;
+        })
+        .catch(function (err) {
+            console.error('Gagal mengambil data jadwal dari web app:', err);
+            jadwalDataCache = null;
+        })
+        .finally(function () {
+            jadwalFetchInFlight = false;
+            renderJadwalWidget();
+        });
 }
 
 function shiftRowsForDate(data, date) {
@@ -1882,10 +1906,8 @@ setInterval(function () {
 renderJadwalWidget();
 placeJadwalWidget();
 window.addEventListener('resize', placeJadwalWidget);
-window.addEventListener('storage', function (e) {
-    if (e.key === 'jadwalDinasData') renderJadwalWidget();
-});
-setInterval(renderJadwalWidget, 60000);
+fetchJadwalData();
+setInterval(fetchJadwalData, 60000);
 </script>
 </body>
 </html>
