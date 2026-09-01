@@ -158,6 +158,15 @@
             </button>
         </div>
 
+        <!-- Status Kehadiran Petugas -->
+        <div class="bg-[#2f3a2c] p-6 rounded-2xl shadow-lg border border-[#404f3d]">
+            <h2 class="text-lg font-semibold text-[#d4dfcd] border-b border-[#404f3d] pb-2 mb-1 flex items-center gap-2">
+                <span>📡</span> Status Kehadiran Petugas
+            </h2>
+            <p class="text-xs text-[#8aa182] mb-4">Nyalakan saklar jika petugas sedang keluar ruangan. Status ini langsung tersinkron ke layar informasi petugas (papan-status-petugas.html).</p>
+            <div id="status-toggle-list" class="space-y-2"></div>
+        </div>
+
         <!-- Output Section -->
         <div id="output-section" class="hidden space-y-4">
             <div class="flex justify-between items-center">
@@ -201,6 +210,36 @@
     </div>
 
     <script>
+        // ===== Konfigurasi Backend (Google Apps Script Web App) =====
+        // Tempel URL hasil deploy Apps Script Anda di sini, contoh:
+        // "https://script.google.com/macros/s/AKfycb.../exec"
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxy-KNfEFZI1avoiOBNJOvh2VU1iKlSPK_1sDaBMZrIKAPrF4uve3xDgl3LhHxuRYxRJA/exec";
+
+        async function remoteGetAll() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                return await res.json();
+            } catch (e) {
+                console.error("Gagal mengambil data dari server:", e);
+                return null;
+            }
+        }
+
+        async function remoteSet(key, value) {
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" }, // hindari CORS preflight Apps Script
+                    body: JSON.stringify({ key, value })
+                });
+                return true;
+            } catch (e) {
+                console.error("Gagal menyimpan data ke server:", e);
+                showToast("Gagal terhubung ke server. Periksa SCRIPT_URL & koneksi internet.");
+                return false;
+            }
+        }
+
         const names = [
             "Alfried R, A.Md, Kep",
             "Algie Ekatara P, S.Tr,T",
@@ -219,6 +258,68 @@
             "Juli", "Agustus", "September", "Oktober", "November", "Desember"
         ];
         
+        // ===== Status Kehadiran Petugas (Sedang Keluar / Di Tempat) =====
+        const STATUS_KEY = 'petugasStatus';
+
+        async function loadStatusData() {
+            const all = await remoteGetAll();
+            if (all && all[STATUS_KEY]) {
+                try {
+                    const parsed = JSON.parse(all[STATUS_KEY]);
+                    localStorage.setItem(STATUS_KEY, all[STATUS_KEY]); // cache offline
+                    return parsed;
+                } catch (e) { /* fall through to cache */ }
+            }
+            // Fallback ke cache lokal jika server tidak terjangkau
+            try {
+                return JSON.parse(localStorage.getItem(STATUS_KEY)) || {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        async function saveStatusData(data) {
+            const json = JSON.stringify(data);
+            localStorage.setItem(STATUS_KEY, json); // cache offline langsung
+            await remoteSet(STATUS_KEY, json);
+        }
+
+        async function renderStatusToggles() {
+            const container = document.getElementById('status-toggle-list');
+            const statusData = await loadStatusData();
+            container.innerHTML = '';
+
+            names.forEach(name => {
+                const isOut = !!(statusData[name] && statusData[name].keluar);
+
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between bg-[#242c22] rounded-xl px-4 py-3 border border-[#3a4736]';
+                row.innerHTML = `
+                    <span class="text-sm text-[#d4dfcd] font-medium pr-3">${name}</span>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <span class="text-xs font-semibold w-24 text-right ${isOut ? 'text-[#f3a56b]' : 'text-[#8fd19e]'}">${isOut ? 'Sedang Keluar' : 'Di Tempat'}</span>
+                        <button type="button" role="switch" aria-checked="${isOut}" data-name="${name}"
+                            class="status-switch relative w-12 h-6 rounded-full transition-colors duration-200 ${isOut ? 'bg-[#c2652f]' : 'bg-[#4a5d46]'}">
+                            <span class="absolute top-0.5 ${isOut ? 'left-6' : 'left-0.5'} w-5 h-5 bg-white rounded-full shadow transition-all duration-200"></span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            container.querySelectorAll('.status-switch').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    btn.disabled = true;
+                    const name = btn.dataset.name;
+                    const data = await loadStatusData();
+                    const current = !!(data[name] && data[name].keluar);
+                    data[name] = { keluar: !current, updatedAt: new Date().toISOString() };
+                    await saveStatusData(data);
+                    await renderStatusToggles();
+                });
+            });
+        }
+
         // Custom Toast Notification
         function showToast(text) {
             const toast = document.getElementById('toast-message');
@@ -402,18 +503,24 @@
             document.getElementById('table-container').innerHTML = html;
             document.getElementById('output-section').classList.remove('hidden');
 
-            // Simpan ke localStorage
-            localStorage.setItem('jadwalDinasData', JSON.stringify(syncData));
-            
-            // Feedback Tombol
+            // Simpan ke cache lokal & kirim ke server (Google Sheet) agar tersinkron ke semua perangkat
+            const syncJson = JSON.stringify(syncData);
+            localStorage.setItem('jadwalDinasData', syncJson);
+
             const btn = document.querySelector('button[onclick="generateSchedule()"]');
             const oldText = btn.innerHTML;
-            btn.innerHTML = "<span>✓</span> Berhasil Dibuat & Tersinkronisasi!";
-            btn.classList.add("bg-[#4ade80]", "text-gray-900");
-            setTimeout(() => {
-                btn.innerHTML = oldText;
-                btn.classList.remove("bg-[#4ade80]", "text-gray-900");
-            }, 2000);
+            btn.innerHTML = "<span>⏳</span> Menyinkronkan ke server...";
+            btn.disabled = true;
+
+            remoteSet('jadwalDinasData', syncJson).then(ok => {
+                btn.disabled = false;
+                btn.innerHTML = ok ? "<span>✓</span> Berhasil Dibuat & Tersinkronisasi!" : "<span>⚠️</span> Tersimpan lokal, gagal sinkron ke server";
+                btn.classList.add(ok ? "bg-[#4ade80]" : "bg-[#b45309]", "text-gray-900");
+                setTimeout(() => {
+                    btn.innerHTML = oldText;
+                    btn.classList.remove("bg-[#4ade80]", "bg-[#b45309]", "text-gray-900");
+                }, 2500);
+            });
         }
 
         function downloadAsImage() {
@@ -433,7 +540,10 @@
         }
 
         // Inisialisasi saat load
-        window.onload = initDropdowns;
+        window.onload = function () {
+            initDropdowns();
+            renderStatusToggles();
+        };
     </script>
 </body>
 </html>
