@@ -1799,11 +1799,14 @@ function getLaporan() {
         var items = [], counts = 0;
         sub.forEach(function (s) {
             var v = parseInt(document.getElementById(s.replace(/\s+/g, '-') + '-' + i).value) || 0;
-            if (v > 0) { items.push(v + ' orang (' + s + ')'); counts += v; }
+            if (v > 0) { items.push('      -' + s + ' : ' + v + ' orang'); counts += v; }
         });
         total += counts;
-        var ket = items.length > 0 ? items.join('\n                    ') : 'nihil';
-        detail += (i + 1) + '. ' + k.padEnd(14) + ': ' + ket + '\n';
+        if (items.length > 0) {
+            detail += (i + 1) + '. ' + k + '\n' + items.join('\n') + '\n';
+        } else {
+            detail += (i + 1) + '. ' + k + ' : nihil\n';
+        }
     });
 
     return 'Kepada\nYth. Karumkit Tk. IV 12.07.03 Palangkaraya\n\n' + sf +
