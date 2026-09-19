@@ -223,6 +223,64 @@
     .jadwal-status-tag { font-family: var(--font-pixel); font-size: 5.5px; padding: 2px 5px; border-radius: 2px; font-weight: 700; white-space: nowrap; color: var(--bg-from); background: var(--primary); transition: background 0.2s ease, color 0.2s ease; }
     .jadwal-status-tag.offline { background: rgba(255,107,107,0.85); color: #2a0000; }
 
+    .jadwal-sheet-wrap {
+        position: relative;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-card);
+        background: rgba(1, 8, 4, 0.7);
+        padding: 10px;
+        overflow: auto;
+        max-height: 70vh;
+        cursor: pointer;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .jadwal-sheet-wrap:hover {
+        border-color: var(--primary);
+        box-shadow: 0 0 20px rgba(89,255,166,0.15);
+    }
+    .jadwal-sheet-wrap .hover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(1,6,3,0.75);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: var(--radius-card);
+        pointer-events: none;
+        z-index: 10;
+    }
+    .jadwal-sheet-wrap:hover .hover-overlay { opacity: 1; }
+    .hover-overlay span {
+        font-family: var(--font-pixel);
+        font-size: clamp(5px, 1.5vw, 8px);
+        color: var(--primary);
+        text-align: center;
+        padding: 8px 12px;
+        background: rgba(1,6,3,0.6);
+        border: 1px solid var(--primary);
+        border-radius: 4px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 0 12px rgba(89,255,166,0.4);
+    }
+
+    .jadwal-sheet {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 11px;
+        font-family: var(--font-mono);
+        color: var(--text-main);
+    }
+    .jadwal-sheet th,
+    .jadwal-sheet td {
+        border: 1px solid rgba(89,255,166,0.2);
+        text-align: center;
+        padding: 5px 4px;
+        white-space: nowrap;
+    }
     .jadwal-zoom-fixed-wrap {
         position: relative;
     }
@@ -401,6 +459,19 @@
         text-align: left;
         font-weight: 800;
         z-index: 1;
+        min-width: 150px;
+        color: var(--text-main);
+    }
+
+    .jadwal-sheet .shift-P { background: rgba(89,255,166,0.15); color: #59ffa6; font-weight: 800; }
+    .jadwal-sheet .shift-S { background: rgba(255,180,69,0.15); color: #ffb445; font-weight: 800; }
+    .jadwal-sheet .shift-M { background: rgba(90,200,255,0.15); color: #5ac8ff; font-weight: 800; }
+    .jadwal-sheet .shift-L { background: rgba(255,107,107,0.15); color: #ff6b6b; font-weight: 800; }
+    .jadwal-sheet .shift-C { background: rgba(180,120,255,0.15); color: #c084fc; font-weight: 800; }
+
+    .jadwal-sheet .weekend-sat { background: rgba(255,180,69,0.08) !important; color: #ffb445; }
+    .jadwal-sheet .weekend-sun { background: rgba(255,107,107,0.08) !important; color: #ff6b6b; }
+    .jadwal-sheet .ref { outline: 2px solid var(--info); outline-offset: -2px; }
         min-width: 180px;
         max-width: 200px;
         color: var(--text-main);
