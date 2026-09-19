@@ -89,7 +89,7 @@
 
   <section class="card header">
     <h1>🗓️ Generator Jadwal Dinas</h1>
-    <div class="muted">Atur tanggal referensi dan tiga petugas dinas. Sistem menghitung jadwal bulanan otomatis dengan pola 8 hari: Pagi 2×, Sore 2×, Malam 2×, Libur 2×.</div>
+    <div class="muted">Atur tanggal referensi dan tiga petugas dinas. Sistem menghitung jadwal bulanan otomatis dengan pola 8 hari: Pagi 2×, Sore 2×, Malam 2×, Libur 2×. Petugas ke-4 yang tidak dipilih otomatis mengikuti rotasi normal (mulai dari slot Libur), sehingga jadwal selalu menampilkan keempat petugas walau tidak ada yang dikecualikan.</div>
   </section>
 
   <section class="card controls no-print">
@@ -108,13 +108,14 @@
       <div class="shift-row"><span class="badge p">Pagi</span><select id="shift-pagi" class="shift-select" data-shift="P"></select></div>
       <div class="shift-row"><span class="badge s">Sore</span><select id="shift-sore" class="shift-select" data-shift="S"></select></div>
       <div class="shift-row"><span class="badge m">Malam</span><select id="shift-malam" class="shift-select" data-shift="M"></select></div>
+      <p class="muted">Petugas yang tidak dipilih di atas akan otomatis mengikuti rotasi normal (Libur → Pagi → Sore → Malam) dan tetap muncul di jadwal.</p>
 
       <div style="margin-top:12px">
-        <label for="excluded-person">Kecualikan petugas</label>
+        <label for="excluded-person">Kecualikan petugas <span style="font-weight:400;color:#94a3b8">(opsional, isi hanya jika perlu)</span></label>
         <select id="excluded-person">
-          <option value="">Tidak ada</option>
+          <option value="">-- Tidak ada --</option>
         </select>
-        <div class="muted" style="margin-top:5px">Nama tetap tampil di spreadsheet. Status pengecualian hanya berlaku pada rentang tanggal yang dipilih.</div>
+        <div class="muted" style="margin-top:5px">Gunakan ini hanya bila ada petugas yang perlu diberi status Libur/Cuti pada rentang tanggal tertentu. Jika dibiarkan kosong, semua petugas (termasuk yang tidak dipilih di atas) tetap dijadwalkan mengikuti rotasi normal.</div>
       </div>
 
       <div class="field-grid" style="margin-top:10px">
@@ -134,7 +135,7 @@
           </select>
         </div>
       </div>
-      <div class="muted" style="margin-top:5px">Contoh: 10–15 September → petugas berstatus Libur/Cuti hanya tanggal 10 sampai 15. Di luar rentang tersebut, pola dinas normal tetap berjalan.</div>
+      <div class="muted" style="margin-top:5px">Contoh: 10–15 September → petugas berstatus Libur/Cuti hanya tanggal 10 sampai 15. Di luar rentang tersebut, pola rotasi normal tetap berjalan untuk petugas tersebut.</div>
     </div>
 
     <div class="actions" style="grid-column:1/-1">
@@ -237,6 +238,7 @@ async function init(){
 
   updateDateDropdown();
   updateShiftSelects();
+  updateExclusionControls();
 
   // Tampilkan jadwal terakhir seketika dari cache lokal, lalu sinkronkan dengan server.
   const cached=readSavedSchedule();
@@ -394,7 +396,7 @@ function generateSchedule(){
   const refDate=+document.getElementById("ref-date").value;
   const month=+document.getElementById("month").value;
   const year=+document.getElementById("year").value;
-  const excluded=document.getElementById("excluded-person").value;
+  const excluded=document.getElementById("excluded-person").value; // opsional: boleh kosong
   const excludedStatus=document.getElementById("excluded-status").value;
   const excludedStart=excluded ? +document.getElementById("excluded-start").value : null;
   const excludedEnd=excluded ? +document.getElementById("excluded-end").value : null;
@@ -410,11 +412,21 @@ function generateSchedule(){
   if(excluded && (!excludedStart || !excludedEnd || excludedStart>excludedEnd)){showToast("Rentang tanggal pengecualian tidak valid.");return;}
 
   const daysInMonth=new Date(year,month+1,0).getDate();
+
+  // Petugas yang dipilih untuk Pagi/Sore/Malam mendapat slot awal sesuai pilihan.
   const refOffsets={};
   refOffsets[selected[0]]=startOffset.P;
   refOffsets[selected[1]]=startOffset.S;
   refOffsets[selected[2]]=startOffset.M;
-  if(excluded) refOffsets[excluded]=startOffset[excludedStatus];
+
+  // PERBAIKAN: petugas yang TIDAK dipilih di atas (termasuk yang dikecualikan, jika ada)
+  // tetap diberi slot dasar "Libur" pada pola rotasi 8 hari. Dengan begitu:
+  // - Jika tidak ada yang dikecualikan, petugas ke-4 tetap muncul dan ikut berotasi normal.
+  // - Jika ada yang dikecualikan, slot dasarnya tetap L, lalu ditimpa status
+  //   Libur/Cuti hanya pada rentang tanggal yang dipilih (lihat di bawah).
+  names.forEach(n=>{
+    if(!(n in refOffsets)) refOffsets[n]=startOffset.L;
+  });
 
   const syncData={
     monthName:monthNames[month],
