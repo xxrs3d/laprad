@@ -159,6 +159,34 @@
     .section-title .st-tag { color: var(--bg-from); background: var(--primary); padding: 2px 5px; border-radius: 2px; white-space: nowrap; font-weight: 700; }
     @keyframes blinkDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
+    /* ===== KOTAK UI BERWARNA PER-KATEGORI ===== */
+    .form-section.section-waktu { border-color: rgba(255,107,107,0.35); background: linear-gradient(180deg, rgba(255,107,107,0.08), rgba(255,107,107,0.02)); }
+    .form-section.section-waktu:hover { border-color: rgba(255,107,107,0.65); box-shadow: 0 4px 18px rgba(255,107,107,0.18); }
+    .form-section.section-waktu .section-title { color: #ff6b6b; border-bottom-color: rgba(255,107,107,0.3); }
+    .form-section.section-waktu .section-title .dot { background: #ff6b6b; box-shadow: 0 0 8px #ff6b6b; }
+
+    .form-section.section-petugas { border-color: rgba(255,224,102,0.35); background: linear-gradient(180deg, rgba(255,224,102,0.08), rgba(255,224,102,0.02)); }
+    .form-section.section-petugas:hover { border-color: rgba(255,224,102,0.65); box-shadow: 0 4px 18px rgba(255,224,102,0.18); }
+    .form-section.section-petugas .section-title { color: #ffe066; border-bottom-color: rgba(255,224,102,0.3); }
+    .form-section.section-petugas .section-title .dot { background: #ffe066; box-shadow: 0 0 8px #ffe066; }
+    .form-section.section-petugas .section-title .st-tag { color: #2a2200; background: #ffe066; }
+
+    .form-section.section-pasien { border-color: rgba(90,200,255,0.35); background: linear-gradient(180deg, rgba(90,200,255,0.08), rgba(90,200,255,0.02)); }
+    .form-section.section-pasien:hover { border-color: rgba(90,200,255,0.65); box-shadow: 0 4px 18px rgba(90,200,255,0.18); }
+    .form-section.section-pasien .section-title { color: #5ac8ff; border-bottom-color: rgba(90,200,255,0.3); }
+    .form-section.section-pasien .section-title .dot { background: #5ac8ff; box-shadow: 0 0 8px #5ac8ff; }
+
+    .form-section.section-jadwal { border-color: rgba(255,152,0,0.35); background: linear-gradient(180deg, rgba(255,152,0,0.08), rgba(255,152,0,0.02)); }
+    .form-section.section-jadwal:hover { border-color: rgba(255,152,0,0.65); box-shadow: 0 4px 18px rgba(255,152,0,0.18); }
+    .form-section.section-jadwal .section-title { color: #ff9800; border-bottom-color: rgba(255,152,0,0.3); }
+    .form-section.section-jadwal .section-title .dot { background: #ff9800; box-shadow: 0 0 8px #ff9800; }
+    .form-section.section-jadwal .jadwal-status-tag { background: #ff9800; color: #2a1600; }
+    .form-section.section-jadwal .jadwal-status-tag.offline { background: rgba(255,107,107,0.85); color: #2a0000; }
+
+    .petugas-photo-row { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; }
+    .petugas-photo-row .photo-frame { flex: 1 1 auto; }
+    .petugas-arrow-btn { flex-shrink: 0; }
+
     label { display: block; font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.6px; }
     select, input[type="date"] { width: 100%; padding: 9px 28px 9px 12px; background: var(--glass-input); border: 1px solid var(--glass-border); border-radius: var(--radius-input); font-family: var(--font-mono); font-size: 15px; color: var(--text-main); outline: none; -webkit-appearance: none; appearance: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
     select:focus, input[type="date"]:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(89,255,166,0.2); }
@@ -657,7 +685,7 @@
 
     <div class="main-grid">
         <div class="panel-left">
-            <div class="form-section">
+            <div class="form-section section-waktu">
                 <div class="section-title"><span class="dot"></span><span class="st-text">Waktu &amp; Tanggal</span></div>
                 <div class="dt-widget" id="dtWidget" onclick="openDatePicker(event)">
                     <input type="date" id="tgl" class="dt-native-input" onchange="onTglManualChange()" aria-label="Ubah tanggal laporan">
@@ -699,7 +727,7 @@
             </div>
 
             <!-- WIDGET JADWAL DINAS — SPREADSHEET -->
-            <div class="form-section jadwal-widget" id="jadwalWidget">
+            <div class="form-section jadwal-widget section-jadwal" id="jadwalWidget">
                 <div class="section-title">
                     <span class="dot"></span><span class="st-text">Jadwal Dinas Bulan Ini</span>
                     <span class="jadwal-status-tag" id="jadwalStatusTag">LIVE</span>
@@ -720,7 +748,7 @@
                 </div>
             </div>
 
-            <div class="form-section" id="petugasSection">
+            <div class="form-section section-petugas" id="petugasSection">
                 <div class="section-title"><span class="dot"></span><span class="st-text">Petugas Dinas</span><span class="st-tag">SERAH TERIMA</span></div>
                 <div class="petugas-horizontal-container">
                     <div class="petugas-card">
@@ -729,30 +757,34 @@
                             <span class="petugas-badge">MENYERAHKAN</span>
                         </div>
                         <div class="petugas-body">
-                            <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
-                                <div class="scan-overlay"></div>
-                                <div class="corner tl"></div><div class="corner tr"></div>
-                                <div class="corner bl"></div><div class="corner br"></div>
-                                <img id="foto1" alt="" style="display:none;"
-                                     onload="this.style.display='block'; document.getElementById('placeholder1').style.display='none';"
-                                     onerror="this.style.display='none'; document.getElementById('placeholder1').style.display='flex';">
-                                <div class="photo-placeholder" id="placeholder1">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-                                        <circle cx="12" cy="8" r="4"/>
-                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
-                                    </svg>
-                                    <small>NO FOTO</small>
+                            <div class="petugas-photo-row">
+                                <button type="button" class="shift-arrow-btn petugas-arrow-btn" onclick="stepPetugas(1,-1)" aria-label="Petugas sebelumnya">&#8249;</button>
+                                <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
+                                    <div class="scan-overlay"></div>
+                                    <div class="corner tl"></div><div class="corner tr"></div>
+                                    <div class="corner bl"></div><div class="corner br"></div>
+                                    <img id="foto1" alt="" style="display:none;"
+                                         onload="this.style.display='block'; document.getElementById('placeholder1').style.display='none';"
+                                         onerror="this.style.display='none'; document.getElementById('placeholder1').style.display='flex';">
+                                    <div class="photo-placeholder" id="placeholder1">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                            <circle cx="12" cy="8" r="4"/>
+                                            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+                                        </svg>
+                                        <small>NO FOTO</small>
+                                    </div>
+                                    <div class="shift-chip" id="chipShift1">PAGI</div>
+                                    <select id="p1" class="petugas-native-select" onchange="gen(); updateFoto(1); markPetugasManual(1);" aria-label="Pilih petugas dinas sebelumnya">
+                                        <option value="PELTU Alfried">PELTU Alfried</option>
+                                        <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                        <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                        <option value="SUKWAN Algie">SUKWAN Algie</option>
+                                    </select>
                                 </div>
-                                <div class="shift-chip" id="chipShift1">PAGI</div>
-                                <select id="p1" class="petugas-native-select" onchange="gen(); updateFoto(1);" aria-label="Pilih petugas dinas sebelumnya">
-                                    <option value="PELTU Alfried">PELTU Alfried</option>
-                                    <option value="SUKWAN Dian">SUKWAN Dian</option>
-                                    <option value="SUKWAN Jo">SUKWAN Jo</option>
-                                    <option value="SUKWAN Algie">SUKWAN Algie</option>
-                                </select>
+                                <button type="button" class="shift-arrow-btn petugas-arrow-btn" onclick="stepPetugas(1,1)" aria-label="Petugas berikutnya">&#8250;</button>
                             </div>
                             <div class="petugas-name-label" id="nameLabel1">PELTU Alfried</div>
-                            <div class="petugas-tap-hint">&#9679; ketuk foto u/ ganti</div>
+                            <div class="petugas-tap-hint">&#9679; ketuk foto / panah u/ ganti manual</div>
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
@@ -790,30 +822,34 @@
                             <span class="petugas-badge">MENERIMA</span>
                         </div>
                         <div class="petugas-body">
-                            <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
-                                <div class="scan-overlay"></div>
-                                <div class="corner tl"></div><div class="corner tr"></div>
-                                <div class="corner bl"></div><div class="corner br"></div>
-                                <img id="foto2" alt="" style="display:none;"
-                                     onload="this.style.display='block'; document.getElementById('placeholder2').style.display='none';"
-                                     onerror="this.style.display='none'; document.getElementById('placeholder2').style.display='flex';">
-                                <div class="photo-placeholder" id="placeholder2">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-                                        <circle cx="12" cy="8" r="4"/>
-                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
-                                    </svg>
-                                    <small>NO FOTO</small>
+                            <div class="petugas-photo-row">
+                                <button type="button" class="shift-arrow-btn petugas-arrow-btn" onclick="stepPetugas(2,-1)" aria-label="Petugas sebelumnya">&#8249;</button>
+                                <div class="photo-frame" title="Ketuk foto untuk ganti petugas">
+                                    <div class="scan-overlay"></div>
+                                    <div class="corner tl"></div><div class="corner tr"></div>
+                                    <div class="corner bl"></div><div class="corner br"></div>
+                                    <img id="foto2" alt="" style="display:none;"
+                                         onload="this.style.display='block'; document.getElementById('placeholder2').style.display='none';"
+                                         onerror="this.style.display='none'; document.getElementById('placeholder2').style.display='flex';">
+                                    <div class="photo-placeholder" id="placeholder2">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                                            <circle cx="12" cy="8" r="4"/>
+                                            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/>
+                                        </svg>
+                                        <small>NO FOTO</small>
+                                    </div>
+                                    <div class="shift-chip" id="chipShift2">SIANG</div>
+                                    <select id="p2" class="petugas-native-select" onchange="gen(); updateFoto(2); markPetugasManual(2);" aria-label="Pilih petugas dinas saat ini">
+                                        <option value="SUKWAN Dian">SUKWAN Dian</option>
+                                        <option value="PELTU Alfried">PELTU Alfried</option>
+                                        <option value="SUKWAN Jo">SUKWAN Jo</option>
+                                        <option value="SUKWAN Algie">SUKWAN Algie</option>
+                                    </select>
                                 </div>
-                                <div class="shift-chip" id="chipShift2">SIANG</div>
-                                <select id="p2" class="petugas-native-select" onchange="gen(); updateFoto(2);" aria-label="Pilih petugas dinas saat ini">
-                                    <option value="SUKWAN Dian">SUKWAN Dian</option>
-                                    <option value="PELTU Alfried">PELTU Alfried</option>
-                                    <option value="SUKWAN Jo">SUKWAN Jo</option>
-                                    <option value="SUKWAN Algie">SUKWAN Algie</option>
-                                </select>
+                                <button type="button" class="shift-arrow-btn petugas-arrow-btn" onclick="stepPetugas(2,1)" aria-label="Petugas berikutnya">&#8250;</button>
                             </div>
                             <div class="petugas-name-label" id="nameLabel2">SUKWAN Dian</div>
-                            <div class="petugas-tap-hint">&#9679; ketuk foto u/ ganti</div>
+                            <div class="petugas-tap-hint">&#9679; ketuk foto / panah u/ ganti manual</div>
                             <div class="petugas-fields">
                                 <div>
                                     <label>Shift</label>
@@ -1028,6 +1064,27 @@ function stepShift(n, dir) {
 
 var SHIFT_ORDER = ['Pagi', 'Siang', 'Malam'];
 
+/* Penanda: petugas 1 / 2 sudah dipilih manual, jadi auto-fill jadwal
+   tidak akan menimpanya sampai tanggal berganti. */
+var petugasManual = { 1: false, 2: false };
+
+function markPetugasManual(n) {
+    petugasManual[n] = true;
+}
+
+function stepPetugas(n, dir) {
+    var sel = document.getElementById('p' + n);
+    var count = sel.options.length;
+    if (!count) return;
+    var idx = sel.selectedIndex;
+    if (idx < 0) idx = 0;
+    idx = (idx + dir + count) % count;
+    sel.selectedIndex = idx;
+    markPetugasManual(n);
+    gen();
+    updateFoto(n);
+}
+
 /* ==========================================================
    FOTO PETUGAS
    ========================================================== */
@@ -1109,18 +1166,23 @@ function openDatePicker(e) {
 
 function onTglManualChange() {
     dateManuallySet = true;
+    petugasManual = { 1: false, 2: false };
     document.getElementById('dtEditHint').innerText = 'Manual \u2022 ketuk u/ ubah';
     document.getElementById('dtLiveDot').style.display = 'none';
     document.getElementById('dtLiveBtn').style.display = 'inline-block';
+    autoFillPetugas(true);
     gen();
 }
 
 function resetToLive(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     dateManuallySet = false;
+    petugasManual = { 1: false, 2: false };
     document.getElementById('dtEditHint').innerText = 'Live \u2022 ketuk u/ ubah';
     document.getElementById('dtLiveDot').style.display = 'block';
     document.getElementById('dtLiveBtn').style.display = 'none';
+    setShifts();
+    autoFillPetugas(true);
     syncNow();
 }
 
@@ -1143,11 +1205,31 @@ function syncNow() {
         var todayStr = y + '-' + m + '-' + d;
         var tglEl = document.getElementById('tgl');
         if (tglEl.value !== todayStr) {
+            // Tanggal berganti (lewat tengah malam) -> segarkan shift & petugas
             tglEl.value = todayStr;
+            petugasManual = { 1: false, 2: false };
+            setShifts();
+            autoFillPetugas(true);
             gen();
         } else {
             updateDateWidget();
+            checkShiftChange();
         }
+    }
+}
+
+/* Dipanggil tiap detik: cek apakah batas jam shift (07:00/14:00/20:00 WIB)
+   sudah terlewati, lalu perbarui shift & petugas dinas secara otomatis. */
+function checkShiftChange() {
+    var s2 = document.getElementById('s2');
+    if (!s2) return;
+    var newShift = getCurrentShift();
+    if (s2.value !== newShift) {
+        setShifts();
+        updateFoto(1);
+        updateFoto(2);
+        autoFillPetugas(false);
+        gen();
     }
 }
 
@@ -1159,6 +1241,92 @@ var BULAN_JADWAL = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Jul
 function getJadwalData() {
     try { return JSON.parse(localStorage.getItem('jadwalDinasData') || 'null'); }
     catch (e) { return null; }
+}
+
+/* ==========================================================
+   AUTO-ISI PETUGAS DARI JADWAL DINAS (cocokkan nama depan)
+   ========================================================== */
+function firstNameToken(str) {
+    if (!str) return '';
+    var parts = String(str).trim().split(/\s+/);
+    return parts[parts.length - 1]
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function shiftLetterFromLabel(label) {
+    if (label === 'Pagi') return 'P';
+    if (label === 'Siang') return 'S';
+    if (label === 'Malam') return 'M';
+    return '';
+}
+
+/* Cari nama personel pada jadwal untuk tanggal & kode shift (P/S/M) tertentu.
+   Mengembalikan null jika data jadwal tidak ada / bulan-tahun tidak cocok. */
+function findPetugasByShift(day, letter) {
+    var data = getJadwalData();
+    if (!data || !data.rows || !data.monthName || !letter) return null;
+
+    var monthIndex = BULAN_JADWAL.indexOf(data.monthName);
+    if (monthIndex === -1) return null;
+
+    var tglVal = document.getElementById('tgl').value;
+    if (!tglVal) return null;
+    var p = tglVal.split('-');
+    var y = +p[0], m = +p[1];
+
+    // Data jadwal hanya berlaku bila bulan & tahun sama dengan tanggal laporan
+    if ((monthIndex + 1) !== m || (+data.year) !== y) return null;
+
+    var match = null;
+    data.rows.forEach(function (row) {
+        if (match) return;
+        var shifts = row.shifts || [];
+        if (shifts[day - 1] === letter) match = row.name;
+    });
+    return match;
+}
+
+/* Pilih opsi pada <select> yang nama depannya cocok dengan nama dari jadwal. */
+function setSelectByName(selId, name) {
+    if (!name) return false;
+    var sel = document.getElementById(selId);
+    if (!sel) return false;
+    var target = firstNameToken(name);
+    if (!target) return false;
+    for (var i = 0; i < sel.options.length; i++) {
+        if (firstNameToken(sel.options[i].value) === target) {
+            sel.selectedIndex = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+/* Isi otomatis petugas dinas (menyerahkan & menerima) berdasarkan jadwal +
+   shift realtime WIB. force=true akan menimpa walau sudah dipilih manual
+   (dipakai saat tanggal berganti). */
+function autoFillPetugas(force) {
+    var tglVal = document.getElementById('tgl').value;
+    if (!tglVal) return;
+    var day = +tglVal.split('-')[2];
+
+    var currentShiftLabel = getCurrentShift();
+    var prevShiftLabel = getPreviousShift(currentShiftLabel);
+    var letterNow = shiftLetterFromLabel(currentShiftLabel);
+    var letterPrev = shiftLetterFromLabel(prevShiftLabel);
+
+    var changed = false;
+
+    if (force || !petugasManual[2]) {
+        var nameNow = findPetugasByShift(day, letterNow);
+        if (nameNow && setSelectByName('p2', nameNow)) { updateFoto(2); changed = true; }
+    }
+    if (force || !petugasManual[1]) {
+        var namePrev = findPetugasByShift(day, letterPrev);
+        if (namePrev && setSelectByName('p1', namePrev)) { updateFoto(1); changed = true; }
+    }
+    if (changed) gen();
 }
 
 function renderJadwalSpreadsheet() {
@@ -1266,7 +1434,7 @@ function updateRowTotal(i) {
 (function buildInputs() {
     var c = document.getElementById('pasien-inputs');
     var wrap = document.createElement('div');
-    wrap.className = 'form-section pasien-table-wrap';
+    wrap.className = 'form-section pasien-table-wrap section-pasien';
 
     var head = '<div class="section-title"><span class="dot"></span><span class="st-text">Data Pasien</span></div>';
 
@@ -1513,28 +1681,21 @@ function doWA() {
 initDate();
 updateFoto(1);
 updateFoto(2);
+renderJadwalSpreadsheet();
+autoFillPetugas(true);
 gen();
 syncNow();
 setInterval(syncNow, 1000);
+/* Catatan: pengecekan pergantian shift (07:00 / 14:00 / 20:00 WIB) dan
+   pergantian tanggal kini dijalankan tiap detik di dalam syncNow(), agar
+   shift dinas & petugas selalu akurat mengikuti jam realtime 24 jam WIB. */
 
-setInterval(function () {
-    var s2 = document.getElementById('s2');
-    var newShift = getCurrentShift();
-    if (s2.value !== newShift && !dateManuallySet) {
-        setShifts();
-        updateFoto(1);
-        updateFoto(2);
-        gen();
-    }
-}, 300000);
-
-renderJadwalSpreadsheet();
 placeJadwalWidget();
 window.addEventListener('resize', placeJadwalWidget);
 window.addEventListener('storage', function (e) {
-    if (e.key === 'jadwalDinasData') renderJadwalSpreadsheet();
+    if (e.key === 'jadwalDinasData') { renderJadwalSpreadsheet(); autoFillPetugas(false); }
 });
-setInterval(renderJadwalSpreadsheet, 60000);
+setInterval(function () { renderJadwalSpreadsheet(); autoFillPetugas(false); }, 60000);
 </script>
 </body>
 </html>
